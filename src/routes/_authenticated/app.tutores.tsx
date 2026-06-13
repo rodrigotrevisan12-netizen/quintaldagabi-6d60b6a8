@@ -294,7 +294,7 @@ function TutorSheet({
   const [inviting, setInviting] = useState(false);
 
   // Reset form ao abrir
-  useMemo(() => {
+  useEffect(() => {
     if (!open) return;
     if (tutor) {
       setForm({
@@ -314,13 +314,13 @@ function TutorSheet({
         address_zip: tutor.address_zip ?? "",
         notes: tutor.notes ?? "",
       });
-      // carrega contatos
       loadRelations(tutor.id);
     } else {
       setForm(blankTutor());
       setEmergency([]);
       setPickups([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tutor?.id]);
 
   async function loadRelations(tutorId: string) {
