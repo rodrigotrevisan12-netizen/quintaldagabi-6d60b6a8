@@ -8,6 +8,13 @@ import {
   Settings,
   LogOut,
   Home,
+  HeartPulse,
+  BedDouble,
+  Bath,
+  AlertCircle,
+  ListChecks,
+  Wallet,
+  BarChart3,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -16,13 +23,26 @@ import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-type NavItem = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; roles: AppRole[] };
+type NavItem = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles: AppRole[];
+  soon?: boolean;
+};
 
 const NAV: NavItem[] = [
   { to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] },
-  { to: "/app/agenda", label: "Agenda", icon: CalendarDays, roles: ["admin", "funcionario"] },
+  { to: "/app/agenda", label: "Agenda", icon: CalendarDays, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
-  { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
+  { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"], soon: true },
+  { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/hospedagem", label: "Hospedagem", icon: BedDouble, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/ocorrencias", label: "Ocorrências", icon: AlertCircle, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"], soon: true },
+  { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, roles: ["admin"], soon: true },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
 ];
 
@@ -59,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 px-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4">
           {items.map((item) => {
             const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
             const Icon = item.icon;
@@ -75,7 +95,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.soon ? (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    em breve
+                  </span>
+                ) : null}
               </Link>
             );
           })}
