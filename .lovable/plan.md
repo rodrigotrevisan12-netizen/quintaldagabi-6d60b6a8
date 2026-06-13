@@ -1,81 +1,83 @@
+## Plano — Próximas fases
 
-# Plano — Quintal da Gabi
+Vou entregar em 4 fases curtas. Após cada uma, você testa e a gente segue.
 
-Plataforma de gestão para pet creche, hospedagem e banho e tosa. Web responsivo primeiro; o mesmo código vira app Android/iOS via Capacitor depois.
+### Fase A — Cadastro de Clientes (Tutores)
+Tabela `tutors` com: nome, CPF, RG, data de nascimento, endereço (rua, número, complemento, bairro, cidade, estado, CEP), telefone, WhatsApp, e-mail, observações.
+Tabelas relacionadas:
+- `tutor_emergency_contacts` (nome, telefone, parentesco)
+- `tutor_authorized_pickups` (nome, documento, telefone, parentesco)
 
-## Decisões já tomadas
+Telas:
+- Lista de tutores (busca por nome/CPF/telefone)
+- Formulário de criar/editar tutor (com seções: dados pessoais, endereço, contatos de emergência, autorizados)
+- Detalhe do tutor
 
-- Começar com **1 unidade**, mas todo o banco já com `unit_id` para ligar multiunidade depois sem refatorar.
-- **Login**: admin cadastra tutor com e-mail → tutor entra, clica "esqueci a senha", define senha pelo link recebido. Funcionários têm login/senha criados pela admin. Admin inicial: `gabrielamarquezinpirana@gmail.com`.
-- **Visual**: verde claro + terracota, fundo creme, tipografia acolhedora mas profissional.
-- **Backend**: Lovable Cloud (Postgres + Auth + Storage + envio de e-mail). Adequado a LGPD, com RLS e auditoria desde o início.
-- **Mobile**: o mesmo app web, empacotado depois com Capacitor para publicar nas lojas. Sem código duplicado.
+Quando o tutor é cadastrado, a admin pode opcionalmente **enviar convite** (cria usuário no Auth com o e-mail dele e vincula ao tutor). Ele entra usando "esqueci a senha".
 
-## Fases
+### Fase B — Cadastro de Cães + Saúde
+Tabela `dogs`: tutor_id, foto, nome, raça, porte (mini/pequeno/médio/grande/gigante), peso, sexo, castrado, data de nascimento, microchip, veterinário (nome + telefone), plano contratado, observações.
 
-### Fase 1 — Fundação (esta entrega)
-- Design system: paleta verde/terracota/creme, tipografia, botões, cards, layout admin.
-- Auth: e-mail+senha, fluxo "esqueci a senha", página `/reset-password`.
-- Papéis: `admin`, `funcionario`, `tutor` (tabela `user_roles` + função `has_role`).
-- Seed do admin inicial após o primeiro login.
-- Shell do app:
-  - **Admin/Funcionário**: dashboard com agenda do dia, atalhos.
-  - **Tutor**: portal com seus cães e próximos serviços.
-- Cadastros essenciais:
-  - **Tutores** (clientes) — dados pessoais, contato, endereço, consentimento LGPD.
-  - **Cães** — nome, raça, porte, sexo, castrado, nascimento, peso, foto, observações de comportamento, vacinas, alergias, medicamentos.
-  - **Serviços** — creche (diária/meia), hospedagem (diária), banho, tosa, com preços.
-- **Agenda**: marcar serviço (tutor + cão + serviço + data/hora + funcionário responsável). Visões dia/semana. Status (agendado, em andamento, concluído, cancelado).
-- **Check-in / check-out** de hospedagem e creche.
-- **Auditoria** automática (quem alterou o quê e quando) nas tabelas sensíveis.
-- LGPD: aceite no cadastro, política de privacidade, exportar/excluir dados do tutor.
+Saúde (tabelas separadas, com histórico):
+- `dog_vaccines` (tipo: V8/V10/Antirrábica/Gripe/Giárdia/outra, data aplicação, próxima dose, lote, veterinário)
+- `dog_dewormings` (data, produto, próxima dose)
+- `dog_flea_treatments` (data, produto, próxima dose)
+- `dog_allergies` (descrição, gravidade)
+- `dog_diet_restrictions` (descrição)
+- `dog_medications` (nome, dose, frequência, ativo)
+- `dog_medical_history` (data, ocorrência, veterinário)
 
-### Fase 2 — Operação completa
-- Permissões granulares por funcionário (quais módulos vê/edita).
-- Prontuário do cão (histórico de banhos/tosas com fotos, comportamento por estadia).
-- Lista de espera, bloqueio de datas, capacidade da casa por dia.
-- Notificações por e-mail (confirmação de agendamento, lembrete D-1, check-in/out).
-- Portal do tutor: agendar online sujeito à aprovação, ver histórico, baixar relatório do cão.
+Telas:
+- Lista de cães (com foto, tutor, alertas)
+- Detalhe do cão com abas: Geral / Saúde / Histórico
+- Upload de foto (Storage bucket `dogs`)
 
-### Fase 3 — Financeiro
-- Lançamentos por agendamento (gera contas a receber).
-- Formas de pagamento manuais (dinheiro, PIX manual, cartão maquininha).
-- Relatórios: faturamento por serviço, por funcionário, por período.
-- Despesas e fluxo de caixa simples.
+### Fase C — Dashboard real + alertas
+Função SQL para alertas:
+- Vacinas vencendo nos próximos 30 dias ou vencidas
+- Vermífugo/antipulgas vencidos
+- (Pagamentos virão na fase financeira)
 
-### Fase 4 — Multiunidade
-- Ativar seletor de unidade no topo. Cada cadastro, agenda e financeiro filtrado por `unit_id`.
-- Admin vê consolidado; funcionário só sua unidade.
+Dashboard com cards reais:
+- Cães presentes (placeholder até existir check-in)
+- Hospedagens ativas (placeholder até agenda)
+- Banhos agendados hoje (placeholder até agenda)
+- Ocorrências do dia (tabela `daily_incidents` simples)
+- Tarefas pendentes (tabela `tasks`)
+- Alertas de vacinas (lista clicável)
+- Indicadores financeiros (placeholder)
+- Alertas de pagamento (placeholder)
 
-### Fase 5 — Mobile nativo
-- Empacotar com Capacitor: build Android (Play Store) e iOS (App Store).
-- Notificações push (FCM/APNs).
-- Mesma base de dados e mesmas contas.
+Os placeholders ficam visíveis com label "em breve" — para não fingir dados.
 
-### Fase 6 — Integrações
-WhatsApp Business (envio de confirmações), PIX/boleto/cartão (gateway a escolher — Stripe/Asaas/Mercado Pago), emissão de NFS-e (provedor municipal), assinatura digital de contratos, Google Agenda (sincronizar agenda do funcionário), câmeras (embed de stream RTSP/HLS por unidade).
+### Fase D — Menu lateral expandido
+Expandir o menu com seções preparadas (mesmo que algumas ainda sejam "em breve"):
+- Início
+- Agenda
+- Tutores
+- Cães
+- Saúde (alertas)
+- Hospedagem (em breve)
+- Banho & tosa (em breve)
+- Ocorrências
+- Tarefas
+- Financeiro (em breve)
+- Relatórios (em breve)
+- Configurações
 
-## Detalhes técnicos (para registro)
+### O que NÃO entra agora
+- Agenda completa, check-in/check-out, hospedagem, banho/tosa — fase própria
+- Financeiro real, pagamentos, NF-e
+- WhatsApp, câmeras, Google Agenda
+- Build mobile (Capacitor)
 
-- **Stack**: TanStack Start + React + Tailwind + shadcn, Lovable Cloud (Supabase).
-- **Banco** (resumo Fase 1):
-  - `profiles` (id=auth.uid, nome, telefone, unit_id padrão)
-  - `units` (id, nome, endereço, ativo)
-  - `app_role` enum + `user_roles` (user_id, role, unit_id)
-  - `tutors` (id, profile_id, dados, lgpd_aceito_em, unit_id)
-  - `dogs` (id, tutor_id, nome, raça, porte, etc., unit_id)
-  - `vaccines`, `dog_notes`
-  - `services` (id, nome, tipo, preço, unit_id)
-  - `appointments` (id, dog_id, service_id, start_at, end_at, status, funcionario_id, unit_id)
-  - `audit_log` (tabela, registro_id, acao, ator, payload, criado_em)
-- RLS em tudo. Tutor só enxerga seus dados; funcionário enxerga sua unidade conforme permissão; admin enxerga tudo.
-- Server functions para operações sensíveis (criação de tutor com convite por e-mail, criação de funcionário).
-- E-mails via Lovable Emails (já integrado).
+### Detalhes técnicos
+- Stack atual: TanStack Start + Supabase + shadcn
+- Todas as tabelas com RLS: admin e funcionário leem/escrevem; tutor só vê os próprios cães/dados
+- Server functions com `requireSupabaseAuth` para envio de convite
+- Storage bucket `dogs` (público para leitura de foto, escrita só autenticado)
+- Validação Zod em todos os formulários
+- Alertas calculados via VIEW SQL para ficar barato
 
-## O que NÃO entra agora
-
-Pagamento online, NF-e, WhatsApp, Google Agenda, câmeras, build mobile, multiunidade ativa, financeiro completo. Tudo isso vira fase própria — a estrutura de dados já fica pronta para receber.
-
-## Próximo passo
-
-Se aprovar, começo pela **Fase 1**: design system + auth + cadastros de tutor/cão + agenda básica + portal do tutor. Entregamos em iterações curtas dentro dessa fase para você validar a cara e o fluxo antes de empilhar funcionalidade.
+### Como vou tocar
+Começo pela **Fase A** (cadastro de tutores ponta a ponta) e te peço para testar antes de seguir. Se aprovar o plano, manda "ok" ou ajusta o que quiser.
