@@ -4,20 +4,16 @@ export const seedAdmin = createServerFn({ method: "POST" })
   .handler(async () => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Verifica se já existe
-    const { data: list } = await supabaseAdmin.auth.admin.listUsers({
-      filter: "email:gabrielamarquezinpirana@gmail.com",
-    });
-    if (list.users.length > 0) {
-      return { ok: true, message: "Conta de administradora já existe. Use 'Esqueci a senha' para entrar." };
-    }
-
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    const { error } = await supabaseAdmin.auth.admin.createUser({
       email: "gabrielamarquezinpirana@gmail.com",
       email_confirm: true,
     });
 
     if (error) {
+      // Código 422 geralmente significa "user already exists"
+      if (error.status === 422 || error.message?.toLowerCase().includes("already")) {
+        return { ok: true, message: "Conta de administradora já existe. Use 'Esqueci a senha' para entrar." };
+      }
       throw new Error(error.message);
     }
 
