@@ -85,13 +85,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Plataforma de gestão do Quintal da Gabi: agenda, prontuário dos cães e portal do tutor em um só lugar.",
       },
-      { property: "og:title", content: "Quintal da Gabi" },
+      { property: "og:title", content: "Quintal da Gabi — Pet creche, hospedagem e banho & tosa" },
       {
         property: "og:description",
         content: "Cuidado, carinho e organização para a rotina do seu cão.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Quintal da Gabi — Pet creche, hospedagem e banho & tosa" },
+      { name: "description", content: "Pet Creche. Hospedagem. Banho e Tosa" },
+      { property: "og:description", content: "Pet Creche. Hospedagem. Banho e Tosa" },
+      { name: "twitter:description", content: "Pet Creche. Hospedagem. Banho e Tosa" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Hr3vTlopKzdlrAO2bFkLdrgHJ5W2/social-images/social-1781361990755-C_fundo_creme_QUINTAL_DA_GABI_.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Hr3vTlopKzdlrAO2bFkLdrgHJ5W2/social-images/social-1781361990755-C_fundo_creme_QUINTAL_DA_GABI_.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
