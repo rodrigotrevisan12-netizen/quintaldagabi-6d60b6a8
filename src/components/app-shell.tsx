@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 px-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4">
           {items.map((item) => {
             const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
             const Icon = item.icon;
@@ -95,7 +95,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.soon ? (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    em breve
+                  </span>
+                ) : null}
               </Link>
             );
           })}
