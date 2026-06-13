@@ -18,6 +18,7 @@ import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
 import { Route as AuthenticatedAppTarefasRouteImport } from './routes/_authenticated/app.tarefas'
 import { Route as AuthenticatedAppSaudeRouteImport } from './routes/_authenticated/app.saude'
+import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
 import { Route as AuthenticatedAppOcorrenciasRouteImport } from './routes/_authenticated/app.ocorrencias'
 import { Route as AuthenticatedAppHospedagemRouteImport } from './routes/_authenticated/app.hospedagem'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/app.financeiro'
@@ -70,6 +71,12 @@ const AuthenticatedAppSaudeRoute = AuthenticatedAppSaudeRouteImport.update({
   path: '/saude',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppRelatoriosRoute =
+  AuthenticatedAppRelatoriosRouteImport.update({
+    id: '/relatorios',
+    path: '/relatorios',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppOcorrenciasRoute =
   AuthenticatedAppOcorrenciasRouteImport.update({
     id: '/ocorrencias',
@@ -123,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRoute
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
+  '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
@@ -139,6 +147,7 @@ export interface FileRoutesByTo {
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRoute
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
+  '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
@@ -158,6 +167,7 @@ export interface FileRoutesById {
   '/_authenticated/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/_authenticated/app/hospedagem': typeof AuthenticatedAppHospedagemRoute
   '/_authenticated/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
+  '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/_authenticated/app/saude': typeof AuthenticatedAppSaudeRoute
   '/_authenticated/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/app/financeiro'
     | '/app/hospedagem'
     | '/app/ocorrencias'
+    | '/app/relatorios'
     | '/app/saude'
     | '/app/tarefas'
     | '/app/tutores'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/app/financeiro'
     | '/app/hospedagem'
     | '/app/ocorrencias'
+    | '/app/relatorios'
     | '/app/saude'
     | '/app/tarefas'
     | '/app/tutores'
@@ -211,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/financeiro'
     | '/_authenticated/app/hospedagem'
     | '/_authenticated/app/ocorrencias'
+    | '/_authenticated/app/relatorios'
     | '/_authenticated/app/saude'
     | '/_authenticated/app/tarefas'
     | '/_authenticated/app/tutores'
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSaudeRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/relatorios': {
+      id: '/_authenticated/app/relatorios'
+      path: '/relatorios'
+      fullPath: '/app/relatorios'
+      preLoaderRoute: typeof AuthenticatedAppRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/ocorrencias': {
       id: '/_authenticated/app/ocorrencias'
       path: '/ocorrencias'
@@ -349,6 +369,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
   AuthenticatedAppHospedagemRoute: typeof AuthenticatedAppHospedagemRoute
   AuthenticatedAppOcorrenciasRoute: typeof AuthenticatedAppOcorrenciasRoute
+  AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
   AuthenticatedAppSaudeRoute: typeof AuthenticatedAppSaudeRoute
   AuthenticatedAppTarefasRoute: typeof AuthenticatedAppTarefasRoute
   AuthenticatedAppTutoresRoute: typeof AuthenticatedAppTutoresRoute
@@ -363,6 +384,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
   AuthenticatedAppHospedagemRoute: AuthenticatedAppHospedagemRoute,
   AuthenticatedAppOcorrenciasRoute: AuthenticatedAppOcorrenciasRoute,
+  AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
   AuthenticatedAppSaudeRoute: AuthenticatedAppSaudeRoute,
   AuthenticatedAppTarefasRoute: AuthenticatedAppTarefasRoute,
   AuthenticatedAppTutoresRoute: AuthenticatedAppTutoresRoute,
