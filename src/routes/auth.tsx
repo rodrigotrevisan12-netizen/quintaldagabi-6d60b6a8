@@ -5,7 +5,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { seedAdmin } from "@/lib/setup.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -149,31 +148,11 @@ function AuthPage() {
                   {loading ? "Entrando…" : "Entrar"}
                 </Button>
               </form>
-              <div className="mt-6 space-y-3 text-center">
+              <div className="mt-6 text-center">
                 <p className="text-xs text-muted-foreground">
                   Primeiro acesso? Clique em "Esqueci a senha" e use o e-mail que
                   a administradora cadastrou para você.
                 </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  disabled={loading}
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      const result = await seedAdmin({});
-                      toast.success(result.message);
-                    } catch (err: any) {
-                      toast.error(err.message ?? "Não foi possível ativar a conta.");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                >
-                  Sou a administradora — ativar minha conta
-                </Button>
               </div>
             </>
           ) : (
