@@ -17,6 +17,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
 import { Route as AuthenticatedAppSaudeRouteImport } from './routes/_authenticated/app.saude'
+import { Route as AuthenticatedAppHospedagemRouteImport } from './routes/_authenticated/app.hospedagem'
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
 import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticated/app.caes'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
@@ -60,6 +61,12 @@ const AuthenticatedAppSaudeRoute = AuthenticatedAppSaudeRouteImport.update({
   path: '/saude',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppHospedagemRoute =
+  AuthenticatedAppHospedagemRouteImport.update({
+    id: '/hospedagem',
+    path: '/hospedagem',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppConfiguracoesRoute =
   AuthenticatedAppConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/caes': typeof AuthenticatedAppCaesRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/hospedagem': typeof AuthenticatedAppHospedagemRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -96,6 +104,7 @@ export interface FileRoutesByTo {
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/caes': typeof AuthenticatedAppCaesRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/hospedagem': typeof AuthenticatedAppHospedagemRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -110,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/app/caes': typeof AuthenticatedAppCaesRoute
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/_authenticated/app/hospedagem': typeof AuthenticatedAppHospedagemRoute
   '/_authenticated/app/saude': typeof AuthenticatedAppSaudeRoute
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/app/agenda'
     | '/app/caes'
     | '/app/configuracoes'
+    | '/app/hospedagem'
     | '/app/saude'
     | '/app/tutores'
     | '/app/'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/app/agenda'
     | '/app/caes'
     | '/app/configuracoes'
+    | '/app/hospedagem'
     | '/app/saude'
     | '/app/tutores'
     | '/app'
@@ -148,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/agenda'
     | '/_authenticated/app/caes'
     | '/_authenticated/app/configuracoes'
+    | '/_authenticated/app/hospedagem'
     | '/_authenticated/app/saude'
     | '/_authenticated/app/tutores'
     | '/_authenticated/app/'
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSaudeRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/hospedagem': {
+      id: '/_authenticated/app/hospedagem'
+      path: '/hospedagem'
+      fullPath: '/app/hospedagem'
+      preLoaderRoute: typeof AuthenticatedAppHospedagemRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/configuracoes': {
       id: '/_authenticated/app/configuracoes'
       path: '/configuracoes'
@@ -246,6 +266,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
   AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRoute
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
+  AuthenticatedAppHospedagemRoute: typeof AuthenticatedAppHospedagemRoute
   AuthenticatedAppSaudeRoute: typeof AuthenticatedAppSaudeRoute
   AuthenticatedAppTutoresRoute: typeof AuthenticatedAppTutoresRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
@@ -255,6 +276,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
   AuthenticatedAppCaesRoute: AuthenticatedAppCaesRoute,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
+  AuthenticatedAppHospedagemRoute: AuthenticatedAppHospedagemRoute,
   AuthenticatedAppSaudeRoute: AuthenticatedAppSaudeRoute,
   AuthenticatedAppTutoresRoute: AuthenticatedAppTutoresRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
