@@ -15,6 +15,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
+import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
+import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticated/app.caes'
+import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -45,18 +49,47 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppTutoresRoute = AuthenticatedAppTutoresRouteImport.update({
+  id: '/tutores',
+  path: '/tutores',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppConfiguracoesRoute =
+  AuthenticatedAppConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCaesRoute = AuthenticatedAppCaesRouteImport.update({
+  id: '/caes',
+  path: '/caes',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/caes': typeof AuthenticatedAppCaesRoute
+  '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/caes': typeof AuthenticatedAppCaesRoute
+  '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -66,13 +99,34 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/_authenticated/app/caes': typeof AuthenticatedAppCaesRoute
+  '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/app' | '/app/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/app'
+    | '/app/agenda'
+    | '/app/caes'
+    | '/app/configuracoes'
+    | '/app/tutores'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/app'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/app/agenda'
+    | '/app/caes'
+    | '/app/configuracoes'
+    | '/app/tutores'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -80,6 +134,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/app'
+    | '/_authenticated/app/agenda'
+    | '/_authenticated/app/caes'
+    | '/_authenticated/app/configuracoes'
+    | '/_authenticated/app/tutores'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -134,14 +192,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/tutores': {
+      id: '/_authenticated/app/tutores'
+      path: '/tutores'
+      fullPath: '/app/tutores'
+      preLoaderRoute: typeof AuthenticatedAppTutoresRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/configuracoes': {
+      id: '/_authenticated/app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/app/configuracoes'
+      preLoaderRoute: typeof AuthenticatedAppConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/caes': {
+      id: '/_authenticated/app/caes'
+      path: '/caes'
+      fullPath: '/app/caes'
+      preLoaderRoute: typeof AuthenticatedAppCaesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/agenda': {
+      id: '/_authenticated/app/agenda'
+      path: '/agenda'
+      fullPath: '/app/agenda'
+      preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
+  AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRoute
+  AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
+  AuthenticatedAppTutoresRoute: typeof AuthenticatedAppTutoresRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
+  AuthenticatedAppCaesRoute: AuthenticatedAppCaesRoute,
+  AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
+  AuthenticatedAppTutoresRoute: AuthenticatedAppTutoresRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
