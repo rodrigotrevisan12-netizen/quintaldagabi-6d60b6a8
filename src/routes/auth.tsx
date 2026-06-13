@@ -1,0 +1,191 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { PawPrint } from "lucide-react";
+import { z } from "zod";
+import { toast } from "sonner";
+
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+export const Route = createFileRoute("/auth")({
+  head: () => ({
+    meta: [
+      { title: "Entrar — Quintal da Gabi" },
+      { name: "description", content: "Acesse o sistema do Quintal da Gabi." },
+    ],
+  }),
+  component: AuthPage,
+});
+
+const emailSchema = z.string().trim().email("E-mail inválido").max(255);
+const passwordSchema = z.string().min(8, "Mínimo de 8 caracteres").max(72);
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<"login" | "forgot">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate({ to: "/app" });
+    });
+  }, [navigate]);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    const emailParsed = emailSchema.safeParse(email);
+    const pwParsed = passwordSchema.safeParse(password);
+    if (!emailParsed.success) return toast.error(emailParsed.error.issues[0].message);
+    if (!pwParsed.success) return toast.error(pwParsed.error.issues[0].message);
+
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: emailParsed.data,
+      password: pwParsed.data,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error("Não conseguimos entrar. Verifique e-mail e senha.");
+      return;
+    }
+    toast.success("Bem-vinda!");
+    navigate({ to: "/app" });
+  }
+
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault();
+    const emailParsed = emailSchema.safeParse(email);
+    if (!emailParsed.success) return toast.error(emailParsed.error.issues[0].message);
+
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(emailParsed.data, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error("Não foi possível enviar o e-mail.");
+      return;
+    }
+    toast.success("Enviamos um e-mail com o link para você criar a senha.");
+    setMode("login");
+  }
+
+  return (
+    <div className="grid min-h-screen lg:grid-cols-2">
+      {/* Lado decorativo */}
+      <div className="relative hidden bg-sidebar lg:block">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/20 to-transparent" />
+        <div className="relative flex h-full flex-col justify-between p-12">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground">
+              <PawPrint className="h-5 w-5" />
+            </span>
+            <span className="font-display text-xl font-semibold">Quintal da Gabi</span>
+          </Link>
+          <div>
+            <p className="font-display text-3xl leading-tight text-sidebar-foreground">
+              "Cada cãozinho tem seu jeitinho. <br /> A gente cuida de tudo —
+              você relaxa."
+            </p>
+            <p className="mt-3 text-sm text-sidebar-foreground/70">— Gabi</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Formulário */}
+      <div className="flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm">
+          <Link to="/" className="mb-8 inline-flex items-center gap-2 lg:hidden">
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
+              <PawPrint className="h-5 w-5" />
+            </span>
+            <span className="font-display text-lg font-semibold">Quintal da Gabi</span>
+          </Link>
+
+          {mode === "login" ? (
+            <>
+              <h1 className="font-display text-3xl font-semibold">Bem-vinda de volta</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Entre com seu e-mail e senha.
+              </p>
+              <form onSubmit={handleLogin} className="mt-8 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Senha</Label>
+                    <button
+                      type="button"
+                      onClick={() => setMode("forgot")}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Esqueci a senha
+                    </button>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Entrando…" : "Entrar"}
+                </Button>
+              </form>
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                Primeiro acesso? Clique em "Esqueci a senha" e use o e-mail que
+                a administradora cadastrou para você.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display text-3xl font-semibold">Criar / redefinir senha</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Digite seu e-mail. Vamos te mandar um link para definir uma nova senha.
+              </p>
+              <form onSubmit={handleForgot} className="mt-8 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-forgot">E-mail</Label>
+                  <Input
+                    id="email-forgot"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Enviando…" : "Enviar link"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setMode("login")}
+                >
+                  Voltar para login
+                </Button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
