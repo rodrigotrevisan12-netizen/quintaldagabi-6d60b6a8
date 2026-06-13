@@ -372,7 +372,7 @@ function TutorSheet({
 
       let tutorId = tutor?.id ?? null;
       if (isEdit && tutorId) {
-        const { error } = await supabase.from("tutors").update(payload).eq("id", tutorId);
+        const { error } = await supabase.from("tutors").update(payload as never).eq("id", tutorId);
         if (error) throw error;
       } else {
         const { data, error } = await supabase
