@@ -662,7 +662,7 @@ function HealthSectionBlock({ section, dogId }: { section: HealthSection; dogId:
       for (const f of section.fields) {
         payload[f.key] = draft[f.key] || null;
       }
-      const { error } = await supabase.from(section.table).insert(payload);
+      const { error } = await supabase.from(section.table).insert(payload as never);
       if (error) throw error;
     },
     onSuccess: () => {
