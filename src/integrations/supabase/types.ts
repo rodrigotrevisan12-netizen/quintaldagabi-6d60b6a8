@@ -14,6 +14,468 @@ export type Database = {
   }
   public: {
     Tables: {
+      dog_allergies: {
+        Row: {
+          created_at: string
+          description: string
+          dog_id: string
+          id: string
+          severity: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          dog_id: string
+          id?: string
+          severity?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          dog_id?: string
+          id?: string
+          severity?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_allergies_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_behavior: {
+        Row: {
+          compat_females: boolean
+          compat_large: boolean
+          compat_males: boolean
+          compat_medium: boolean
+          compat_small: boolean
+          created_at: string
+          dog_id: string
+          notes: string | null
+          traits: Database["public"]["Enums"]["behavior_trait"][]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          compat_females?: boolean
+          compat_large?: boolean
+          compat_males?: boolean
+          compat_medium?: boolean
+          compat_small?: boolean
+          created_at?: string
+          dog_id: string
+          notes?: string | null
+          traits?: Database["public"]["Enums"]["behavior_trait"][]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          compat_females?: boolean
+          compat_large?: boolean
+          compat_males?: boolean
+          compat_medium?: boolean
+          compat_small?: boolean
+          created_at?: string
+          dog_id?: string
+          notes?: string | null
+          traits?: Database["public"]["Enums"]["behavior_trait"][]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_behavior_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: true
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_behavior_history: {
+        Row: {
+          compat_females: boolean | null
+          compat_large: boolean | null
+          compat_males: boolean | null
+          compat_medium: boolean | null
+          compat_small: boolean | null
+          created_at: string
+          created_by: string | null
+          dog_id: string
+          event_date: string
+          id: string
+          notes: string | null
+          traits: Database["public"]["Enums"]["behavior_trait"][]
+        }
+        Insert: {
+          compat_females?: boolean | null
+          compat_large?: boolean | null
+          compat_males?: boolean | null
+          compat_medium?: boolean | null
+          compat_small?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          dog_id: string
+          event_date?: string
+          id?: string
+          notes?: string | null
+          traits?: Database["public"]["Enums"]["behavior_trait"][]
+        }
+        Update: {
+          compat_females?: boolean | null
+          compat_large?: boolean | null
+          compat_males?: boolean | null
+          compat_medium?: boolean | null
+          compat_small?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string
+          event_date?: string
+          id?: string
+          notes?: string | null
+          traits?: Database["public"]["Enums"]["behavior_trait"][]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_behavior_history_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_dewormings: {
+        Row: {
+          applied_date: string
+          created_at: string
+          dog_id: string
+          id: string
+          next_due_date: string | null
+          notes: string | null
+          product: string | null
+          updated_at: string
+        }
+        Insert: {
+          applied_date: string
+          created_at?: string
+          dog_id: string
+          id?: string
+          next_due_date?: string | null
+          notes?: string | null
+          product?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applied_date?: string
+          created_at?: string
+          dog_id?: string
+          id?: string
+          next_due_date?: string | null
+          notes?: string | null
+          product?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_dewormings_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_diet_restrictions: {
+        Row: {
+          created_at: string
+          description: string
+          dog_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          dog_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          dog_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_diet_restrictions_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_flea_treatments: {
+        Row: {
+          applied_date: string
+          created_at: string
+          dog_id: string
+          id: string
+          next_due_date: string | null
+          notes: string | null
+          product: string | null
+          updated_at: string
+        }
+        Insert: {
+          applied_date: string
+          created_at?: string
+          dog_id: string
+          id?: string
+          next_due_date?: string | null
+          notes?: string | null
+          product?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applied_date?: string
+          created_at?: string
+          dog_id?: string
+          id?: string
+          next_due_date?: string | null
+          notes?: string | null
+          product?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_flea_treatments_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_medical_history: {
+        Row: {
+          created_at: string
+          description: string
+          dog_id: string
+          event_date: string
+          id: string
+          updated_at: string
+          vet_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          dog_id: string
+          event_date: string
+          id?: string
+          updated_at?: string
+          vet_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          dog_id?: string
+          event_date?: string
+          id?: string
+          updated_at?: string
+          vet_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_medical_history_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_medications: {
+        Row: {
+          active: boolean
+          created_at: string
+          dog_id: string
+          dose: string | null
+          frequency: string | null
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          dog_id: string
+          dose?: string | null
+          frequency?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          dog_id?: string
+          dose?: string | null
+          frequency?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_medications_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dog_vaccines: {
+        Row: {
+          applied_date: string
+          batch: string | null
+          created_at: string
+          dog_id: string
+          id: string
+          next_due_date: string | null
+          notes: string | null
+          updated_at: string
+          vaccine_type: string
+          vet_name: string | null
+        }
+        Insert: {
+          applied_date: string
+          batch?: string | null
+          created_at?: string
+          dog_id: string
+          id?: string
+          next_due_date?: string | null
+          notes?: string | null
+          updated_at?: string
+          vaccine_type: string
+          vet_name?: string | null
+        }
+        Update: {
+          applied_date?: string
+          batch?: string | null
+          created_at?: string
+          dog_id?: string
+          id?: string
+          next_due_date?: string | null
+          notes?: string | null
+          updated_at?: string
+          vaccine_type?: string
+          vet_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_vaccines_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dogs: {
+        Row: {
+          birth_date: string | null
+          breed: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          microchip: string | null
+          name: string
+          neutered: boolean | null
+          notes: string | null
+          photo_url: string | null
+          plan: string | null
+          sex: Database["public"]["Enums"]["dog_sex"] | null
+          size: Database["public"]["Enums"]["dog_size"] | null
+          tutor_id: string
+          unit_id: string | null
+          updated_at: string
+          vet_name: string | null
+          vet_phone: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          birth_date?: string | null
+          breed?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          microchip?: string | null
+          name: string
+          neutered?: boolean | null
+          notes?: string | null
+          photo_url?: string | null
+          plan?: string | null
+          sex?: Database["public"]["Enums"]["dog_sex"] | null
+          size?: Database["public"]["Enums"]["dog_size"] | null
+          tutor_id: string
+          unit_id?: string | null
+          updated_at?: string
+          vet_name?: string | null
+          vet_phone?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          birth_date?: string | null
+          breed?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          microchip?: string | null
+          name?: string
+          neutered?: boolean | null
+          notes?: string | null
+          photo_url?: string | null
+          plan?: string | null
+          sex?: Database["public"]["Enums"]["dog_sex"] | null
+          size?: Database["public"]["Enums"]["dog_size"] | null
+          tutor_id?: string
+          unit_id?: string | null
+          updated_at?: string
+          vet_name?: string | null
+          vet_phone?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dogs_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dogs_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -291,6 +753,15 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "funcionario" | "tutor"
+      behavior_trait:
+        | "sociavel"
+        | "dominante"
+        | "medroso"
+        | "reativo"
+        | "agressivo"
+        | "ansioso"
+      dog_sex: "macho" | "femea"
+      dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -419,6 +890,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "funcionario", "tutor"],
+      behavior_trait: [
+        "sociavel",
+        "dominante",
+        "medroso",
+        "reativo",
+        "agressivo",
+        "ansioso",
+      ],
+      dog_sex: ["macho", "femea"],
+      dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
     },
   },
 } as const
