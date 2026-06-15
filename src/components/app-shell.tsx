@@ -35,7 +35,7 @@ const NAV: NavItem[] = [
   { to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] },
   { to: "/app/agenda", label: "Agenda", icon: CalendarDays, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
-  { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"], soon: true },
+  { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
   { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/hospedagem", label: "Hospedagem", icon: BedDouble, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"], soon: true },
