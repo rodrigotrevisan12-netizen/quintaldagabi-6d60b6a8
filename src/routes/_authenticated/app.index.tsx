@@ -29,12 +29,28 @@ function Dashboard() {
   const counts = useQuery({
     queryKey: ["dashboard-counts"],
     queryFn: async () => {
-      const { count: tutorsCount } = await supabase
-        .from("tutors")
-        .select("*", { count: "exact", head: true });
-      return { tutors: tutorsCount ?? 0 };
+      const today = new Date();
+      const startToday = new Date(today); startToday.setHours(0, 0, 0, 0);
+      const endToday = new Date(today); endToday.setHours(23, 59, 59, 999);
+      const nowIso = new Date().toISOString();
+
+      const [tutors, daycare, boarding, grooming] = await Promise.all([
+        supabase.from("tutors").select("*", { count: "exact", head: true }),
+        supabase.from("daycare_stays").select("*", { count: "exact", head: true }).is("check_out_at", null),
+        supabase.from("boarding_stays").select("*", { count: "exact", head: true }).is("check_out_at", null).lte("check_in_at", nowIso),
+        supabase.from("grooming_appointments").select("*", { count: "exact", head: true })
+          .gte("scheduled_at", startToday.toISOString())
+          .lte("scheduled_at", endToday.toISOString()),
+      ]);
+      return {
+        tutors: tutors.count ?? 0,
+        present: daycare.count ?? 0,
+        boarding: boarding.count ?? 0,
+        grooming: grooming.count ?? 0,
+      };
     },
   });
+  const v = (n?: number) => (counts.isLoading ? "…" : String(n ?? 0));
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
@@ -58,10 +74,10 @@ function Dashboard() {
 
       {/* Indicadores principais */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card icon={<Dog className="h-5 w-5" />} label="Cães presentes" value="—" hint="agenda em breve" />
-        <Card icon={<BedDouble className="h-5 w-5" />} label="Hospedagens ativas" value="—" hint="em breve" />
-        <Card icon={<Bath className="h-5 w-5" />} label="Banhos hoje" value="—" hint="em breve" />
-        <Card icon={<CalendarDays className="h-5 w-5" />} label="Agendamentos hoje" value="—" hint="em breve" />
+        <Card icon={<Dog className="h-5 w-5" />} label="Cães na creche" value={v(counts.data?.present)} />
+        <Card icon={<BedDouble className="h-5 w-5" />} label="Hospedagens ativas" value={v(counts.data?.boarding)} />
+        <Card icon={<Bath className="h-5 w-5" />} label="Banhos hoje" value={v(counts.data?.grooming)} />
+        <Card icon={<CalendarDays className="h-5 w-5" />} label="Agendamentos hoje" value={v(counts.data?.grooming)} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

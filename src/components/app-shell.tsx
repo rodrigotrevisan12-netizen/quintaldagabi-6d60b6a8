@@ -33,12 +33,12 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] },
-  { to: "/app/agenda", label: "Agenda", icon: CalendarDays, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/agenda", label: "Creche", icon: CalendarDays, roles: ["admin", "funcionario"] },
   { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
   { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
   { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"], soon: true },
-  { to: "/app/hospedagem", label: "Hospedagem", icon: BedDouble, roles: ["admin", "funcionario"], soon: true },
-  { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"], soon: true },
+  { to: "/app/hospedagem", label: "Hospedagem", icon: BedDouble, roles: ["admin", "funcionario"] },
+  { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"] },
   { to: "/app/ocorrencias", label: "Ocorrências", icon: AlertCircle, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"], soon: true },
@@ -64,7 +64,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[260px_1fr]">
-      {/* Sidebar */}
       <aside className="hidden border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <div className="flex items-center gap-2 px-6 py-6">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
@@ -119,9 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Conteúdo */}
       <div className="flex flex-col">
-        {/* Topbar mobile */}
         <header className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
           <Link to="/app" className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground">
@@ -136,7 +133,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <main className="flex-1 px-6 py-8 lg:px-10">{children}</main>
 
-        {/* Nav inferior mobile */}
         <nav className="sticky bottom-0 grid grid-cols-4 border-t border-border bg-card lg:hidden">
           {items.slice(0, 4).map((item) => {
             const Icon = item.icon;
