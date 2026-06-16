@@ -14,6 +14,236 @@ export type Database = {
   }
   public: {
     Tables: {
+      boarding_belongings: {
+        Row: {
+          created_at: string
+          id: string
+          item: string
+          notes: string | null
+          quantity: number
+          returned: boolean
+          stay_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item: string
+          notes?: string | null
+          quantity?: number
+          returned?: boolean
+          stay_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item?: string
+          notes?: string | null
+          quantity?: number
+          returned?: boolean
+          stay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boarding_belongings_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "boarding_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      boarding_daily_logs: {
+        Row: {
+          created_at: string
+          fed_ok: boolean
+          id: string
+          log_date: string
+          medication_ok: boolean
+          mood: string | null
+          notes: string | null
+          recorded_by: string | null
+          stay_id: string
+        }
+        Insert: {
+          created_at?: string
+          fed_ok?: boolean
+          id?: string
+          log_date?: string
+          medication_ok?: boolean
+          mood?: string | null
+          notes?: string | null
+          recorded_by?: string | null
+          stay_id: string
+        }
+        Update: {
+          created_at?: string
+          fed_ok?: boolean
+          id?: string
+          log_date?: string
+          medication_ok?: boolean
+          mood?: string | null
+          notes?: string | null
+          recorded_by?: string | null
+          stay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boarding_daily_logs_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "boarding_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      boarding_food: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: string
+          meals_per_day: number | null
+          notes: string | null
+          portion_g: number | null
+          source: string
+          stay_id: string
+          total_amount_g: number | null
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          meals_per_day?: number | null
+          notes?: string | null
+          portion_g?: number | null
+          source?: string
+          stay_id: string
+          total_amount_g?: number | null
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          meals_per_day?: number | null
+          notes?: string | null
+          portion_g?: number | null
+          source?: string
+          stay_id?: string
+          total_amount_g?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boarding_food_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "boarding_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      boarding_medications: {
+        Row: {
+          created_at: string
+          dose: string | null
+          frequency: string | null
+          id: string
+          medication: string
+          notes: string | null
+          schedule: string | null
+          stay_id: string
+        }
+        Insert: {
+          created_at?: string
+          dose?: string | null
+          frequency?: string | null
+          id?: string
+          medication: string
+          notes?: string | null
+          schedule?: string | null
+          stay_id: string
+        }
+        Update: {
+          created_at?: string
+          dose?: string | null
+          frequency?: string | null
+          id?: string
+          medication?: string
+          notes?: string | null
+          schedule?: string | null
+          stay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boarding_medications_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "boarding_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      boarding_stays: {
+        Row: {
+          check_in_at: string
+          check_in_by: string | null
+          check_out_at: string | null
+          check_out_by: string | null
+          created_at: string
+          daily_rate: number
+          dog_id: string
+          expected_check_out_at: string
+          id: string
+          kennel: string | null
+          notes: string | null
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          check_in_at: string
+          check_in_by?: string | null
+          check_out_at?: string | null
+          check_out_by?: string | null
+          created_at?: string
+          daily_rate?: number
+          dog_id: string
+          expected_check_out_at: string
+          id?: string
+          kennel?: string | null
+          notes?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          check_in_at?: string
+          check_in_by?: string | null
+          check_out_at?: string | null
+          check_out_by?: string | null
+          created_at?: string
+          daily_rate?: number
+          dog_id?: string
+          expected_check_out_at?: string
+          id?: string
+          kennel?: string | null
+          notes?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boarding_stays_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "boarding_stays_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daycare_activities: {
         Row: {
           activity_type: Database["public"]["Enums"]["daycare_activity_type"]
