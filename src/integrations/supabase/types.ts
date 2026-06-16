@@ -14,6 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
+      daycare_activities: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["daycare_activity_type"]
+          created_at: string
+          duration_min: number | null
+          id: string
+          notes: string | null
+          performed_at: string
+          recorded_by: string | null
+          stay_id: string
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["daycare_activity_type"]
+          created_at?: string
+          duration_min?: number | null
+          id?: string
+          notes?: string | null
+          performed_at?: string
+          recorded_by?: string | null
+          stay_id: string
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["daycare_activity_type"]
+          created_at?: string
+          duration_min?: number | null
+          id?: string
+          notes?: string | null
+          performed_at?: string
+          recorded_by?: string | null
+          stay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daycare_activities_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "daycare_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daycare_feedings: {
+        Row: {
+          amount: string | null
+          created_at: string
+          fed_at: string
+          feeding_type: Database["public"]["Enums"]["daycare_feeding_type"]
+          id: string
+          notes: string | null
+          recorded_by: string | null
+          stay_id: string
+        }
+        Insert: {
+          amount?: string | null
+          created_at?: string
+          fed_at?: string
+          feeding_type: Database["public"]["Enums"]["daycare_feeding_type"]
+          id?: string
+          notes?: string | null
+          recorded_by?: string | null
+          stay_id: string
+        }
+        Update: {
+          amount?: string | null
+          created_at?: string
+          fed_at?: string
+          feeding_type?: Database["public"]["Enums"]["daycare_feeding_type"]
+          id?: string
+          notes?: string | null
+          recorded_by?: string | null
+          stay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daycare_feedings_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "daycare_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daycare_medications: {
+        Row: {
+          created_at: string
+          dose: string | null
+          given_at: string
+          id: string
+          medication: string
+          notes: string | null
+          recorded_by: string | null
+          stay_id: string
+        }
+        Insert: {
+          created_at?: string
+          dose?: string | null
+          given_at?: string
+          id?: string
+          medication: string
+          notes?: string | null
+          recorded_by?: string | null
+          stay_id: string
+        }
+        Update: {
+          created_at?: string
+          dose?: string | null
+          given_at?: string
+          id?: string
+          medication?: string
+          notes?: string | null
+          recorded_by?: string | null
+          stay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daycare_medications_stay_id_fkey"
+            columns: ["stay_id"]
+            isOneToOne: false
+            referencedRelation: "daycare_stays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daycare_stays: {
+        Row: {
+          check_in_at: string
+          check_in_by: string | null
+          check_out_at: string | null
+          check_out_by: string | null
+          created_at: string
+          dog_id: string
+          drop_off_person: string | null
+          id: string
+          notes: string | null
+          pickup_person: string | null
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          check_in_at?: string
+          check_in_by?: string | null
+          check_out_at?: string | null
+          check_out_by?: string | null
+          created_at?: string
+          dog_id: string
+          drop_off_person?: string | null
+          id?: string
+          notes?: string | null
+          pickup_person?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          check_in_at?: string
+          check_in_by?: string | null
+          check_out_at?: string | null
+          check_out_by?: string | null
+          created_at?: string
+          dog_id?: string
+          drop_off_person?: string | null
+          id?: string
+          notes?: string | null
+          pickup_person?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daycare_stays_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daycare_stays_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dog_allergies: {
         Row: {
           created_at: string
@@ -673,6 +856,38 @@ export type Database = {
           },
         ]
       }
+      unit_settings: {
+        Row: {
+          boarding_capacity: number
+          created_at: string
+          daycare_capacity: number
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          boarding_capacity?: number
+          created_at?: string
+          daycare_capacity?: number
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          boarding_capacity?: number
+          created_at?: string
+          daycare_capacity?: number
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_settings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: true
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           address: string | null
@@ -760,6 +975,14 @@ export type Database = {
         | "reativo"
         | "agressivo"
         | "ansioso"
+      daycare_activity_type:
+        | "passeio"
+        | "brincadeira"
+        | "soneca"
+        | "socializacao"
+        | "treino"
+        | "outra"
+      daycare_feeding_type: "racao" | "petisco" | "umida" | "agua" | "outra"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
     }
@@ -898,6 +1121,15 @@ export const Constants = {
         "agressivo",
         "ansioso",
       ],
+      daycare_activity_type: [
+        "passeio",
+        "brincadeira",
+        "soneca",
+        "socializacao",
+        "treino",
+        "outra",
+      ],
+      daycare_feeding_type: ["racao", "petisco", "umida", "agua", "outra"],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
     },
