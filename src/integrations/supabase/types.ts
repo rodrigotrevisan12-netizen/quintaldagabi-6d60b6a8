@@ -889,6 +889,170 @@ export type Database = {
           },
         ]
       }
+      grooming_appointment_services: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          id: string
+          price: number
+          service_id: string
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          id?: string
+          price?: number
+          service_id: string
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          id?: string
+          price?: number
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_appointment_services_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "grooming_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_appointment_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "grooming_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_appointments: {
+        Row: {
+          created_at: string
+          dog_id: string
+          duration_min: number
+          finished_at: string | null
+          groomer_id: string | null
+          id: string
+          notes: string | null
+          scheduled_at: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["grooming_status"]
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dog_id: string
+          duration_min?: number
+          finished_at?: string | null
+          groomer_id?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["grooming_status"]
+          total_price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dog_id?: string
+          duration_min?: number
+          finished_at?: string | null
+          groomer_id?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["grooming_status"]
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_appointments_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_appointments_groomer_id_fkey"
+            columns: ["groomer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_photos: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          id: string
+          moment: Database["public"]["Enums"]["grooming_photo_moment"]
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          id?: string
+          moment: Database["public"]["Enums"]["grooming_photo_moment"]
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          id?: string
+          moment?: Database["public"]["Enums"]["grooming_photo_moment"]
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_photos_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "grooming_appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grooming_services: {
+        Row: {
+          base_price: number
+          created_at: string
+          duration_min: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          created_at?: string
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1215,6 +1379,13 @@ export type Database = {
       daycare_feeding_type: "racao" | "petisco" | "umida" | "agua" | "outra"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
+      grooming_photo_moment: "before" | "after"
+      grooming_status:
+        | "scheduled"
+        | "in_progress"
+        | "done"
+        | "cancelled"
+        | "no_show"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1362,6 +1533,14 @@ export const Constants = {
       daycare_feeding_type: ["racao", "petisco", "umida", "agua", "outra"],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
+      grooming_photo_moment: ["before", "after"],
+      grooming_status: [
+        "scheduled",
+        "in_progress",
+        "done",
+        "cancelled",
+        "no_show",
+      ],
     },
   },
 } as const
