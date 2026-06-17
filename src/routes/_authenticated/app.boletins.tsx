@@ -226,7 +226,8 @@ function ReportDetail({ report, onClose, onChanged }: { report: Report | null; o
     mutationFn: async () => {
       if (!desc.trim()) throw new Error("Descrição obrigatória.");
       const { error } = await supabase.from("daily_report_entries").insert({
-        report_id: report!.id, entry_type: type, description: desc, notes: notes || null,
+        report_id: report!.id, entry_type: type as "alimentacao" | "hidratacao" | "brincadeira" | "passeio" | "descanso" | "comportamento",
+        description: desc, notes: notes || null,
         occurred_at: new Date().toISOString(),
       });
       if (error) throw error;

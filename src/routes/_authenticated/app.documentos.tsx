@@ -177,7 +177,7 @@ function CreateDocumentSheet({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tutors")
-        .select("id,full_name,cpf,address,email")
+        .select("id,full_name,cpf,email,address_street,address_number,address_neighborhood,address_city,address_state")
         .order("full_name");
       if (error) throw error;
       return data ?? [];
@@ -202,8 +202,10 @@ function CreateDocumentSheet({
       const dog = dogsQuery.data?.find((d) => d.id === dogId);
       if (!tpl || !tutor) throw new Error("Selecione modelo e tutor.");
 
+      const endereco = [tutor.address_street, tutor.address_number, tutor.address_neighborhood, tutor.address_city, tutor.address_state]
+        .filter(Boolean).join(", ");
       const body = renderTemplate(tpl.body, {
-        tutor: { nome: tutor.full_name, cpf: tutor.cpf as string | null, endereco: (tutor as any).address, email: tutor.email },
+        tutor: { nome: tutor.full_name, cpf: tutor.cpf as string | null, endereco, email: tutor.email },
         cao: dog ? { nome: dog.name, raca: dog.breed as string | null } : undefined,
         estadia: { entrada, saida, valor_diaria: valorDiaria },
       });
