@@ -244,6 +244,187 @@ export type Database = {
           },
         ]
       }
+      daily_schedule_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          item_id: string
+          new_status: Database["public"]["Enums"]["schedule_status"]
+          note: string | null
+          previous_status: Database["public"]["Enums"]["schedule_status"] | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          item_id: string
+          new_status: Database["public"]["Enums"]["schedule_status"]
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["schedule_status"]
+            | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          item_id?: string
+          new_status?: Database["public"]["Enums"]["schedule_status"]
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["schedule_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_history_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "daily_schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_items: {
+        Row: {
+          activity: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string | null
+          end_time: string | null
+          id: string
+          location: string | null
+          not_done_reason: string | null
+          notes: string | null
+          requires_confirmation: boolean
+          requires_photo: boolean
+          responsible_id: string | null
+          start_time: string
+          status: Database["public"]["Enums"]["schedule_status"]
+          updated_at: string
+        }
+        Insert: {
+          activity: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          not_done_reason?: string | null
+          notes?: string | null
+          requires_confirmation?: boolean
+          requires_photo?: boolean
+          responsible_id?: string | null
+          start_time: string
+          status?: Database["public"]["Enums"]["schedule_status"]
+          updated_at?: string
+        }
+        Update: {
+          activity?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          not_done_reason?: string | null
+          notes?: string | null
+          requires_confirmation?: boolean
+          requires_photo?: boolean
+          responsible_id?: string | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["schedule_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_items_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_participants: {
+        Row: {
+          created_at: string
+          dog_id: string
+          id: string
+          item_id: string
+        }
+        Insert: {
+          created_at?: string
+          dog_id: string
+          id?: string
+          item_id: string
+        }
+        Update: {
+          created_at?: string
+          dog_id?: string
+          id?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_participants_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_schedule_participants_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "daily_schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_photos: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          photo_url: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          photo_url: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          photo_url?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_photos_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "daily_schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daycare_activities: {
         Row: {
           activity_type: Database["public"]["Enums"]["daycare_activity_type"]
@@ -1555,6 +1736,7 @@ export type Database = {
         | "done"
         | "cancelled"
         | "no_show"
+      schedule_status: "pending" | "done" | "not_done"
       signature_method: "typed" | "drawn"
     }
     CompositeTypes: {
@@ -1719,6 +1901,7 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      schedule_status: ["pending", "done", "not_done"],
       signature_method: ["typed", "drawn"],
     },
   },
