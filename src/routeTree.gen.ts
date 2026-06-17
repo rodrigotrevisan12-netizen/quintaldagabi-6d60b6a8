@@ -19,14 +19,18 @@ import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppTarefasRouteImport } from './routes/_authenticated/app.tarefas'
 import { Route as AuthenticatedAppSaudeRouteImport } from './routes/_authenticated/app.saude'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
+import { Route as AuthenticatedAppProgramacaoRouteImport } from './routes/_authenticated/app.programacao'
 import { Route as AuthenticatedAppOcorrenciasRouteImport } from './routes/_authenticated/app.ocorrencias'
 import { Route as AuthenticatedAppHospedagemRouteImport } from './routes/_authenticated/app.hospedagem'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/app.financeiro'
+import { Route as AuthenticatedAppDocumentosRouteImport } from './routes/_authenticated/app.documentos'
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
 import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticated/app.caes'
+import { Route as AuthenticatedAppBoletinsRouteImport } from './routes/_authenticated/app.boletins'
 import { Route as AuthenticatedAppBanhoTosaRouteImport } from './routes/_authenticated/app.banho-tosa'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
 import { Route as AuthenticatedAppHospedagemIdRelatorioRouteImport } from './routes/_authenticated/app.hospedagem.$id.relatorio'
+import { Route as AuthenticatedAppCaesIdTimelineRouteImport } from './routes/_authenticated/app.caes.$id.timeline'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -78,6 +82,12 @@ const AuthenticatedAppRelatoriosRoute =
     path: '/relatorios',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppProgramacaoRoute =
+  AuthenticatedAppProgramacaoRouteImport.update({
+    id: '/programacao',
+    path: '/programacao',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppOcorrenciasRoute =
   AuthenticatedAppOcorrenciasRouteImport.update({
     id: '/ocorrencias',
@@ -96,6 +106,12 @@ const AuthenticatedAppFinanceiroRoute =
     path: '/financeiro',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDocumentosRoute =
+  AuthenticatedAppDocumentosRouteImport.update({
+    id: '/documentos',
+    path: '/documentos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppConfiguracoesRoute =
   AuthenticatedAppConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -107,6 +123,12 @@ const AuthenticatedAppCaesRoute = AuthenticatedAppCaesRouteImport.update({
   path: '/caes',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppBoletinsRoute =
+  AuthenticatedAppBoletinsRouteImport.update({
+    id: '/boletins',
+    path: '/boletins',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppBanhoTosaRoute =
   AuthenticatedAppBanhoTosaRouteImport.update({
     id: '/banho-tosa',
@@ -124,6 +146,12 @@ const AuthenticatedAppHospedagemIdRelatorioRoute =
     path: '/$id/relatorio',
     getParentRoute: () => AuthenticatedAppHospedagemRoute,
   } as any)
+const AuthenticatedAppCaesIdTimelineRoute =
+  AuthenticatedAppCaesIdTimelineRouteImport.update({
+    id: '/$id/timeline',
+    path: '/$id/timeline',
+    getParentRoute: () => AuthenticatedAppCaesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,16 +160,20 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
-  '/app/caes': typeof AuthenticatedAppCaesRoute
+  '/app/boletins': typeof AuthenticatedAppBoletinsRoute
+  '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
+  '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
 export interface FileRoutesByTo {
@@ -150,16 +182,20 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
-  '/app/caes': typeof AuthenticatedAppCaesRoute
+  '/app/boletins': typeof AuthenticatedAppBoletinsRoute
+  '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
+  '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
 export interface FileRoutesById {
@@ -171,16 +207,20 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
-  '/_authenticated/app/caes': typeof AuthenticatedAppCaesRoute
+  '/_authenticated/app/boletins': typeof AuthenticatedAppBoletinsRoute
+  '/_authenticated/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/_authenticated/app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/_authenticated/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/_authenticated/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
   '/_authenticated/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
+  '/_authenticated/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/_authenticated/app/saude': typeof AuthenticatedAppSaudeRoute
   '/_authenticated/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/_authenticated/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
 export interface FileRouteTypes {
@@ -192,16 +232,20 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/agenda'
     | '/app/banho-tosa'
+    | '/app/boletins'
     | '/app/caes'
     | '/app/configuracoes'
+    | '/app/documentos'
     | '/app/financeiro'
     | '/app/hospedagem'
     | '/app/ocorrencias'
+    | '/app/programacao'
     | '/app/relatorios'
     | '/app/saude'
     | '/app/tarefas'
     | '/app/tutores'
     | '/app/'
+    | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -210,16 +254,20 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/app/agenda'
     | '/app/banho-tosa'
+    | '/app/boletins'
     | '/app/caes'
     | '/app/configuracoes'
+    | '/app/documentos'
     | '/app/financeiro'
     | '/app/hospedagem'
     | '/app/ocorrencias'
+    | '/app/programacao'
     | '/app/relatorios'
     | '/app/saude'
     | '/app/tarefas'
     | '/app/tutores'
     | '/app'
+    | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
   id:
     | '__root__'
@@ -230,16 +278,20 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/app/agenda'
     | '/_authenticated/app/banho-tosa'
+    | '/_authenticated/app/boletins'
     | '/_authenticated/app/caes'
     | '/_authenticated/app/configuracoes'
+    | '/_authenticated/app/documentos'
     | '/_authenticated/app/financeiro'
     | '/_authenticated/app/hospedagem'
     | '/_authenticated/app/ocorrencias'
+    | '/_authenticated/app/programacao'
     | '/_authenticated/app/relatorios'
     | '/_authenticated/app/saude'
     | '/_authenticated/app/tarefas'
     | '/_authenticated/app/tutores'
     | '/_authenticated/app/'
+    | '/_authenticated/app/caes/$id/timeline'
     | '/_authenticated/app/hospedagem/$id/relatorio'
   fileRoutesById: FileRoutesById
 }
@@ -322,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRelatoriosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/programacao': {
+      id: '/_authenticated/app/programacao'
+      path: '/programacao'
+      fullPath: '/app/programacao'
+      preLoaderRoute: typeof AuthenticatedAppProgramacaoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/ocorrencias': {
       id: '/_authenticated/app/ocorrencias'
       path: '/ocorrencias'
@@ -343,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppFinanceiroRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/documentos': {
+      id: '/_authenticated/app/documentos'
+      path: '/documentos'
+      fullPath: '/app/documentos'
+      preLoaderRoute: typeof AuthenticatedAppDocumentosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/configuracoes': {
       id: '/_authenticated/app/configuracoes'
       path: '/configuracoes'
@@ -355,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/caes'
       fullPath: '/app/caes'
       preLoaderRoute: typeof AuthenticatedAppCaesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/boletins': {
+      id: '/_authenticated/app/boletins'
+      path: '/boletins'
+      fullPath: '/app/boletins'
+      preLoaderRoute: typeof AuthenticatedAppBoletinsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/banho-tosa': {
@@ -378,8 +451,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppHospedagemIdRelatorioRouteImport
       parentRoute: typeof AuthenticatedAppHospedagemRoute
     }
+    '/_authenticated/app/caes/$id/timeline': {
+      id: '/_authenticated/app/caes/$id/timeline'
+      path: '/$id/timeline'
+      fullPath: '/app/caes/$id/timeline'
+      preLoaderRoute: typeof AuthenticatedAppCaesIdTimelineRouteImport
+      parentRoute: typeof AuthenticatedAppCaesRoute
+    }
   }
 }
+
+interface AuthenticatedAppCaesRouteChildren {
+  AuthenticatedAppCaesIdTimelineRoute: typeof AuthenticatedAppCaesIdTimelineRoute
+}
+
+const AuthenticatedAppCaesRouteChildren: AuthenticatedAppCaesRouteChildren = {
+  AuthenticatedAppCaesIdTimelineRoute: AuthenticatedAppCaesIdTimelineRoute,
+}
+
+const AuthenticatedAppCaesRouteWithChildren =
+  AuthenticatedAppCaesRoute._addFileChildren(AuthenticatedAppCaesRouteChildren)
 
 interface AuthenticatedAppHospedagemRouteChildren {
   AuthenticatedAppHospedagemIdRelatorioRoute: typeof AuthenticatedAppHospedagemIdRelatorioRoute
@@ -399,11 +490,14 @@ const AuthenticatedAppHospedagemRouteWithChildren =
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
   AuthenticatedAppBanhoTosaRoute: typeof AuthenticatedAppBanhoTosaRoute
-  AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRoute
+  AuthenticatedAppBoletinsRoute: typeof AuthenticatedAppBoletinsRoute
+  AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRouteWithChildren
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
+  AuthenticatedAppDocumentosRoute: typeof AuthenticatedAppDocumentosRoute
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
   AuthenticatedAppHospedagemRoute: typeof AuthenticatedAppHospedagemRouteWithChildren
   AuthenticatedAppOcorrenciasRoute: typeof AuthenticatedAppOcorrenciasRoute
+  AuthenticatedAppProgramacaoRoute: typeof AuthenticatedAppProgramacaoRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
   AuthenticatedAppSaudeRoute: typeof AuthenticatedAppSaudeRoute
   AuthenticatedAppTarefasRoute: typeof AuthenticatedAppTarefasRoute
@@ -414,11 +508,14 @@ interface AuthenticatedAppRouteChildren {
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
   AuthenticatedAppBanhoTosaRoute: AuthenticatedAppBanhoTosaRoute,
-  AuthenticatedAppCaesRoute: AuthenticatedAppCaesRoute,
+  AuthenticatedAppBoletinsRoute: AuthenticatedAppBoletinsRoute,
+  AuthenticatedAppCaesRoute: AuthenticatedAppCaesRouteWithChildren,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
+  AuthenticatedAppDocumentosRoute: AuthenticatedAppDocumentosRoute,
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
   AuthenticatedAppHospedagemRoute: AuthenticatedAppHospedagemRouteWithChildren,
   AuthenticatedAppOcorrenciasRoute: AuthenticatedAppOcorrenciasRoute,
+  AuthenticatedAppProgramacaoRoute: AuthenticatedAppProgramacaoRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
   AuthenticatedAppSaudeRoute: AuthenticatedAppSaudeRoute,
   AuthenticatedAppTarefasRoute: AuthenticatedAppTarefasRoute,

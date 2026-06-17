@@ -15,6 +15,9 @@ import {
   ListChecks,
   Wallet,
   BarChart3,
+  FileText,
+  ClipboardList,
+  Newspaper,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -34,11 +37,14 @@ type NavItem = {
 const NAV: NavItem[] = [
   { to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] },
   { to: "/app/agenda", label: "Creche", icon: CalendarDays, roles: ["admin", "funcionario"] },
+  { to: "/app/programacao", label: "Programação do dia", icon: ClipboardList, roles: ["admin", "funcionario"] },
   { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
   { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
   { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/hospedagem", label: "Hospedagem", icon: BedDouble, roles: ["admin", "funcionario"] },
   { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"] },
+  { to: "/app/boletins", label: "Boletins", icon: Newspaper, roles: ["admin", "funcionario"] },
+  { to: "/app/documentos", label: "Documentos", icon: FileText, roles: ["admin", "funcionario"] },
   { to: "/app/ocorrencias", label: "Ocorrências", icon: AlertCircle, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"], soon: true },

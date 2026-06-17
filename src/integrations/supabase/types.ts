@@ -244,6 +244,310 @@ export type Database = {
           },
         ]
       }
+      daily_report_entries: {
+        Row: {
+          created_at: string
+          description: string
+          entry_type: Database["public"]["Enums"]["report_entry_type"]
+          id: string
+          notes: string | null
+          occurred_at: string
+          report_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          entry_type: Database["public"]["Enums"]["report_entry_type"]
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          report_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          entry_type?: Database["public"]["Enums"]["report_entry_type"]
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_report_entries_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "daily_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_report_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_type: Database["public"]["Enums"]["report_media_type"]
+          media_url: string
+          report_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["report_media_type"]
+          media_url: string
+          report_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["report_media_type"]
+          media_url?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_report_media_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "daily_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_reports: {
+        Row: {
+          author_id: string | null
+          created_at: string
+          date: string
+          dog_id: string
+          id: string
+          published: boolean
+          published_at: string | null
+          stay_id: string | null
+          stay_type: string | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string
+          date: string
+          dog_id: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          stay_id?: string | null
+          stay_type?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string
+          date?: string
+          dog_id?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          stay_id?: string | null
+          stay_type?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_reports_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          item_id: string
+          new_status: Database["public"]["Enums"]["schedule_status"]
+          note: string | null
+          previous_status: Database["public"]["Enums"]["schedule_status"] | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          item_id: string
+          new_status: Database["public"]["Enums"]["schedule_status"]
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["schedule_status"]
+            | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          item_id?: string
+          new_status?: Database["public"]["Enums"]["schedule_status"]
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["schedule_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_history_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "daily_schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_items: {
+        Row: {
+          activity: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string | null
+          end_time: string | null
+          id: string
+          location: string | null
+          not_done_reason: string | null
+          notes: string | null
+          requires_confirmation: boolean
+          requires_photo: boolean
+          responsible_id: string | null
+          start_time: string
+          status: Database["public"]["Enums"]["schedule_status"]
+          updated_at: string
+        }
+        Insert: {
+          activity: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          not_done_reason?: string | null
+          notes?: string | null
+          requires_confirmation?: boolean
+          requires_photo?: boolean
+          responsible_id?: string | null
+          start_time: string
+          status?: Database["public"]["Enums"]["schedule_status"]
+          updated_at?: string
+        }
+        Update: {
+          activity?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          not_done_reason?: string | null
+          notes?: string | null
+          requires_confirmation?: boolean
+          requires_photo?: boolean
+          responsible_id?: string | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["schedule_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_items_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_participants: {
+        Row: {
+          created_at: string
+          dog_id: string
+          id: string
+          item_id: string
+        }
+        Insert: {
+          created_at?: string
+          dog_id: string
+          id?: string
+          item_id: string
+        }
+        Update: {
+          created_at?: string
+          dog_id?: string
+          id?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_participants_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_schedule_participants_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "daily_schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_schedule_photos: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          photo_url: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          photo_url: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          photo_url?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_schedule_photos_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "daily_schedule_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daycare_activities: {
         Row: {
           activity_type: Database["public"]["Enums"]["daycare_activity_type"]
@@ -423,6 +727,168 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          ip_address: string | null
+          method: Database["public"]["Enums"]["signature_method"]
+          signature_data: string
+          signed_at: string
+          signer_email: string | null
+          signer_name: string
+          signer_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          method: Database["public"]["Enums"]["signature_method"]
+          signature_data: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name: string
+          signer_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          method?: Database["public"]["Enums"]["signature_method"]
+          signature_data?: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name?: string
+          signer_user_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          title: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          title: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          body: string
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          dog_id: string | null
+          id: string
+          pdf_path: string | null
+          reference_id: string | null
+          reference_table: string | null
+          sign_token: string
+          signed_at: string | null
+          status: Database["public"]["Enums"]["document_status"]
+          template_id: string | null
+          title: string
+          tutor_id: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string | null
+          id?: string
+          pdf_path?: string | null
+          reference_id?: string | null
+          reference_table?: string | null
+          sign_token?: string
+          signed_at?: string | null
+          status?: Database["public"]["Enums"]["document_status"]
+          template_id?: string | null
+          title: string
+          tutor_id: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string | null
+          id?: string
+          pdf_path?: string | null
+          reference_id?: string | null
+          reference_table?: string | null
+          sign_token?: string
+          signed_at?: string | null
+          status?: Database["public"]["Enums"]["document_status"]
+          template_id?: string | null
+          title?: string
+          tutor_id?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutors"
             referencedColumns: ["id"]
           },
         ]
@@ -1349,7 +1815,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dog_timeline_events: {
+        Row: {
+          dog_id: string | null
+          event_at: string | null
+          event_type: string | null
+          payload: Json | null
+          summary: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -1377,6 +1852,13 @@ export type Database = {
         | "treino"
         | "outra"
       daycare_feeding_type: "racao" | "petisco" | "umida" | "agua" | "outra"
+      document_status: "draft" | "pending_signature" | "signed" | "cancelled"
+      document_type:
+        | "contrato_creche"
+        | "contrato_hospedagem"
+        | "contrato_banho_tosa"
+        | "termo_responsabilidade"
+        | "autorizacao_imagem"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
       grooming_photo_moment: "before" | "after"
@@ -1386,6 +1868,16 @@ export type Database = {
         | "done"
         | "cancelled"
         | "no_show"
+      report_entry_type:
+        | "alimentacao"
+        | "hidratacao"
+        | "brincadeira"
+        | "passeio"
+        | "descanso"
+        | "comportamento"
+      report_media_type: "photo" | "video"
+      schedule_status: "pending" | "done" | "not_done"
+      signature_method: "typed" | "drawn"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1531,6 +2023,14 @@ export const Constants = {
         "outra",
       ],
       daycare_feeding_type: ["racao", "petisco", "umida", "agua", "outra"],
+      document_status: ["draft", "pending_signature", "signed", "cancelled"],
+      document_type: [
+        "contrato_creche",
+        "contrato_hospedagem",
+        "contrato_banho_tosa",
+        "termo_responsabilidade",
+        "autorizacao_imagem",
+      ],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
       grooming_photo_moment: ["before", "after"],
@@ -1541,6 +2041,17 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      report_entry_type: [
+        "alimentacao",
+        "hidratacao",
+        "brincadeira",
+        "passeio",
+        "descanso",
+        "comportamento",
+      ],
+      report_media_type: ["photo", "video"],
+      schedule_status: ["pending", "done", "not_done"],
+      signature_method: ["typed", "drawn"],
     },
   },
 } as const
