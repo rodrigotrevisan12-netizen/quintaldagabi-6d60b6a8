@@ -427,6 +427,168 @@ export type Database = {
           },
         ]
       }
+      document_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          ip_address: string | null
+          method: Database["public"]["Enums"]["signature_method"]
+          signature_data: string
+          signed_at: string
+          signer_email: string | null
+          signer_name: string
+          signer_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          ip_address?: string | null
+          method: Database["public"]["Enums"]["signature_method"]
+          signature_data: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name: string
+          signer_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          ip_address?: string | null
+          method?: Database["public"]["Enums"]["signature_method"]
+          signature_data?: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name?: string
+          signer_user_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          title: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          title: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          body: string
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          dog_id: string | null
+          id: string
+          pdf_path: string | null
+          reference_id: string | null
+          reference_table: string | null
+          sign_token: string
+          signed_at: string | null
+          status: Database["public"]["Enums"]["document_status"]
+          template_id: string | null
+          title: string
+          tutor_id: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string | null
+          id?: string
+          pdf_path?: string | null
+          reference_id?: string | null
+          reference_table?: string | null
+          sign_token?: string
+          signed_at?: string | null
+          status?: Database["public"]["Enums"]["document_status"]
+          template_id?: string | null
+          title: string
+          tutor_id: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string | null
+          id?: string
+          pdf_path?: string | null
+          reference_id?: string | null
+          reference_table?: string | null
+          sign_token?: string
+          signed_at?: string | null
+          status?: Database["public"]["Enums"]["document_status"]
+          template_id?: string | null
+          title?: string
+          tutor_id?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dog_allergies: {
         Row: {
           created_at: string
@@ -1377,6 +1539,13 @@ export type Database = {
         | "treino"
         | "outra"
       daycare_feeding_type: "racao" | "petisco" | "umida" | "agua" | "outra"
+      document_status: "draft" | "pending_signature" | "signed" | "cancelled"
+      document_type:
+        | "contrato_creche"
+        | "contrato_hospedagem"
+        | "contrato_banho_tosa"
+        | "termo_responsabilidade"
+        | "autorizacao_imagem"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
       grooming_photo_moment: "before" | "after"
@@ -1386,6 +1555,7 @@ export type Database = {
         | "done"
         | "cancelled"
         | "no_show"
+      signature_method: "typed" | "drawn"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1531,6 +1701,14 @@ export const Constants = {
         "outra",
       ],
       daycare_feeding_type: ["racao", "petisco", "umida", "agua", "outra"],
+      document_status: ["draft", "pending_signature", "signed", "cancelled"],
+      document_type: [
+        "contrato_creche",
+        "contrato_hospedagem",
+        "contrato_banho_tosa",
+        "termo_responsabilidade",
+        "autorizacao_imagem",
+      ],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
       grooming_photo_moment: ["before", "after"],
@@ -1541,6 +1719,7 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      signature_method: ["typed", "drawn"],
     },
   },
 } as const

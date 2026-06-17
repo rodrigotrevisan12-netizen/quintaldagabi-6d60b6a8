@@ -1,81 +1,109 @@
-# Fase C — Operação diária (Creche, Hospedagem, Banho & Tosa)
+# Fase D — Documentos, Programação, Boletins, Timeline
 
-Três módulos grandes. Vou entregar em **3 sub-fases** para você testar cada uma antes da próxima. Se preferir tudo de uma vez, me avisa.
+Quatro módulos grandes. Vou entregar em **4 sub-fases**, na ordem abaixo. Confirma e começo pela D1. Se quiser tudo de uma vez, me avisa.
 
 ---
 
-## C1 — Creche (daycare)
+## D1 — Documentos (contratos e termos)
+
+### Modelos automáticos
+- **Contrato de creche**
+- **Contrato de hospedagem**
+- **Contrato de banho e tosa**
+- **Termo de responsabilidade**
+- **Autorização de uso de imagem**
+
+Cada modelo é um template com variáveis ({{tutor.nome}}, {{cao.nome}}, {{estadia.entrada}}, valores, datas). A administradora edita o texto base em Configurações; os documentos são gerados preenchendo as variáveis.
 
 ### Banco
-- `daycare_stays` — `dog_id`, `check_in_at`, `check_out_at` (null = presente), `check_in_by`, `check_out_by`, `pickup_person` (texto, validado contra `tutor_authorized_pickups`), observações.
-- `daycare_feedings` — `stay_id`, hora, tipo (ração/petisco/úmida), quantidade, observação.
-- `daycare_medications` — `stay_id`, hora, medicamento, dose, aplicado_por.
-- `daycare_activities` — `stay_id`, hora, atividade (passeio, brincadeira, soneca, socialização, treino, outra), duração, observação.
-- `unit_settings` — `unit_id`, `daycare_capacity` (int). Configurável em Configurações.
-
-Enums: `daycare_feeding_type`, `daycare_activity_type`.
+- `document_templates` — tipo (enum), título, corpo (markdown/html), versão, ativo. Seed com os 5 modelos.
+- `documents` — tipo, `tutor_id`, `dog_id` (opcional), referência (creche/hospedagem/grooming id, opcional), corpo renderizado, status (`draft`/`pending_signature`/`signed`/`cancelled`), pdf_path (storage), criado_por.
+- `document_signatures` — `document_id`, signatário (tutor user_id ou nome+email), método (`typed`/`drawn`), assinatura (texto ou PNG base64 → storage), assinado_em, ip, user_agent.
+- Storage bucket `documents` (privado).
 
 ### Telas
-- **Agenda → Creche (hoje)**: lista de cães presentes (foto, nome, tutor, hora check-in, alertas de medicação pendente). Botão **Check-out** por linha.
-- **Botão Check-in**: dialog seleciona cão (busca), opcional pessoa que trouxe, observação. Bloqueia se já tem estadia aberta.
-- **Detalhe da estadia** (drawer): abas Alimentação / Medicação / Atividades — cada uma com timeline + form de novo registro.
-- **Painel diário** (card no dashboard + topo da página): Presentes / Ausentes hoje / Capacidade usada (barra) / Vagas disponíveis.
+- **Documentos** (lista): filtros por tipo/tutor/status. Botão "Novo documento" → escolhe modelo + tutor + cão/estadia → preview → enviar para assinatura.
+- **Detalhe**: visualização do contrato renderizado, botão **Baixar PDF**, painel de assinaturas (quem, quando, IP), botão **Cancelar**.
+- **Página pública de assinatura** (`/assinar/$token`): tutor logado abre, lê, assina (digitada ou desenhada no canvas), confirma. Após assinar → status `signed`, PDF final gerado e salvo.
+- **Histórico de assinaturas** por tutor (na ficha do tutor).
+- **Configurações → Modelos**: editar texto base dos 5 modelos.
+
+PDF: geração client-side com `jspdf` + `html2canvas` (sem dependência server pesada, compatível com Worker).
 
 ---
 
-## C2 — Hospedagem (boarding)
+## D2 — Programação do Dia
 
 ### Banco
-- `boarding_stays` — `dog_id`, `check_in_at`, `expected_check_out_at`, `check_out_at` (null = em andamento), `kennel` (texto opcional), `daily_rate` (numeric), observações.
-- `boarding_belongings` — `stay_id`, item, quantidade, devolvido (bool).
-- `boarding_food` — `stay_id`, tipo (própria/casa), marca, quantidade_total_g, porção_g, frequência/dia.
-- `boarding_medications` — `stay_id`, medicamento, dose, frequência, horários, observação.
-- `boarding_daily_logs` — `stay_id`, data, alimentação_ok, medicação_ok, humor, observação. (Reusa estrutura para relatório.)
-- `unit_settings.boarding_capacity`.
+- `daily_schedule_items` — `date`, `start_time`, `end_time` (opcional), `activity`, `description`, `responsible_id` (profiles), `location`, `requires_photo` (bool), `requires_confirmation` (bool), `status` (`pending`/`done`/`not_done`), `completed_at`, `completed_by`, `notes`, `not_done_reason`.
+- `daily_schedule_participants` — `item_id`, `dog_id`. (Lista de cães participantes.)
+- `daily_schedule_photos` — `item_id`, url (bucket `documents` ou novo `schedule`).
+- `daily_schedule_history` — snapshot ao mudar status (quem, quando, status anterior/novo, observação).
 
 ### Telas
-- **Hospedagem**: lista de estadias ativas (cão, tutor, entrada, saída prevista, dias restantes, status). Filtros: ativas/futuras/encerradas.
-- **Nova hospedagem** (sheet): cão, datas, kennel, ração, medicamentos, pertences, valor diária, observações.
-- **Detalhe da estadia**: abas Geral / Ração / Medicamentos / Pertences / Diário.
-- **Check-out**: confirma data efetiva, marca pertences devolvidos, gera **relatório PDF/print** (resumo da estadia, logs diários, medicação dada, valor total = diária × dias).
-- **Painel**: Ocupados / Capacidade / Saídas hoje / Entradas hoje.
+- **Programação do Dia** (admin): visão diária com timeline por hora. Botão "Nova tarefa" abre sheet com todos os campos. Edição inline. Filtro por responsável/data.
+- **Minha programação** (funcionário): lista das tarefas do dia atribuídas a ele. Cada item: botões **Concluído** / **Não realizado** (pede motivo) / **Pendente**. Se `requires_photo`, exige upload antes de concluir. Se `requires_confirmation`, pede checkbox de confirmação.
+- **Histórico** (admin): filtro por data/responsável/status, vê quem fez/quando.
+- Dashboard: card "Tarefas hoje" — total / concluídas / pendentes / não realizadas.
+
+RLS: admin vê tudo; funcionário vê e atualiza só itens onde é `responsible_id`.
 
 ---
 
-## C3 — Banho & Tosa (grooming)
+## D3 — Boletins diários
 
 ### Banco
-- `grooming_services` (catálogo): nome, duração_min, preço_base. Seed: Banho, Tosa completa, Tosa higiênica, Corte de unhas, Escovação.
-- `grooming_appointments` — `dog_id`, `scheduled_at`, `duration_min`, `groomer_id` (profiles), status (`scheduled`/`in_progress`/`done`/`cancelled`/`no_show`), `started_at`, `finished_at`, observações, valor_total.
-- `grooming_appointment_services` — `appointment_id`, `service_id`, preço.
-- `grooming_photos` — `appointment_id`, url, momento (`before`/`after`).
-- Storage bucket `grooming` (já temos `dogs`, criamos novo).
+- `daily_reports` — `dog_id`, `date`, `stay_id` (opcional — creche ou hospedagem), `author_id`, `published` (bool).
+- `daily_report_entries` — `report_id`, tipo (enum: `alimentacao`/`hidratacao`/`brincadeira`/`passeio`/`descanso`/`comportamento`), hora, descrição, observação.
+- `daily_report_media` — `report_id`, url, tipo (`photo`/`video`), legenda. Bucket `reports` (privado).
+- Trigger: ao concluir check-out de creche/hospedagem, sugerir gerar boletim. Botão "Gerar boletim automático" agrega:
+  - alimentações de `daycare_feedings`/`boarding_food`
+  - medicações
+  - atividades (`daycare_activities`)
+  - logs diários (`boarding_daily_logs`)
+  - tarefas concluídas da programação onde o cão participou
+  - fotos do dia (banho & tosa, programação)
 
 ### Telas
-- **Banho & Tosa → Agenda**: visão dia/semana com slots. Click vazio = novo agendamento (cão, serviços, profissional, horário). Click ocupado = detalhe.
-- **Detalhe do agendamento**: serviços, status (Iniciar / Concluir), upload fotos antes/depois, observações, total.
-- **Fila do dia**: lista por status (agendado / em execução / concluído).
-- **Produtividade**: card por profissional — atendimentos no período, tempo médio, faturamento. Filtro de data.
+- **Boletins** (funcionário/admin): lista por dia/cão. Editor: timeline com botão "+ Adicionar registro" (escolhe tipo), upload de fotos/vídeos.
+- **Botão "Gerar automático"**: cria boletim pré-preenchido com dados do dia, funcionário só revisa e publica.
+- **Visão tutor**: boletim publicado renderizado bonitinho, com fotos.
+- RLS: equipe edita; tutor lê só do próprio cão e só publicados.
 
 ---
 
-## O que NÃO entra nesta fase
-- Integração financeira completa (lançamento automático em "contas a receber") — só calculamos valores; lançamento vai na fase financeira.
-- WhatsApp / e-mail de confirmação.
-- Câmeras ao vivo.
-- App do tutor.
+## D4 — Timeline do Pet (visão do tutor)
 
-## Detalhes técnicos
-- Tabelas todas com RLS: equipe (admin/funcionario) lê e escreve; tutor lê só dos seus cães.
-- `service_role` grant em todas; trigger `set_updated_at` onde aplicável.
-- Validação Zod nos forms.
-- Relatório de hospedagem: rota imprimível (`/_authenticated/app/hospedagem/$id/relatorio`) — usuário usa "imprimir → salvar PDF" do navegador (sem dependência extra).
-- Painéis no dashboard passam de placeholder para dados reais.
-- Menu lateral: remover badges "em breve" de Agenda, Hospedagem, Banho & Tosa.
+Página única por cão que **agrega tudo**, em ordem cronológica reversa:
+- Estadias de creche (check-in/out)
+- Estadias de hospedagem (com link para o relatório)
+- Serviços de banho & tosa (com fotos antes/depois)
+- Boletins publicados
+- Vacinas, vermífugos, medicações, ocorrências de saúde
+- Histórico comportamental
+- Documentos assinados
+- Fotos & vídeos (galeria separada)
 
-## Ordem de execução
-1. **C1 Creche** → você testa check-in/out, alimentação, medicação, atividades, painel.
-2. **C2 Hospedagem** → você testa estadia completa + relatório.
-3. **C3 Banho & Tosa** → você testa agendamento, execução, fotos, produtividade.
+### Telas
+- **Timeline** (`/app/caes/$id/timeline`) com filtros por tipo de evento e período.
+- Visão **galeria**: grid de todas as mídias (fotos + vídeos) do cão, ordenada por data.
+- Tutor acessa por `/app/caes/$id` → aba "Timeline".
+- Para a equipe, mesma página com mais ações (editar/remover entradas).
 
-Se aprovar, começo pela **C1**. Manda "ok" ou ajusta.
+Backend: view SQL `dog_timeline_events` (UNION ALL das tabelas relevantes, com `event_type`, `event_at`, `summary`, `payload jsonb`). RLS herdada das tabelas-fonte; o tutor só vê o que já pode ver hoje.
+
+---
+
+## O que NÃO entra
+- Assinatura digital com certificado ICP-Brasil (usamos assinatura simples + log de IP/user-agent, suficiente para uso interno).
+- Envio automático de contrato por WhatsApp/e-mail.
+- Edição rich-text WYSIWYG dos modelos (markdown simples já resolve).
+- Notificação push de tarefas.
+
+## Ordem
+1. **D1 Documentos** — você testa criação, assinatura e PDF.
+2. **D2 Programação** — você testa criação, execução pelo funcionário, histórico.
+3. **D3 Boletins** — você testa registro manual e geração automática.
+4. **D4 Timeline** — você testa visão consolidada.
+
+Confirma "ok" para começar pela **D1**, ou ajusta a ordem/escopo.
