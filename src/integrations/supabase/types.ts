@@ -244,6 +244,129 @@ export type Database = {
           },
         ]
       }
+      daily_report_entries: {
+        Row: {
+          created_at: string
+          description: string
+          entry_type: Database["public"]["Enums"]["report_entry_type"]
+          id: string
+          notes: string | null
+          occurred_at: string
+          report_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          entry_type: Database["public"]["Enums"]["report_entry_type"]
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          report_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          entry_type?: Database["public"]["Enums"]["report_entry_type"]
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_report_entries_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "daily_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_report_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_type: Database["public"]["Enums"]["report_media_type"]
+          media_url: string
+          report_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["report_media_type"]
+          media_url: string
+          report_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["report_media_type"]
+          media_url?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_report_media_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "daily_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_reports: {
+        Row: {
+          author_id: string | null
+          created_at: string
+          date: string
+          dog_id: string
+          id: string
+          published: boolean
+          published_at: string | null
+          stay_id: string | null
+          stay_type: string | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string
+          date: string
+          dog_id: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          stay_id?: string | null
+          stay_type?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string
+          date?: string
+          dog_id?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          stay_id?: string | null
+          stay_type?: string | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_reports_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_schedule_history: {
         Row: {
           changed_at: string
@@ -1692,7 +1815,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dog_timeline_events: {
+        Row: {
+          dog_id: string | null
+          event_at: string | null
+          event_type: string | null
+          payload: Json | null
+          summary: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -1736,6 +1868,14 @@ export type Database = {
         | "done"
         | "cancelled"
         | "no_show"
+      report_entry_type:
+        | "alimentacao"
+        | "hidratacao"
+        | "brincadeira"
+        | "passeio"
+        | "descanso"
+        | "comportamento"
+      report_media_type: "photo" | "video"
       schedule_status: "pending" | "done" | "not_done"
       signature_method: "typed" | "drawn"
     }
@@ -1901,6 +2041,15 @@ export const Constants = {
         "cancelled",
         "no_show",
       ],
+      report_entry_type: [
+        "alimentacao",
+        "hidratacao",
+        "brincadeira",
+        "passeio",
+        "descanso",
+        "comportamento",
+      ],
+      report_media_type: ["photo", "video"],
       schedule_status: ["pending", "done", "not_done"],
       signature_method: ["typed", "drawn"],
     },
