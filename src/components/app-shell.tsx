@@ -47,7 +47,7 @@ const NAV: NavItem[] = [
   { to: "/app/documentos", label: "Documentos", icon: FileText, roles: ["admin", "funcionario"] },
   { to: "/app/ocorrencias", label: "Ocorrências", icon: AlertCircle, roles: ["admin", "funcionario"], soon: true },
   { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"], soon: true },
-  { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"], soon: true },
+  { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"] },
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, roles: ["admin"], soon: true },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
 ];
