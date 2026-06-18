@@ -1355,6 +1355,96 @@ export type Database = {
           },
         ]
       }
+      financial_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string | null
+          expense_category:
+            | Database["public"]["Enums"]["fin_expense_category"]
+            | null
+          id: string
+          kind: Database["public"]["Enums"]["fin_kind"]
+          notes: string | null
+          paid_at: string | null
+          payment_method: string | null
+          reference_id: string | null
+          reference_type: string | null
+          revenue_category:
+            | Database["public"]["Enums"]["fin_revenue_category"]
+            | null
+          status: Database["public"]["Enums"]["fin_status"]
+          tutor_id: string | null
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          description: string
+          due_date?: string | null
+          expense_category?:
+            | Database["public"]["Enums"]["fin_expense_category"]
+            | null
+          id?: string
+          kind: Database["public"]["Enums"]["fin_kind"]
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          revenue_category?:
+            | Database["public"]["Enums"]["fin_revenue_category"]
+            | null
+          status?: Database["public"]["Enums"]["fin_status"]
+          tutor_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          expense_category?:
+            | Database["public"]["Enums"]["fin_expense_category"]
+            | null
+          id?: string
+          kind?: Database["public"]["Enums"]["fin_kind"]
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          revenue_category?:
+            | Database["public"]["Enums"]["fin_revenue_category"]
+            | null
+          status?: Database["public"]["Enums"]["fin_status"]
+          tutor_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grooming_appointment_services: {
         Row: {
           appointment_id: string
@@ -1553,6 +1643,53 @@ export type Database = {
             columns: ["default_unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receipts: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          number: string
+          payer_document: string | null
+          payer_name: string
+          transaction_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          number: string
+          payer_document?: string | null
+          payer_name: string
+          transaction_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          number?: string
+          payer_document?: string | null
+          payer_name?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -1861,6 +1998,21 @@ export type Database = {
         | "autorizacao_imagem"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
+      fin_expense_category:
+        | "salarios"
+        | "produtos"
+        | "aluguel"
+        | "agua"
+        | "energia"
+        | "veterinario"
+        | "outros"
+      fin_kind: "receita" | "despesa"
+      fin_revenue_category:
+        | "creche"
+        | "hospedagem"
+        | "banho_tosa"
+        | "outros_servicos"
+      fin_status: "pendente" | "pago" | "recebido" | "cancelado" | "vencido"
       grooming_photo_moment: "before" | "after"
       grooming_status:
         | "scheduled"
@@ -2033,6 +2185,23 @@ export const Constants = {
       ],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
+      fin_expense_category: [
+        "salarios",
+        "produtos",
+        "aluguel",
+        "agua",
+        "energia",
+        "veterinario",
+        "outros",
+      ],
+      fin_kind: ["receita", "despesa"],
+      fin_revenue_category: [
+        "creche",
+        "hospedagem",
+        "banho_tosa",
+        "outros_servicos",
+      ],
+      fin_status: ["pendente", "pago", "recebido", "cancelado", "vencido"],
       grooming_photo_moment: ["before", "after"],
       grooming_status: [
         "scheduled",
