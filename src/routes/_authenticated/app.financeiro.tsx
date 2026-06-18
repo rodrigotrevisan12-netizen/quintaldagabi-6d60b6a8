@@ -432,13 +432,13 @@ function TxSheet({
       };
       if (editing) {
         const { error } = await supabase
-          .from("financial_transactions").update(payload).eq("id", editing.id);
+          .from("financial_transactions").update(payload as never).eq("id", editing.id);
         if (error) throw error;
       } else {
         const { data: u } = await supabase.auth.getUser();
         const { error } = await supabase
           .from("financial_transactions")
-          .insert({ ...payload, created_by: u.user?.id });
+          .insert({ ...payload, created_by: u.user?.id } as never);
         if (error) throw error;
       }
     },
