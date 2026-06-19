@@ -29,11 +29,19 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  async function redirectByRole(userId: string) {
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const list = (roles ?? []).map((r) => r.role);
+    const isStaff = list.includes("admin") || list.includes("funcionario");
+    navigate({ to: isStaff ? "/app" : "/tutor" });
+  }
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/app" });
+      if (data.user) redirectByRole(data.user.id);
     });
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -43,17 +51,17 @@ function AuthPage() {
     if (!pwParsed.success) return toast.error(pwParsed.error.issues[0].message);
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: emailParsed.data,
       password: pwParsed.data,
     });
     setLoading(false);
-    if (error) {
+    if (error || !data.user) {
       toast.error("Não conseguimos entrar. Verifique e-mail e senha.");
       return;
     }
     toast.success("Bem-vinda!");
-    navigate({ to: "/app" });
+    await redirectByRole(data.user.id);
   }
 
   async function handleForgot(e: React.FormEvent) {
