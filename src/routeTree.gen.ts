@@ -13,22 +13,34 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedTutorRouteImport } from './routes/_authenticated/tutor'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedTutorIndexRouteImport } from './routes/_authenticated/tutor.index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedTutorFinanceiroRouteImport } from './routes/_authenticated/tutor.financeiro'
+import { Route as AuthenticatedTutorDocumentosRouteImport } from './routes/_authenticated/tutor.documentos'
+import { Route as AuthenticatedTutorChegadaRouteImport } from './routes/_authenticated/tutor.chegada'
+import { Route as AuthenticatedTutorCaesRouteImport } from './routes/_authenticated/tutor.caes'
+import { Route as AuthenticatedTutorBoletinsRouteImport } from './routes/_authenticated/tutor.boletins'
 import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
+import { Route as AuthenticatedAppTreinamentoRouteImport } from './routes/_authenticated/app.treinamento'
 import { Route as AuthenticatedAppTarefasRouteImport } from './routes/_authenticated/app.tarefas'
 import { Route as AuthenticatedAppSaudeRouteImport } from './routes/_authenticated/app.saude'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
 import { Route as AuthenticatedAppProgramacaoRouteImport } from './routes/_authenticated/app.programacao'
 import { Route as AuthenticatedAppOcorrenciasRouteImport } from './routes/_authenticated/app.ocorrencias'
 import { Route as AuthenticatedAppHospedagemRouteImport } from './routes/_authenticated/app.hospedagem'
+import { Route as AuthenticatedAppFuncionariosRouteImport } from './routes/_authenticated/app.funcionarios'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/app.financeiro'
 import { Route as AuthenticatedAppDocumentosRouteImport } from './routes/_authenticated/app.documentos'
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
+import { Route as AuthenticatedAppComunicacaoRouteImport } from './routes/_authenticated/app.comunicacao'
+import { Route as AuthenticatedAppChegadasRouteImport } from './routes/_authenticated/app.chegadas'
 import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticated/app.caes'
 import { Route as AuthenticatedAppBoletinsRouteImport } from './routes/_authenticated/app.boletins'
 import { Route as AuthenticatedAppBanhoTosaRouteImport } from './routes/_authenticated/app.banho-tosa'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
+import { Route as AuthenticatedTutorCaesIdRouteImport } from './routes/_authenticated/tutor.caes.$id'
 import { Route as AuthenticatedAppHospedagemIdRelatorioRouteImport } from './routes/_authenticated/app.hospedagem.$id.relatorio'
 import { Route as AuthenticatedAppCaesIdTimelineRouteImport } from './routes/_authenticated/app.caes.$id.timeline'
 
@@ -51,21 +63,66 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTutorRoute = AuthenticatedTutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTutorIndexRoute = AuthenticatedTutorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedTutorRoute,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedTutorFinanceiroRoute =
+  AuthenticatedTutorFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
+const AuthenticatedTutorDocumentosRoute =
+  AuthenticatedTutorDocumentosRouteImport.update({
+    id: '/documentos',
+    path: '/documentos',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
+const AuthenticatedTutorChegadaRoute =
+  AuthenticatedTutorChegadaRouteImport.update({
+    id: '/chegada',
+    path: '/chegada',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
+const AuthenticatedTutorCaesRoute = AuthenticatedTutorCaesRouteImport.update({
+  id: '/caes',
+  path: '/caes',
+  getParentRoute: () => AuthenticatedTutorRoute,
+} as any)
+const AuthenticatedTutorBoletinsRoute =
+  AuthenticatedTutorBoletinsRouteImport.update({
+    id: '/boletins',
+    path: '/boletins',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
 const AuthenticatedAppTutoresRoute = AuthenticatedAppTutoresRouteImport.update({
   id: '/tutores',
   path: '/tutores',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppTreinamentoRoute =
+  AuthenticatedAppTreinamentoRouteImport.update({
+    id: '/treinamento',
+    path: '/treinamento',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppTarefasRoute = AuthenticatedAppTarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
@@ -100,6 +157,12 @@ const AuthenticatedAppHospedagemRoute =
     path: '/hospedagem',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppFuncionariosRoute =
+  AuthenticatedAppFuncionariosRouteImport.update({
+    id: '/funcionarios',
+    path: '/funcionarios',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppFinanceiroRoute =
   AuthenticatedAppFinanceiroRouteImport.update({
     id: '/financeiro',
@@ -116,6 +179,18 @@ const AuthenticatedAppConfiguracoesRoute =
   AuthenticatedAppConfiguracoesRouteImport.update({
     id: '/configuracoes',
     path: '/configuracoes',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppComunicacaoRoute =
+  AuthenticatedAppComunicacaoRouteImport.update({
+    id: '/comunicacao',
+    path: '/comunicacao',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppChegadasRoute =
+  AuthenticatedAppChegadasRouteImport.update({
+    id: '/chegadas',
+    path: '/chegadas',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppCaesRoute = AuthenticatedAppCaesRouteImport.update({
@@ -140,6 +215,12 @@ const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedTutorCaesIdRoute =
+  AuthenticatedTutorCaesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedTutorCaesRoute,
+  } as any)
 const AuthenticatedAppHospedagemIdRelatorioRoute =
   AuthenticatedAppHospedagemIdRelatorioRouteImport.update({
     id: '/$id/relatorio',
@@ -158,21 +239,33 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/tutor': typeof AuthenticatedTutorRouteWithChildren
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
+  '/app/chegadas': typeof AuthenticatedAppChegadasRoute
+  '/app/comunicacao': typeof AuthenticatedAppComunicacaoRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/app/funcionarios': typeof AuthenticatedAppFuncionariosRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
   '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
+  '/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
+  '/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
+  '/tutor/caes': typeof AuthenticatedTutorCaesRouteWithChildren
+  '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
+  '/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
+  '/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/tutor/': typeof AuthenticatedTutorIndexRoute
+  '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
   '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
@@ -184,17 +277,28 @@ export interface FileRoutesByTo {
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
+  '/app/chegadas': typeof AuthenticatedAppChegadasRoute
+  '/app/comunicacao': typeof AuthenticatedAppComunicacaoRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/app/funcionarios': typeof AuthenticatedAppFuncionariosRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
   '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
+  '/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
+  '/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
+  '/tutor/caes': typeof AuthenticatedTutorCaesRouteWithChildren
+  '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
+  '/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
+  '/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/tutor': typeof AuthenticatedTutorIndexRoute
+  '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
   '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
@@ -205,21 +309,33 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/tutor': typeof AuthenticatedTutorRouteWithChildren
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
   '/_authenticated/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/_authenticated/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/_authenticated/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
+  '/_authenticated/app/chegadas': typeof AuthenticatedAppChegadasRoute
+  '/_authenticated/app/comunicacao': typeof AuthenticatedAppComunicacaoRoute
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/_authenticated/app/documentos': typeof AuthenticatedAppDocumentosRoute
   '/_authenticated/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/_authenticated/app/funcionarios': typeof AuthenticatedAppFuncionariosRoute
   '/_authenticated/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
   '/_authenticated/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
   '/_authenticated/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/_authenticated/app/saude': typeof AuthenticatedAppSaudeRoute
   '/_authenticated/app/tarefas': typeof AuthenticatedAppTarefasRoute
+  '/_authenticated/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
+  '/_authenticated/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
+  '/_authenticated/tutor/caes': typeof AuthenticatedTutorCaesRouteWithChildren
+  '/_authenticated/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
+  '/_authenticated/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
+  '/_authenticated/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/tutor/': typeof AuthenticatedTutorIndexRoute
+  '/_authenticated/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
   '/_authenticated/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/_authenticated/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
@@ -230,21 +346,33 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/app'
+    | '/tutor'
     | '/app/agenda'
     | '/app/banho-tosa'
     | '/app/boletins'
     | '/app/caes'
+    | '/app/chegadas'
+    | '/app/comunicacao'
     | '/app/configuracoes'
     | '/app/documentos'
     | '/app/financeiro'
+    | '/app/funcionarios'
     | '/app/hospedagem'
     | '/app/ocorrencias'
     | '/app/programacao'
     | '/app/relatorios'
     | '/app/saude'
     | '/app/tarefas'
+    | '/app/treinamento'
     | '/app/tutores'
+    | '/tutor/boletins'
+    | '/tutor/caes'
+    | '/tutor/chegada'
+    | '/tutor/documentos'
+    | '/tutor/financeiro'
     | '/app/'
+    | '/tutor/'
+    | '/tutor/caes/$id'
     | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
   fileRoutesByTo: FileRoutesByTo
@@ -256,17 +384,28 @@ export interface FileRouteTypes {
     | '/app/banho-tosa'
     | '/app/boletins'
     | '/app/caes'
+    | '/app/chegadas'
+    | '/app/comunicacao'
     | '/app/configuracoes'
     | '/app/documentos'
     | '/app/financeiro'
+    | '/app/funcionarios'
     | '/app/hospedagem'
     | '/app/ocorrencias'
     | '/app/programacao'
     | '/app/relatorios'
     | '/app/saude'
     | '/app/tarefas'
+    | '/app/treinamento'
     | '/app/tutores'
+    | '/tutor/boletins'
+    | '/tutor/caes'
+    | '/tutor/chegada'
+    | '/tutor/documentos'
+    | '/tutor/financeiro'
     | '/app'
+    | '/tutor'
+    | '/tutor/caes/$id'
     | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
   id:
@@ -276,21 +415,33 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/app'
+    | '/_authenticated/tutor'
     | '/_authenticated/app/agenda'
     | '/_authenticated/app/banho-tosa'
     | '/_authenticated/app/boletins'
     | '/_authenticated/app/caes'
+    | '/_authenticated/app/chegadas'
+    | '/_authenticated/app/comunicacao'
     | '/_authenticated/app/configuracoes'
     | '/_authenticated/app/documentos'
     | '/_authenticated/app/financeiro'
+    | '/_authenticated/app/funcionarios'
     | '/_authenticated/app/hospedagem'
     | '/_authenticated/app/ocorrencias'
     | '/_authenticated/app/programacao'
     | '/_authenticated/app/relatorios'
     | '/_authenticated/app/saude'
     | '/_authenticated/app/tarefas'
+    | '/_authenticated/app/treinamento'
     | '/_authenticated/app/tutores'
+    | '/_authenticated/tutor/boletins'
+    | '/_authenticated/tutor/caes'
+    | '/_authenticated/tutor/chegada'
+    | '/_authenticated/tutor/documentos'
+    | '/_authenticated/tutor/financeiro'
     | '/_authenticated/app/'
+    | '/_authenticated/tutor/'
+    | '/_authenticated/tutor/caes/$id'
     | '/_authenticated/app/caes/$id/timeline'
     | '/_authenticated/app/hospedagem/$id/relatorio'
   fileRoutesById: FileRoutesById
@@ -332,12 +483,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/tutor': {
+      id: '/_authenticated/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof AuthenticatedTutorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tutor/': {
+      id: '/_authenticated/tutor/'
+      path: '/'
+      fullPath: '/tutor/'
+      preLoaderRoute: typeof AuthenticatedTutorIndexRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
     }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
@@ -346,11 +511,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/tutor/financeiro': {
+      id: '/_authenticated/tutor/financeiro'
+      path: '/financeiro'
+      fullPath: '/tutor/financeiro'
+      preLoaderRoute: typeof AuthenticatedTutorFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/_authenticated/tutor/documentos': {
+      id: '/_authenticated/tutor/documentos'
+      path: '/documentos'
+      fullPath: '/tutor/documentos'
+      preLoaderRoute: typeof AuthenticatedTutorDocumentosRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/_authenticated/tutor/chegada': {
+      id: '/_authenticated/tutor/chegada'
+      path: '/chegada'
+      fullPath: '/tutor/chegada'
+      preLoaderRoute: typeof AuthenticatedTutorChegadaRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/_authenticated/tutor/caes': {
+      id: '/_authenticated/tutor/caes'
+      path: '/caes'
+      fullPath: '/tutor/caes'
+      preLoaderRoute: typeof AuthenticatedTutorCaesRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/_authenticated/tutor/boletins': {
+      id: '/_authenticated/tutor/boletins'
+      path: '/boletins'
+      fullPath: '/tutor/boletins'
+      preLoaderRoute: typeof AuthenticatedTutorBoletinsRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
     '/_authenticated/app/tutores': {
       id: '/_authenticated/app/tutores'
       path: '/tutores'
       fullPath: '/app/tutores'
       preLoaderRoute: typeof AuthenticatedAppTutoresRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/treinamento': {
+      id: '/_authenticated/app/treinamento'
+      path: '/treinamento'
+      fullPath: '/app/treinamento'
+      preLoaderRoute: typeof AuthenticatedAppTreinamentoRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/tarefas': {
@@ -395,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppHospedagemRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/funcionarios': {
+      id: '/_authenticated/app/funcionarios'
+      path: '/funcionarios'
+      fullPath: '/app/funcionarios'
+      preLoaderRoute: typeof AuthenticatedAppFuncionariosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/financeiro': {
       id: '/_authenticated/app/financeiro'
       path: '/financeiro'
@@ -414,6 +628,20 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes'
       fullPath: '/app/configuracoes'
       preLoaderRoute: typeof AuthenticatedAppConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/comunicacao': {
+      id: '/_authenticated/app/comunicacao'
+      path: '/comunicacao'
+      fullPath: '/app/comunicacao'
+      preLoaderRoute: typeof AuthenticatedAppComunicacaoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/chegadas': {
+      id: '/_authenticated/app/chegadas'
+      path: '/chegadas'
+      fullPath: '/app/chegadas'
+      preLoaderRoute: typeof AuthenticatedAppChegadasRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/caes': {
@@ -443,6 +671,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/agenda'
       preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/tutor/caes/$id': {
+      id: '/_authenticated/tutor/caes/$id'
+      path: '/$id'
+      fullPath: '/tutor/caes/$id'
+      preLoaderRoute: typeof AuthenticatedTutorCaesIdRouteImport
+      parentRoute: typeof AuthenticatedTutorCaesRoute
     }
     '/_authenticated/app/hospedagem/$id/relatorio': {
       id: '/_authenticated/app/hospedagem/$id/relatorio'
@@ -492,15 +727,19 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppBanhoTosaRoute: typeof AuthenticatedAppBanhoTosaRoute
   AuthenticatedAppBoletinsRoute: typeof AuthenticatedAppBoletinsRoute
   AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRouteWithChildren
+  AuthenticatedAppChegadasRoute: typeof AuthenticatedAppChegadasRoute
+  AuthenticatedAppComunicacaoRoute: typeof AuthenticatedAppComunicacaoRoute
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
   AuthenticatedAppDocumentosRoute: typeof AuthenticatedAppDocumentosRoute
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
+  AuthenticatedAppFuncionariosRoute: typeof AuthenticatedAppFuncionariosRoute
   AuthenticatedAppHospedagemRoute: typeof AuthenticatedAppHospedagemRouteWithChildren
   AuthenticatedAppOcorrenciasRoute: typeof AuthenticatedAppOcorrenciasRoute
   AuthenticatedAppProgramacaoRoute: typeof AuthenticatedAppProgramacaoRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
   AuthenticatedAppSaudeRoute: typeof AuthenticatedAppSaudeRoute
   AuthenticatedAppTarefasRoute: typeof AuthenticatedAppTarefasRoute
+  AuthenticatedAppTreinamentoRoute: typeof AuthenticatedAppTreinamentoRoute
   AuthenticatedAppTutoresRoute: typeof AuthenticatedAppTutoresRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
@@ -510,15 +749,19 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppBanhoTosaRoute: AuthenticatedAppBanhoTosaRoute,
   AuthenticatedAppBoletinsRoute: AuthenticatedAppBoletinsRoute,
   AuthenticatedAppCaesRoute: AuthenticatedAppCaesRouteWithChildren,
+  AuthenticatedAppChegadasRoute: AuthenticatedAppChegadasRoute,
+  AuthenticatedAppComunicacaoRoute: AuthenticatedAppComunicacaoRoute,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
   AuthenticatedAppDocumentosRoute: AuthenticatedAppDocumentosRoute,
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
+  AuthenticatedAppFuncionariosRoute: AuthenticatedAppFuncionariosRoute,
   AuthenticatedAppHospedagemRoute: AuthenticatedAppHospedagemRouteWithChildren,
   AuthenticatedAppOcorrenciasRoute: AuthenticatedAppOcorrenciasRoute,
   AuthenticatedAppProgramacaoRoute: AuthenticatedAppProgramacaoRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
   AuthenticatedAppSaudeRoute: AuthenticatedAppSaudeRoute,
   AuthenticatedAppTarefasRoute: AuthenticatedAppTarefasRoute,
+  AuthenticatedAppTreinamentoRoute: AuthenticatedAppTreinamentoRoute,
   AuthenticatedAppTutoresRoute: AuthenticatedAppTutoresRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
@@ -526,12 +769,49 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
 const AuthenticatedAppRouteWithChildren =
   AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
 
+interface AuthenticatedTutorCaesRouteChildren {
+  AuthenticatedTutorCaesIdRoute: typeof AuthenticatedTutorCaesIdRoute
+}
+
+const AuthenticatedTutorCaesRouteChildren: AuthenticatedTutorCaesRouteChildren =
+  {
+    AuthenticatedTutorCaesIdRoute: AuthenticatedTutorCaesIdRoute,
+  }
+
+const AuthenticatedTutorCaesRouteWithChildren =
+  AuthenticatedTutorCaesRoute._addFileChildren(
+    AuthenticatedTutorCaesRouteChildren,
+  )
+
+interface AuthenticatedTutorRouteChildren {
+  AuthenticatedTutorBoletinsRoute: typeof AuthenticatedTutorBoletinsRoute
+  AuthenticatedTutorCaesRoute: typeof AuthenticatedTutorCaesRouteWithChildren
+  AuthenticatedTutorChegadaRoute: typeof AuthenticatedTutorChegadaRoute
+  AuthenticatedTutorDocumentosRoute: typeof AuthenticatedTutorDocumentosRoute
+  AuthenticatedTutorFinanceiroRoute: typeof AuthenticatedTutorFinanceiroRoute
+  AuthenticatedTutorIndexRoute: typeof AuthenticatedTutorIndexRoute
+}
+
+const AuthenticatedTutorRouteChildren: AuthenticatedTutorRouteChildren = {
+  AuthenticatedTutorBoletinsRoute: AuthenticatedTutorBoletinsRoute,
+  AuthenticatedTutorCaesRoute: AuthenticatedTutorCaesRouteWithChildren,
+  AuthenticatedTutorChegadaRoute: AuthenticatedTutorChegadaRoute,
+  AuthenticatedTutorDocumentosRoute: AuthenticatedTutorDocumentosRoute,
+  AuthenticatedTutorFinanceiroRoute: AuthenticatedTutorFinanceiroRoute,
+  AuthenticatedTutorIndexRoute: AuthenticatedTutorIndexRoute,
+}
+
+const AuthenticatedTutorRouteWithChildren =
+  AuthenticatedTutorRoute._addFileChildren(AuthenticatedTutorRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+  AuthenticatedTutorRoute: typeof AuthenticatedTutorRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+  AuthenticatedTutorRoute: AuthenticatedTutorRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -546,13 +826,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

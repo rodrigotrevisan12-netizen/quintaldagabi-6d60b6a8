@@ -4,8 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/app")({
   beforeLoad: async () => {
-    // Defesa em profundidade: o painel interno é exclusivo da equipe (admin/funcionario).
-    // RLS já bloqueia leitura/escrita para tutores, mas evitamos renderizar a UI da equipe.
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData.user?.id;
     if (!userId) throw redirect({ to: "/auth" });
@@ -15,12 +13,11 @@ export const Route = createFileRoute("/_authenticated/app")({
       .select("role")
       .eq("user_id", userId);
 
-    const allowed = (roles ?? []).some(
-      (r) => r.role === "admin" || r.role === "funcionario",
-    );
-    if (!allowed) {
-      await supabase.auth.signOut();
-      throw redirect({ to: "/auth" });
+    const list = (roles ?? []).map((r) => r.role);
+    const isStaff = list.includes("admin") || list.includes("funcionario");
+    if (!isStaff) {
+      // Tutor: encaminhar para o app do tutor (não desloga)
+      throw redirect({ to: "/tutor" });
     }
   },
   component: () => (
