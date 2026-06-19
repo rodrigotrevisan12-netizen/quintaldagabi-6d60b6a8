@@ -14,6 +14,76 @@ export type Database = {
   }
   public: {
     Tables: {
+      arrival_notifications: {
+        Row: {
+          arrived_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          dog_id: string | null
+          eta_minutes: number
+          id: string
+          message: string | null
+          purpose: string
+          status: string
+          tutor_id: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          arrived_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string | null
+          eta_minutes: number
+          id?: string
+          message?: string | null
+          purpose?: string
+          status?: string
+          tutor_id: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arrived_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string | null
+          eta_minutes?: number
+          id?: string
+          message?: string | null
+          purpose?: string
+          status?: string
+          tutor_id?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arrival_notifications_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arrival_notifications_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arrival_notifications_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       boarding_belongings: {
         Row: {
           created_at: string
@@ -1355,6 +1425,62 @@ export type Database = {
           },
         ]
       }
+      employees: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string | null
+          full_name: string
+          hired_at: string | null
+          id: string
+          job_role: Database["public"]["Enums"]["employee_role"]
+          notes: string | null
+          permissions: Json
+          phone: string | null
+          unit_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          full_name: string
+          hired_at?: string | null
+          id?: string
+          job_role?: Database["public"]["Enums"]["employee_role"]
+          notes?: string | null
+          permissions?: Json
+          phone?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          hired_at?: string | null
+          id?: string
+          job_role?: Database["public"]["Enums"]["employee_role"]
+          notes?: string | null
+          permissions?: Json
+          phone?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_transactions: {
         Row: {
           amount: number
@@ -1609,6 +1735,123 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_communication_attachments: {
+        Row: {
+          comm_id: string
+          created_at: string
+          file_name: string | null
+          file_url: string
+          id: string
+          mime_type: string | null
+        }
+        Insert: {
+          comm_id: string
+          created_at?: string
+          file_name?: string | null
+          file_url: string
+          id?: string
+          mime_type?: string | null
+        }
+        Update: {
+          comm_id?: string
+          created_at?: string
+          file_name?: string | null
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_communication_attachments_comm_id_fkey"
+            columns: ["comm_id"]
+            isOneToOne: false
+            referencedRelation: "internal_communications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_communication_reads: {
+        Row: {
+          comm_id: string
+          id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          comm_id: string
+          id?: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          comm_id?: string
+          id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_communication_reads_comm_id_fkey"
+            columns: ["comm_id"]
+            isOneToOne: false
+            referencedRelation: "internal_communications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_communications: {
+        Row: {
+          author_id: string
+          body: string
+          comm_type: Database["public"]["Enums"]["comm_type"]
+          created_at: string
+          id: string
+          is_broadcast: boolean
+          priority: string
+          recipient_id: string | null
+          status: string
+          title: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          comm_type: Database["public"]["Enums"]["comm_type"]
+          created_at?: string
+          id?: string
+          is_broadcast?: boolean
+          priority?: string
+          recipient_id?: string | null
+          status?: string
+          title: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          comm_type?: Database["public"]["Enums"]["comm_type"]
+          created_at?: string
+          id?: string
+          is_broadcast?: boolean
+          priority?: string
+          recipient_id?: string | null
+          status?: string
+          title?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_communications_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1690,6 +1933,145 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "financial_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_courses: {
+        Row: {
+          active: boolean
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_onboarding: boolean
+          order_index: number
+          required: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_onboarding?: boolean
+          order_index?: number
+          required?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_onboarding?: boolean
+          order_index?: number
+          required?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      training_materials: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string
+          file_url: string | null
+          id: string
+          material_type: Database["public"]["Enums"]["training_material_type"]
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          material_type: Database["public"]["Enums"]["training_material_type"]
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          material_type?: Database["public"]["Enums"]["training_material_type"]
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "training_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_progress: {
+        Row: {
+          certificate_code: string | null
+          certificate_issued: boolean
+          completed: boolean
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number | null
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          certificate_code?: string | null
+          certificate_issued?: boolean
+          completed?: boolean
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          certificate_code?: string | null
+          certificate_issued?: boolean
+          completed?: boolean
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "training_courses"
             referencedColumns: ["id"]
           },
         ]
@@ -1981,6 +2363,12 @@ export type Database = {
         | "reativo"
         | "agressivo"
         | "ansioso"
+      comm_type:
+        | "aviso"
+        | "comunicado"
+        | "solicitacao"
+        | "ocorrencia"
+        | "mensagem"
       daycare_activity_type:
         | "passeio"
         | "brincadeira"
@@ -1998,6 +2386,14 @@ export type Database = {
         | "autorizacao_imagem"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
+      employee_role:
+        | "tosador"
+        | "banhista"
+        | "recepcionista"
+        | "cuidador"
+        | "gerente"
+        | "veterinario"
+        | "outro"
       fin_expense_category:
         | "salarios"
         | "produtos"
@@ -2030,6 +2426,13 @@ export type Database = {
       report_media_type: "photo" | "video"
       schedule_status: "pending" | "done" | "not_done"
       signature_method: "typed" | "drawn"
+      training_material_type:
+        | "video"
+        | "pdf"
+        | "procedimento"
+        | "checklist"
+        | "foto"
+        | "link"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2166,6 +2569,13 @@ export const Constants = {
         "agressivo",
         "ansioso",
       ],
+      comm_type: [
+        "aviso",
+        "comunicado",
+        "solicitacao",
+        "ocorrencia",
+        "mensagem",
+      ],
       daycare_activity_type: [
         "passeio",
         "brincadeira",
@@ -2185,6 +2595,15 @@ export const Constants = {
       ],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
+      employee_role: [
+        "tosador",
+        "banhista",
+        "recepcionista",
+        "cuidador",
+        "gerente",
+        "veterinario",
+        "outro",
+      ],
       fin_expense_category: [
         "salarios",
         "produtos",
@@ -2221,6 +2640,14 @@ export const Constants = {
       report_media_type: ["photo", "video"],
       schedule_status: ["pending", "done", "not_done"],
       signature_method: ["typed", "drawn"],
+      training_material_type: [
+        "video",
+        "pdf",
+        "procedimento",
+        "checklist",
+        "foto",
+        "link",
+      ],
     },
   },
 } as const
