@@ -18,6 +18,10 @@ import {
   FileText,
   ClipboardList,
   Newspaper,
+  UserCog,
+  GraduationCap,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
