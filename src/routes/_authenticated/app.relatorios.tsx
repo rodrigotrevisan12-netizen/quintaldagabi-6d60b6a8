@@ -103,7 +103,7 @@ function RelatoriosPage() {
   });
 
   const reports = useMemo<Record<string, Report>>(() => {
-    if (!data.data) return {};
+    if (!data.data) return {} as Record<string, Report>;
     const d = data.data;
     const dogById = new Map(d.dogs.map((x: any) => [x.id, x]));
     const tutorById = new Map(d.tutors.map((x: any) => [x.id, x]));
