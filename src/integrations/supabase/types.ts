@@ -314,6 +314,33 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          attachment_name: string | null
+          attachment_url: string | null
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       daily_report_entries: {
         Row: {
           created_at: string
@@ -889,6 +916,7 @@ export type Database = {
           created_by: string | null
           dog_id: string | null
           id: string
+          package_info: Json | null
           pdf_path: string | null
           reference_id: string | null
           reference_table: string | null
@@ -908,6 +936,7 @@ export type Database = {
           created_by?: string | null
           dog_id?: string | null
           id?: string
+          package_info?: Json | null
           pdf_path?: string | null
           reference_id?: string | null
           reference_table?: string | null
@@ -927,6 +956,7 @@ export type Database = {
           created_by?: string | null
           dog_id?: string | null
           id?: string
+          package_info?: Json | null
           pdf_path?: string | null
           reference_id?: string | null
           reference_table?: string | null
