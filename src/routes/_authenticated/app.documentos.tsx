@@ -258,6 +258,9 @@ function CreateDocumentSheet({
   const [valorDiaria, setValorDiaria] = useState<string>("");
   const [entrada, setEntrada] = useState<string>("");
   const [saida, setSaida] = useState<string>("");
+  const [pacoteNome, setPacoteNome] = useState<string>("");
+  const [pacoteValor, setPacoteValor] = useState<string>("");
+  const [pacoteDesc, setPacoteDesc] = useState<string>("");
 
   const templatesQuery = useQuery({
     queryKey: ["document_templates"],
@@ -309,6 +312,7 @@ function CreateDocumentSheet({
         tutor: { nome: tutor.full_name, cpf: tutor.cpf as string | null, endereco, email: tutor.email },
         cao: dog ? { nome: dog.name, raca: dog.breed as string | null } : undefined,
         estadia: { entrada, saida, valor_diaria: valorDiaria },
+        pacote: { nome: pacoteNome, valor: pacoteValor, descricao: pacoteDesc },
       });
 
       const { data: user } = await supabase.auth.getUser();
