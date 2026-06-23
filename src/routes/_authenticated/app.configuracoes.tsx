@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Loader2, Building2, Scissors } from "lucide-react";
@@ -72,6 +72,7 @@ function UnitsPanel() {
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Capacidade salva"); qc.invalidateQueries({ queryKey: ["units-config"] }); },
+    onError: (e: any) => toast.error(e.message),
   });
 
   return (
@@ -96,21 +97,15 @@ function UnitsPanel() {
         {(q.data ?? []).map((u: any) => {
           const s = (u.settings && u.settings[0]) || {};
           return (
-            <div key={u.id} className="rounded-lg border p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="font-medium">{u.name} <span className="text-xs text-muted-foreground">{u.city}</span></p>
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs">Ativa</Label>
-                  <Switch checked={u.is_active} onCheckedChange={(v) => updateUnit.mutate({ id: u.id, patch: { is_active: v } })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <div><Label className="text-xs">Endereço</Label><Input defaultValue={u.address ?? ""} onBlur={(e) => e.target.value !== (u.address ?? "") && updateUnit.mutate({ id: u.id, patch: { address: e.target.value || null } })} /></div>
-                <div><Label className="text-xs">Telefone</Label><Input defaultValue={u.phone ?? ""} onBlur={(e) => e.target.value !== (u.phone ?? "") && updateUnit.mutate({ id: u.id, patch: { phone: e.target.value || null } })} /></div>
-                <CapacityInput label="Capacidade creche" defaultValue={s.daycare_capacity ?? 20} onSave={(v) => updateCap.mutate({ unit_id: u.id, daycare: v, boarding: s.boarding_capacity ?? 10 })} />
-                <CapacityInput label="Capacidade hospedagem" defaultValue={s.boarding_capacity ?? 10} onSave={(v) => updateCap.mutate({ unit_id: u.id, daycare: s.daycare_capacity ?? 20, boarding: v })} />
-              </div>
-            </div>
+            <UnitRow
+              key={u.id}
+              unit={u}
+              daycareValue={s.daycare_capacity ?? 20}
+              boardingValue={s.boarding_capacity ?? 10}
+              onSaveUnit={(patch) => updateUnit.mutate({ id: u.id, patch })}
+              onSaveCap={(d, b) => updateCap.mutate({ unit_id: u.id, daycare: d, boarding: b })}
+              saving={updateCap.isPending}
+            />
           );
         })}
         {(q.data ?? []).length === 0 && <p className="text-muted-foreground">Nenhuma unidade.</p>}
@@ -119,13 +114,68 @@ function UnitsPanel() {
   );
 }
 
-function CapacityInput({ label, defaultValue, onSave }: { label: string; defaultValue: number; onSave: (v: number) => void }) {
+function UnitRow({ unit, daycareValue, boardingValue, onSaveUnit, onSaveCap, saving }: {
+  unit: any;
+  daycareValue: number;
+  boardingValue: number;
+  onSaveUnit: (patch: any) => void;
+  onSaveCap: (d: number, b: number) => void;
+  saving: boolean;
+}) {
+  const [daycare, setDaycare] = useState<string>(String(daycareValue));
+  const [boarding, setBoarding] = useState<string>(String(boardingValue));
+
+  // Atualiza quando o servidor devolver novo valor
+  // (mas só se o usuário não estiver editando)
+  // Aqui simplesmente sincroniza ao mudar prop:
+  useEffectSync(daycareValue, setDaycare);
+  useEffectSync(boardingValue, setBoarding);
+
+  const dirty = Number(daycare) !== daycareValue || Number(boarding) !== boardingValue;
+
   return (
-    <div>
-      <Label className="text-xs">{label}</Label>
-      <Input type="number" min={0} defaultValue={defaultValue} onBlur={(e) => { const v = Number(e.target.value); if (v !== defaultValue) onSave(v); }} />
+    <div className="rounded-lg border p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="font-medium">{unit.name} <span className="text-xs text-muted-foreground">{unit.city}</span></p>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs">Ativa</Label>
+          <Switch checked={unit.is_active} onCheckedChange={(v) => onSaveUnit({ is_active: v })} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div><Label className="text-xs">Endereço</Label>
+          <Input defaultValue={unit.address ?? ""} onBlur={(e) => e.target.value !== (unit.address ?? "") && onSaveUnit({ address: e.target.value || null })} /></div>
+        <div><Label className="text-xs">Telefone</Label>
+          <Input defaultValue={unit.phone ?? ""} onBlur={(e) => e.target.value !== (unit.phone ?? "") && onSaveUnit({ phone: e.target.value || null })} /></div>
+        <div>
+          <Label className="text-xs">Capacidade creche</Label>
+          <Input type="number" min={0} value={daycare} onChange={(e) => setDaycare(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Capacidade hospedagem</Label>
+          <Input type="number" min={0} value={boarding} onChange={(e) => setBoarding(e.target.value)} />
+        </div>
+      </div>
+      {dirty && (
+        <div className="flex justify-end">
+          <Button size="sm" onClick={() => onSaveCap(Number(daycare) || 0, Number(boarding) || 0)} disabled={saving}>
+            {saving && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}Salvar capacidade
+          </Button>
+        </div>
+      )}
     </div>
   );
+}
+
+function useEffectSync(value: number, setter: (v: string) => void) {
+  // Hook auxiliar para resync defaults
+  const ref = useRef(value);
+  useEffect(() => {
+    if (ref.current !== value) {
+      ref.current = value;
+      setter(String(value));
+    }
+  }, [value, setter]);
 }
 
 function ServicesPanel() {
