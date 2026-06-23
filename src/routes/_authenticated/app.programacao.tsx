@@ -220,14 +220,15 @@ function CreateItemSheet({ open, date, onClose, onCreated }: { open: boolean; da
   const [requiresConfirmation, setRequiresConfirmation] = useState(false);
 
   const staffQuery = useQuery({
-    queryKey: ["staff-profiles"],
+    queryKey: ["staff-employees"],
     queryFn: async () => {
-      const { data: roles } = await supabase.from("user_roles").select("user_id,role").in("role", ["admin", "funcionario"]);
-      const ids = Array.from(new Set((roles ?? []).map((r) => r.user_id)));
-      if (ids.length === 0) return [];
-      const { data, error } = await supabase.from("profiles").select("id,full_name").in("id", ids);
+      const { data, error } = await supabase
+        .from("employees")
+        .select("id, user_id, full_name")
+        .eq("active", true)
+        .order("full_name");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []).map((e: any) => ({ id: e.user_id ?? e.id, full_name: e.full_name, has_access: !!e.user_id }));
     },
     enabled: open,
   });
@@ -267,7 +268,7 @@ function CreateItemSheet({ open, date, onClose, onCreated }: { open: boolean; da
             <Select value={responsibleId} onValueChange={setResponsibleId}>
               <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
               <SelectContent>
-                {(staffQuery.data ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name ?? "—"}</SelectItem>)}
+                {(staffQuery.data ?? []).map((p) => <SelectItem key={p.id} value={p.id}>{p.full_name ?? "—"}{!p.has_access && " (sem acesso)"}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
