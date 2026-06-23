@@ -327,7 +327,8 @@ function CreateDocumentSheet({
           body,
           status: "pending_signature",
           created_by: user.user?.id,
-        })
+          package_info: pacoteNome ? { nome: pacoteNome, valor: pacoteValor, descricao: pacoteDesc } : null,
+        } as any)
         .select("id,type,title,body,status,tutor_id,dog_id,pdf_path,signed_at,created_at,tutor:tutors(full_name),dog:dogs(name)")
         .single();
       if (error) throw error;
@@ -341,6 +342,7 @@ function CreateDocumentSheet({
       setValorDiaria("");
       setEntrada("");
       setSaida("");
+      setPacoteNome(""); setPacoteValor(""); setPacoteDesc("");
       onCreated(doc);
     },
     onError: (e: Error) => toast.error(e.message),
