@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, GraduationCap, Award, CheckCircle2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Award, CheckCircle2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -206,12 +206,17 @@ function CourseMaterials({ courseId, isAdmin }: { courseId: string; isAdmin: boo
 }
 
 function MyProgress() {
+  const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const { data } = useQuery({
     queryKey: ["my-progress", me?.userId],
     enabled: !!me?.userId,
     queryFn: async () => (await supabase.from("training_progress")
       .select("*, training_courses(title, category)").eq("user_id", me!.userId)).data ?? [],
+  });
+  const del = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("training_progress").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => { toast.success("Progresso removido"); qc.invalidateQueries({ queryKey: ["my-progress"] }); },
   });
   return (
     <div className="space-y-2">
@@ -222,7 +227,12 @@ function MyProgress() {
               <p className="font-medium">{p.training_courses?.title}</p>
               <p className="text-xs text-muted-foreground">Visualizações: {p.views} · {p.completed ? "concluído" : "em andamento"}</p>
             </div>
-            {p.certificate_code && <Badge><Award className="mr-1 h-3 w-3" />{p.certificate_code}</Badge>}
+            <div className="flex items-center gap-2">
+              {p.certificate_code && <Badge><Award className="mr-1 h-3 w-3" />{p.certificate_code}</Badge>}
+              <Button size="icon" variant="ghost" onClick={() => { if (confirm("Apagar progresso?")) del.mutate(p.id); }}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </CardContent></Card>
         ))}
     </div>
