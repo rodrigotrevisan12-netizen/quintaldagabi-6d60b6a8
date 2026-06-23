@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Paperclip, Send } from "lucide-react";
+import { Plus, Paperclip, Send, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/app/comunicacao")({
   head: () => ({ meta: [{ title: "Comunicação — Quintal da Gabi" }] }),
@@ -31,6 +31,136 @@ const TYPES = [
 ] as const;
 
 function Comms() {
+  return (
+    <div className="space-y-4">
+      <header>
+        <h1 className="font-display text-2xl font-semibold">Comunicação interna</h1>
+        <p className="text-sm text-muted-foreground">Chat da equipe + avisos, comunicados, solicitações e ocorrências.</p>
+      </header>
+
+      <Tabs defaultValue="chat">
+        <TabsList>
+          <TabsTrigger value="chat">Chat da equipe</TabsTrigger>
+          <TabsTrigger value="avisos">Avisos & comunicados</TabsTrigger>
+        </TabsList>
+        <TabsContent value="chat"><TeamChat /></TabsContent>
+        <TabsContent value="avisos"><Announcements /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function TeamChat() {
+  const qc = useQueryClient();
+  const { data: me } = useCurrentUser();
+  const [body, setBody] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: messages } = useQuery({
+    queryKey: ["chat_messages"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("chat_messages")
+        .select("*").order("created_at", { ascending: true }).limit(500);
+      return data ?? [];
+    },
+    refetchOnWindowFocus: true,
+  });
+
+  // Realtime
+  useEffect(() => {
+    const ch = supabase.channel("chat_messages")
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" },
+        () => qc.invalidateQueries({ queryKey: ["chat_messages"] }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  // Mapa de nomes dos autores
+  const { data: profiles } = useQuery({
+    queryKey: ["chat-authors", messages?.length],
+    enabled: !!messages?.length,
+    queryFn: async () => {
+      const ids = Array.from(new Set((messages ?? []).map((m: any) => m.author_id)));
+      if (!ids.length) return {};
+      const { data } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((p: any) => { map[p.id] = p.full_name ?? "—"; });
+      return map;
+    },
+  });
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
+
+  const send = useMutation({
+    mutationFn: async () => {
+      let attachment_url: string | null = null;
+      let attachment_name: string | null = null;
+      if (file) {
+        const path = `chat/${Date.now()}-${file.name}`;
+        const up = await supabase.storage.from("comms").upload(path, file);
+        if (up.error) throw up.error;
+        const { data: signed } = await supabase.storage.from("comms").createSignedUrl(path, 60 * 60 * 24 * 365);
+        attachment_url = signed?.signedUrl ?? null;
+        attachment_name = file.name;
+      }
+      const { error } = await (supabase as any).from("chat_messages").insert({
+        author_id: me!.userId, body: body.trim(), attachment_url, attachment_name,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { setBody(""); setFile(null); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => { const { error } = await (supabase as any).from("chat_messages").delete().eq("id", id); if (error) throw error; },
+  });
+
+  return (
+    <Card>
+      <CardContent className="flex h-[60vh] flex-col gap-3 p-3">
+        <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto pr-1">
+          {(messages ?? []).map((m: any) => {
+            const mine = m.author_id === me?.userId;
+            const name = profiles?.[m.author_id] ?? "—";
+            return (
+              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div className={`group max-w-[80%] rounded-2xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                  <p className="mb-1 text-[10px] opacity-70">{name} · {new Date(m.created_at).toLocaleString("pt-BR", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</p>
+                  <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                  {m.attachment_url && (
+                    <a href={m.attachment_url} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs underline">
+                      <Paperclip className="h-3 w-3" />{m.attachment_name}
+                    </a>
+                  )}
+                  {mine && (
+                    <button onClick={() => del.mutate(m.id)} className="ml-2 text-[10px] opacity-0 group-hover:opacity-70">apagar</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {!messages?.length && <p className="py-8 text-center text-sm text-muted-foreground">Nenhuma mensagem ainda. Diga oi!</p>}
+        </div>
+        <div className="flex items-end gap-2 border-t pt-2">
+          <Textarea rows={2} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Mensagem para a equipe..." className="flex-1"
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && body.trim()) { e.preventDefault(); send.mutate(); } }} />
+          <label className="cursor-pointer rounded-md border p-2 hover:bg-accent">
+            <Paperclip className="h-4 w-4" />
+            <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          </label>
+          <Button onClick={() => send.mutate()} disabled={!body.trim() || send.isPending}><Send className="h-4 w-4" /></Button>
+        </div>
+        {file && <p className="text-xs text-muted-foreground">Anexo: {file.name} <button className="underline" onClick={() => setFile(null)}>remover</button></p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Announcements() {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const [filter, setFilter] = useState("all");
@@ -55,10 +185,7 @@ function Comms() {
 
   const create = useMutation({
     mutationFn: async () => {
-      const payload = {
-        ...form, author_id: me!.userId,
-        recipient_id: form.is_broadcast ? null : (form.recipient_id || null),
-      };
+      const payload = { ...form, author_id: me!.userId, recipient_id: form.is_broadcast ? null : (form.recipient_id || null) };
       const { data, error } = await supabase.from("internal_communications").insert(payload).select().single();
       if (error) throw error;
       if (file && data) {
@@ -76,22 +203,24 @@ function Comms() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const del = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("internal_communications").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["comms"] }),
+  });
+
   const filtered = list?.filter((c: any) => filter === "all" || c.comm_type === filter) ?? [];
 
   return (
-    <div className="space-y-4">
-      <header className="flex items-center justify-between">
-        <div><h1 className="font-display text-2xl font-semibold">Comunicação interna</h1>
-          <p className="text-sm text-muted-foreground">Avisos, comunicados, solicitações, ocorrências e mensagens.</p></div>
-        <Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" />Nova</Button>
-      </header>
-
-      <Tabs value={filter} onValueChange={setFilter}>
-        <TabsList>
-          <TabsTrigger value="all">Tudo</TabsTrigger>
-          {TYPES.map((t) => <TabsTrigger key={t.v} value={t.v}>{t.label}</TabsTrigger>)}
-        </TabsList>
-      </Tabs>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Tabs value={filter} onValueChange={setFilter}>
+          <TabsList>
+            <TabsTrigger value="all">Tudo</TabsTrigger>
+            {TYPES.map((t) => <TabsTrigger key={t.v} value={t.v}>{t.label}</TabsTrigger>)}
+          </TabsList>
+        </Tabs>
+        <Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" />Novo</Button>
+      </div>
 
       <div className="space-y-2">
         {filtered.map((c: any) => (
@@ -101,11 +230,12 @@ function Comms() {
               {c.priority !== "normal" && <Badge variant="destructive">{c.priority}</Badge>}
               {c.is_broadcast && <Badge variant="outline">para todos</Badge>}
               <span className="ml-auto text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString("pt-BR")}</span>
+              <Button size="icon" variant="ghost" onClick={() => { if (confirm("Excluir?")) del.mutate(c.id); }}><Trash2 className="h-4 w-4" /></Button>
             </div>
             <p className="font-medium">{c.title}</p>
             <p className="text-sm whitespace-pre-wrap">{c.body}</p>
             {c.attachments?.map((a: any) => (
-              <a key={a.id} href={a.file_url} target="_blank" className="inline-flex items-center gap-1 text-xs text-primary underline">
+              <a key={a.id} href={a.file_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary underline">
                 <Paperclip className="h-3 w-3" />{a.file_name}
               </a>
             ))}
