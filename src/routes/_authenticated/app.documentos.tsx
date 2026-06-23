@@ -468,6 +468,12 @@ function DocumentDetail({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async () => { const { error } = await supabase.from("documents").delete().eq("id", doc!.id); if (error) throw error; },
+    onSuccess: () => { toast.success("Documento excluído."); onChanged(); onClose(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   async function downloadPdf() {
     if (!doc) return;
     const sig = sigsQuery.data?.[0];
@@ -522,6 +528,14 @@ function DocumentDetail({
                       <X className="mr-2 h-4 w-4" />Cancelar documento
                     </Button>
                   )}
+                  {doc.status !== "cancelled" && (
+                    <Button variant="ghost" onClick={() => cancel.mutate()} disabled={cancel.isPending}>
+                      <X className="mr-2 h-4 w-4" />Cancelar documento
+                    </Button>
+                  )}
+                  <Button variant="ghost" className="text-destructive" onClick={() => { if (confirm("Excluir definitivamente este documento?")) remove.mutate(); }} disabled={remove.isPending}>
+                    <X className="mr-2 h-4 w-4" />Excluir
+                  </Button>
                 </div>
               </TabsContent>
               <TabsContent value="assinaturas" className="mt-4 space-y-2">
