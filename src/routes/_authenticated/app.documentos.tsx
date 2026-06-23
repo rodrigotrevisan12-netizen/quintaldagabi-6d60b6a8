@@ -68,6 +68,7 @@ function DocumentosPage() {
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [opened, setOpened] = useState<Doc | null>(null);
+  const [tab, setTab] = useState("docs");
 
   const docsQuery = useQuery({
     queryKey: ["documents"],
@@ -88,44 +89,59 @@ function DocumentosPage() {
           <h1 className="font-display text-3xl font-semibold">Documentos</h1>
           <p className="text-sm text-muted-foreground">Contratos, termos e autorizações com assinatura digital.</p>
         </div>
-        <Button onClick={() => setCreating(true)}>
-          <Plus className="mr-2 h-4 w-4" />Novo documento
-        </Button>
+        {tab === "docs" && (
+          <Button onClick={() => setCreating(true)}>
+            <Plus className="mr-2 h-4 w-4" />Novo documento
+          </Button>
+        )}
       </header>
 
-      <div className="rounded-2xl border border-border bg-card">
-        {docsQuery.isLoading ? (
-          <div className="flex justify-center p-10"><Loader2 className="h-5 w-5 animate-spin" /></div>
-        ) : (docsQuery.data ?? []).length === 0 ? (
-          <div className="p-10 text-center text-sm text-muted-foreground">
-            Nenhum documento ainda. Clique em "Novo documento" para começar.
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTrigger value="docs">Documentos</TabsTrigger>
+          <TabsTrigger value="modelos">Modelos</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="docs" className="mt-4">
+          <div className="rounded-2xl border border-border bg-card">
+            {docsQuery.isLoading ? (
+              <div className="flex justify-center p-10"><Loader2 className="h-5 w-5 animate-spin" /></div>
+            ) : (docsQuery.data ?? []).length === 0 ? (
+              <div className="p-10 text-center text-sm text-muted-foreground">
+                Nenhum documento ainda. Clique em "Novo documento" para começar.
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {(docsQuery.data ?? []).map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-4 p-4 hover:bg-muted/40">
+                    <button onClick={() => setOpened(d)} className="flex flex-1 items-center gap-3 text-left">
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+                        <FileText className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{d.title}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {d.tutor?.full_name ?? "—"}
+                          {d.dog?.name ? ` · ${d.dog.name}` : ""}
+                          {" · "}
+                          {format(new Date(d.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </button>
+                    <Badge variant={d.status === "signed" ? "default" : d.status === "cancelled" ? "destructive" : "secondary"}>
+                      {DOCUMENT_STATUS_LABEL[d.status]}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        ) : (
-          <ul className="divide-y divide-border">
-            {(docsQuery.data ?? []).map((d) => (
-              <li key={d.id} className="flex items-center justify-between gap-4 p-4 hover:bg-muted/40">
-                <button onClick={() => setOpened(d)} className="flex flex-1 items-center gap-3 text-left">
-                  <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
-                    <FileText className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{d.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {d.tutor?.full_name ?? "—"}
-                      {d.dog?.name ? ` · ${d.dog.name}` : ""}
-                      {" · "}
-                      {format(new Date(d.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                    </p>
-                  </div>
-                </button>
-                <Badge variant={d.status === "signed" ? "default" : d.status === "cancelled" ? "destructive" : "secondary"}>
-                  {DOCUMENT_STATUS_LABEL[d.status]}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="modelos" className="mt-4">
+          <TemplatesPanel />
+        </TabsContent>
+      </Tabs>
 
       <CreateDocumentSheet
         open={creating}
@@ -138,6 +154,91 @@ function DocumentosPage() {
       />
 
       <DocumentDetail doc={opened} onClose={() => setOpened(null)} onChanged={() => qc.invalidateQueries({ queryKey: ["documents"] })} />
+    </div>
+  );
+}
+
+function TemplatesPanel() {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState<any>(null);
+  const [form, setForm] = useState<any>({ type: "contrato_creche", title: "", body: "", is_active: true });
+
+  const { data: tpls } = useQuery({
+    queryKey: ["doc-templates-all"],
+    queryFn: async () => (await supabase.from("document_templates").select("*").order("title")).data ?? [],
+  });
+
+  function start(t: any | null) {
+    setEditing(t);
+    setForm(t ? { ...t } : { type: "contrato_creche", title: "", body: "", is_active: true });
+  }
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (editing) {
+        const { error } = await supabase.from("document_templates").update({ title: form.title, body: form.body, type: form.type, is_active: form.is_active }).eq("id", editing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("document_templates").insert({ title: form.title, body: form.body, type: form.type, is_active: form.is_active });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { toast.success("Modelo salvo"); qc.invalidateQueries({ queryKey: ["doc-templates-all"] }); setEditing(null); setForm({ type: "contrato_creche", title: "", body: "", is_active: true }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("document_templates").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => { toast.success("Modelo removido"); qc.invalidateQueries({ queryKey: ["doc-templates-all"] }); },
+  });
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">Modelos existentes</h3>
+          <Button size="sm" variant="outline" onClick={() => start(null)}><Plus className="mr-1 h-4 w-4" />Novo</Button>
+        </div>
+        <ul className="divide-y rounded-lg border">
+          {(tpls ?? []).map((t: any) => (
+            <li key={t.id} className="flex items-center justify-between gap-2 p-3 text-sm">
+              <button className="flex-1 text-left" onClick={() => start(t)}>
+                <p className="font-medium">{t.title}</p>
+                <p className="text-xs text-muted-foreground">{DOCUMENT_TYPE_LABEL[t.type] ?? t.type} {!t.is_active && "· inativo"}</p>
+              </button>
+              <Button size="icon" variant="ghost" onClick={() => { if (confirm("Excluir modelo?")) del.mutate(t.id); }}><X className="h-4 w-4" /></Button>
+            </li>
+          ))}
+          {!tpls?.length && <li className="p-3 text-sm text-muted-foreground">Nenhum modelo.</li>}
+        </ul>
+      </div>
+
+      <div className="rounded-lg border p-3 space-y-3">
+        <h3 className="font-medium">{editing ? "Editar modelo" : "Novo modelo"}</h3>
+        <div className="space-y-2">
+          <Label>Tipo</Label>
+          <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Object.entries(DOCUMENT_TYPE_LABEL).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2"><Label>Título</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+        <div className="space-y-2">
+          <Label>Corpo do documento</Label>
+          <Textarea rows={14} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} className="font-mono text-xs" />
+          <p className="text-xs text-muted-foreground">
+            Variáveis: <code>{`{{tutor.nome}}`}</code> <code>{`{{tutor.cpf}}`}</code> <code>{`{{tutor.endereco}}`}</code> <code>{`{{cao.nome}}`}</code> <code>{`{{cao.raca}}`}</code> <code>{`{{estadia.entrada}}`}</code> <code>{`{{estadia.saida}}`}</code> <code>{`{{estadia.valor_diaria}}`}</code> <code>{`{{pacote.nome}}`}</code> <code>{`{{pacote.valor}}`}</code> <code>{`{{pacote.descricao}}`}</code> <code>{`{{data.hoje}}`}</code>
+          </p>
+        </div>
+        <div className="flex gap-2 justify-end">
+          {editing && <Button variant="ghost" onClick={() => start(null)}>Limpar</Button>}
+          <Button onClick={() => save.mutate()} disabled={!form.title || !form.body || save.isPending}>
+            {save.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Salvar
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
