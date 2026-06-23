@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, CheckCircle2, XCircle, Clock, Camera } from "lucide-react";
+import { Plus, Loader2, CheckCircle2, XCircle, Clock, Camera, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -81,6 +81,12 @@ function ProgramacaoPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const delItem = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("daily_schedule_items").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => { toast.success("Tarefa removida."); qc.invalidateQueries({ queryKey: ["schedule"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const counts = useMemo(() => {
     const items = itemsQuery.data ?? [];
     return {
@@ -156,6 +162,12 @@ function ProgramacaoPage() {
                     onClick={() => setNotDone(it)}>
                     <XCircle className="h-4 w-4" />
                   </Button>
+                  {isAdmin && (
+                    <Button size="sm" variant="ghost"
+                      onClick={() => { if (confirm("Excluir tarefa?")) delItem.mutate(it.id); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </li>
             ))}
