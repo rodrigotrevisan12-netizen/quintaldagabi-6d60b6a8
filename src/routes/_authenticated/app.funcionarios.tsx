@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, UserPlus, Loader2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { inviteEmployee } from "@/lib/employees.functions";
 
 export const Route = createFileRoute("/_authenticated/app/funcionarios")({
   head: () => ({ meta: [{ title: "Funcionários — Quintal da Gabi" }] }),
@@ -38,6 +40,8 @@ function Employees() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Emp | null>(null);
+  const invite = useServerFn(inviteEmployee);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
 
   const { data: list } = useQuery({
     queryKey: ["employees"],
@@ -61,9 +65,22 @@ function Employees() {
       if (editing) {
         const { error } = await supabase.from("employees").update(payload).eq("id", editing.id);
         if (error) throw error;
+        // Se tem email e ainda não tem acesso, cria automaticamente
+        if (payload.email && !editing.user_id) {
+          try {
+            const r = await invite({ data: { employeeId: editing.id, email: payload.email } });
+            toast.success(r.message);
+          } catch (e: any) { toast.error("Salvo, mas não consegui criar acesso: " + e.message); }
+        }
       } else {
-        const { error } = await supabase.from("employees").insert(payload);
+        const { data, error } = await supabase.from("employees").insert(payload).select("id").single();
         if (error) throw error;
+        if (payload.email && data?.id) {
+          try {
+            const r = await invite({ data: { employeeId: data.id, email: payload.email } });
+            toast.success(r.message);
+          } catch (e: any) { toast.error("Funcionário criado, mas não consegui criar acesso: " + e.message); }
+        }
       }
     },
     onSuccess: () => { toast.success("Salvo"); qc.invalidateQueries({ queryKey: ["employees"] }); setOpen(false); },
@@ -75,6 +92,17 @@ function Employees() {
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["employees"] }); },
   });
 
+  async function resendInvite(e: Emp) {
+    if (!e.email) { toast.error("Funcionário sem e-mail."); return; }
+    setInvitingId(e.id);
+    try {
+      const r = await invite({ data: { employeeId: e.id, email: e.email } });
+      toast.success(r.message);
+      qc.invalidateQueries({ queryKey: ["employees"] });
+    } catch (err: any) { toast.error(err.message); }
+    finally { setInvitingId(null); }
+  }
+
   function applyRolePreset(role: string) {
     const preset = ROLES.find((r) => r.v === role)?.perms ?? {};
     setForm((f: any) => ({ ...f, job_role: role, permissions: { ...preset } }));
@@ -84,18 +112,28 @@ function Employees() {
     <div className="space-y-4">
       <header className="flex items-center justify-between">
         <div><h1 className="font-display text-2xl font-semibold">Funcionários</h1>
-          <p className="text-sm text-muted-foreground">Cadastro com cargo e permissões individuais.</p></div>
+          <p className="text-sm text-muted-foreground">Cadastro com cargo, permissões e criação automática de acesso ao app.</p></div>
         <Button onClick={() => startEdit(null)}><Plus className="mr-2 h-4 w-4" />Novo</Button>
       </header>
 
       <div className="grid gap-2">
         {list?.map((e: Emp) => (
-          <Card key={e.id}><CardContent className="flex items-center justify-between p-4">
-            <div>
-              <p className="font-medium">{e.full_name} {!e.active && <Badge variant="outline">inativo</Badge>}</p>
-              <p className="text-xs text-muted-foreground">{ROLES.find((r) => r.v === e.job_role)?.label} · {e.email ?? "—"} · {e.phone ?? "—"}</p>
+          <Card key={e.id}><CardContent className="flex items-center justify-between p-4 gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="font-medium truncate">
+                {e.full_name}{" "}
+                {!e.active && <Badge variant="outline">inativo</Badge>}
+                {e.user_id && <Badge variant="secondary" className="ml-1 text-[10px]">acesso liberado</Badge>}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">{ROLES.find((r) => r.v === e.job_role)?.label} · {e.email ?? "—"} · {e.phone ?? "—"}</p>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 shrink-0">
+              {e.email && (
+                <Button size="sm" variant="outline" onClick={() => resendInvite(e)} disabled={invitingId === e.id}>
+                  {invitingId === e.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                  <span className="ml-1 hidden sm:inline">{e.user_id ? "Reenviar acesso" : "Criar acesso"}</span>
+                </Button>
+              )}
               <Button size="icon" variant="ghost" onClick={() => startEdit(e)}><Pencil className="h-4 w-4" /></Button>
               <Button size="icon" variant="ghost" onClick={() => { if (confirm("Remover?")) del.mutate(e.id); }}><Trash2 className="h-4 w-4" /></Button>
             </div>
@@ -116,8 +154,9 @@ function Employees() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Telefone</Label><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-              <div><Label>E-mail</Label><Input value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+              <div><Label>E-mail</Label><Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
             </div>
+            <p className="text-xs text-muted-foreground">Ao salvar com e-mail, o acesso ao app é criado e o link de senha é enviado por e-mail.</p>
             <div><Label>Data de admissão</Label><Input type="date" value={form.hired_at ?? ""} onChange={(e) => setForm({ ...form, hired_at: e.target.value })} /></div>
             <div className="space-y-2">
               <Label>Permissões individuais (ajustes finos)</Label>
@@ -138,7 +177,9 @@ function Employees() {
             </div>
             <div><Label>Notas</Label><Textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
           </div>
-          <SheetFooter className="mt-4"><Button onClick={() => save.mutate()} disabled={save.isPending || !form.full_name}>Salvar</Button></SheetFooter>
+          <SheetFooter className="mt-4"><Button onClick={() => save.mutate()} disabled={save.isPending || !form.full_name}>
+            {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Salvar
+          </Button></SheetFooter>
         </SheetContent>
       </Sheet>
     </div>

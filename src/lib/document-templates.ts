@@ -8,6 +8,7 @@ export type TemplateVars = {
     saida?: string | null;
     valor_diaria?: string | number | null;
   };
+  pacote?: { nome?: string | null; valor?: string | number | null; descricao?: string | null };
   data?: { hoje?: string };
 };
 
@@ -23,6 +24,9 @@ export function renderTemplate(body: string, vars: TemplateVars): string {
     "estadia.entrada": vars.estadia?.entrada ?? "________",
     "estadia.saida": vars.estadia?.saida ?? "________",
     "estadia.valor_diaria": String(vars.estadia?.valor_diaria ?? "________"),
+    "pacote.nome": vars.pacote?.nome ?? "________",
+    "pacote.valor": String(vars.pacote?.valor ?? "________"),
+    "pacote.descricao": vars.pacote?.descricao ?? "________",
     "data.hoje": vars.data?.hoje ?? format(new Date(), "dd/MM/yyyy"),
   };
   return body.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => flat[key] ?? `{{${key}}}`);

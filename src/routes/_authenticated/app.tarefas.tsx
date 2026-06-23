@@ -31,8 +31,8 @@ function TarefasPage() {
   const [form, setForm] = useState({ title: "", description: "", assigned_to: "", due_date: "", priority: "normal" });
 
   const employeesQ = useQuery({
-    queryKey: ["employees-min"],
-    queryFn: async () => { const { data, error } = await supabase.from("employees").select("user_id,full_name").eq("active", true).not("user_id", "is", null); if (error) throw error; return data ?? []; },
+    queryKey: ["employees-all"],
+    queryFn: async () => { const { data, error } = await supabase.from("employees").select("id,user_id,full_name").eq("active", true).order("full_name"); if (error) throw error; return data ?? []; },
   });
 
   const q = useQuery({
@@ -109,7 +109,7 @@ function TarefasPage() {
                     <Label>Responsável</Label>
                     <Select value={form.assigned_to} onValueChange={(v) => setForm({ ...form, assigned_to: v })}>
                       <SelectTrigger><SelectValue placeholder="Não atribuído" /></SelectTrigger>
-                      <SelectContent>{employees.map((e) => <SelectItem key={e.user_id} value={e.user_id}>{e.full_name}</SelectItem>)}</SelectContent>
+                      <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.user_id ?? e.id}>{e.full_name}{!e.user_id && " (sem acesso)"}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div>
@@ -133,7 +133,7 @@ function TarefasPage() {
       ) : (
         <div className="grid gap-3">
           {(q.data ?? []).map((t: any) => {
-            const owner = employees.find((e) => e.user_id === t.assigned_to);
+            const owner = employees.find((e) => e.user_id === t.assigned_to || e.id === t.assigned_to);
             return (
               <Card key={t.id}>
                 <CardHeader className="pb-2">

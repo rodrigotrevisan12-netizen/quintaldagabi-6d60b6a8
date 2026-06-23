@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/app/tutores")({
   head: () => ({ meta: [{ title: "Tutores — Quintal da Gabi" }] }),
@@ -115,17 +116,20 @@ function blankTutor(): z.infer<typeof tutorSchema> {
 function TutoresPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"new" | "old" | "az">("az");
   const [editing, setEditing] = useState<Tutor | null>(null);
   const [creating, setCreating] = useState(false);
   const [toDelete, setToDelete] = useState<Tutor | null>(null);
 
   const tutorsQuery = useQuery({
-    queryKey: ["tutors"],
+    queryKey: ["tutors", sort],
     queryFn: async (): Promise<Tutor[]> => {
+      const col = sort === "az" ? "full_name" : "created_at";
+      const asc = sort === "old" || sort === "az";
       const { data, error } = await supabase
         .from("tutors")
         .select("*")
-        .order("full_name", { ascending: true });
+        .order(col, { ascending: asc });
       if (error) throw error;
       return (data ?? []) as Tutor[];
     },
@@ -168,14 +172,24 @@ function TutoresPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nome, CPF, telefone ou e-mail"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, CPF, telefone ou e-mail"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={sort} onValueChange={(v: any) => setSort(v)}>
+          <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="az">Ordem alfabética</SelectItem>
+            <SelectItem value="new">Mais novos primeiro</SelectItem>
+            <SelectItem value="old">Mais antigos primeiro</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {tutorsQuery.isLoading ? (
