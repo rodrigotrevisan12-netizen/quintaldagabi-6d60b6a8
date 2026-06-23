@@ -407,6 +407,16 @@ function CreateDocumentSheet({
             <Label>Valor diária (R$)</Label>
             <Input type="number" step="0.01" value={valorDiaria} onChange={(e) => setValorDiaria(e.target.value)} />
           </div>
+
+          <div className="rounded-lg border p-3 space-y-2">
+            <p className="text-sm font-medium">Pacote contratado (opcional)</p>
+            <p className="text-xs text-muted-foreground">Use no contrato de creche/hospedagem com <code>{`{{pacote.nome}}`}</code>, <code>{`{{pacote.valor}}`}</code>, <code>{`{{pacote.descricao}}`}</code>.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Nome do pacote</Label><Input value={pacoteNome} onChange={(e) => setPacoteNome(e.target.value)} placeholder="Ex: 10 diárias creche" /></div>
+              <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={pacoteValor} onChange={(e) => setPacoteValor(e.target.value)} /></div>
+            </div>
+            <div><Label>Descrição</Label><Textarea rows={2} value={pacoteDesc} onChange={(e) => setPacoteDesc(e.target.value)} /></div>
+          </div>
         </div>
 
         <SheetFooter>
