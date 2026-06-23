@@ -102,17 +102,20 @@ const TRAITS: Trait[] = ["sociavel", "dominante", "medroso", "reativo", "agressi
 function CaesPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"new" | "old" | "az">("new");
   const [openSheet, setOpenSheet] = useState(false);
   const [editing, setEditing] = useState<Dog | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Dog | null>(null);
 
   const dogsQuery = useQuery({
-    queryKey: ["dogs"],
+    queryKey: ["dogs", sort],
     queryFn: async () => {
+      const col = sort === "az" ? "name" : "created_at";
+      const asc = sort === "old" || sort === "az";
       const { data, error } = await supabase
         .from("dogs")
         .select("*, tutors(full_name)")
-        .order("created_at", { ascending: false });
+        .order(col, { ascending: asc });
       if (error) throw error;
       return data as Dog[];
     },
@@ -161,14 +164,24 @@ function CaesPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nome, raça ou tutor..."
-          className="pl-9"
-        />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome, raça ou tutor..."
+            className="pl-9"
+          />
+        </div>
+        <Select value={sort} onValueChange={(v: any) => setSort(v)}>
+          <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="new">Mais novos primeiro</SelectItem>
+            <SelectItem value="old">Mais antigos primeiro</SelectItem>
+            <SelectItem value="az">Ordem alfabética</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {dogsQuery.isLoading ? (
