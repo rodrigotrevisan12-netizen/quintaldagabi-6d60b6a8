@@ -81,7 +81,7 @@ function TeamChat() {
     queryKey: ["chat-authors", messages?.length],
     enabled: !!messages?.length,
     queryFn: async () => {
-      const ids = Array.from(new Set((messages ?? []).map((m: any) => m.author_id)));
+      const ids = Array.from(new Set((messages ?? []).map((m: any) => m.author_id as string))) as string[];
       if (!ids.length) return {};
       const { data } = await supabase.from("profiles").select("id, full_name").in("id", ids);
       const map: Record<string, string> = {};
