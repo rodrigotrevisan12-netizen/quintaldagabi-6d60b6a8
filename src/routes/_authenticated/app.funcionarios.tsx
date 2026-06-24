@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UserPlus, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, UserPlus, Loader2, Link2, ShieldOff } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { inviteEmployee } from "@/lib/employees.functions";
+import { getPasswordSetupLink, revokeEmployeeAccess } from "@/lib/access.functions";
 
 export const Route = createFileRoute("/_authenticated/app/funcionarios")({
   head: () => ({ meta: [{ title: "Funcionários — Quintal da Gabi" }] }),
