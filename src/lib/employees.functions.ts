@@ -9,7 +9,7 @@ const inviteSchema = z.object({
 
 /**
  * Cria/garante o usuário Auth para um funcionário, vincula no registro,
- * concede papel "funcionario" e envia link de definição de senha.
+ * concede papel "funcionario", marca que precisa definir senha e dispara link de senha.
  */
 export const inviteEmployee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -50,9 +50,19 @@ export const inviteEmployee = createServerFn({ method: "POST" })
     }
     if (!authUserId) throw new Error("Falha ao obter id do usuário.");
 
+    // Remove papel "tutor" se houver — esse usuário agora é funcionário
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", authUserId).eq("role", "tutor");
+
+    // Garante papel "funcionario"
     await supabaseAdmin
       .from("user_roles")
-      .upsert({ user_id: authUserId, role: "funcionario" }, { onConflict: "user_id,role", ignoreDuplicates: true });
+      .upsert({ user_id: authUserId, role: "funcionario" }, { onConflict: "user_id,role,unit_id", ignoreDuplicates: true });
+
+    // Marca obrigação de definir senha no 1º acesso
+    await supabaseAdmin.from("profiles").upsert(
+      { id: authUserId, must_set_password: true },
+      { onConflict: "id" },
+    );
 
     const { error: updErr } = await supabaseAdmin
       .from("employees")
@@ -60,13 +70,12 @@ export const inviteEmployee = createServerFn({ method: "POST" })
       .eq("id", data.employeeId);
     if (updErr) throw new Error(updErr.message);
 
-    const redirectTo = process.env.PUBLIC_SITE_URL
-      ? `${process.env.PUBLIC_SITE_URL}/reset-password`
-      : undefined;
+    const siteUrl = process.env.PUBLIC_SITE_URL ?? "https://quintaldagabi.lovable.app";
+    const redirectTo = `${siteUrl}/reset-password`;
 
     const { error: linkErr } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, { redirectTo });
     if (linkErr) {
-      return { ok: true, message: "Funcionário vinculado, mas o e-mail não saiu. Peça para usar 'esqueci a senha' no login." };
+      return { ok: true, message: "Acesso criado. O e-mail não saiu agora — use 'Copiar link de senha' para enviar manualmente." };
     }
-    return { ok: true, message: "Acesso criado! O funcionário vai receber e-mail para definir a senha." };
+    return { ok: true, message: "Acesso criado! O funcionário receberá e-mail para definir a senha." };
   });
