@@ -42,6 +42,8 @@ function Employees() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Emp | null>(null);
   const invite = useServerFn(inviteEmployee);
+  const copyLink = useServerFn(getPasswordSetupLink);
+  const revoke = useServerFn(revokeEmployeeAccess);
   const [invitingId, setInvitingId] = useState<string | null>(null);
 
   const { data: list } = useQuery({
