@@ -121,6 +121,36 @@ function TutoresPage() {
   const [editing, setEditing] = useState<Tutor | null>(null);
   const [creating, setCreating] = useState(false);
   const [toDelete, setToDelete] = useState<Tutor | null>(null);
+  const inviteFn = useServerFn(inviteTutor);
+  const copyLinkFn = useServerFn(getPasswordSetupLink);
+  const revokeFn = useServerFn(revokeTutorAccess);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function quickInvite(t: Tutor) {
+    if (!t.email) { toast.error("Tutor sem e-mail."); return; }
+    setBusyId(t.id);
+    try {
+      const r = await inviteFn({ data: { tutorId: t.id, email: t.email } });
+      toast.success(r.message);
+      qc.invalidateQueries({ queryKey: ["tutors"] });
+    } catch (e: any) { toast.error(e.message); } finally { setBusyId(null); }
+  }
+  async function copyPwLink(t: Tutor) {
+    if (!t.email) { toast.error("Tutor sem e-mail."); return; }
+    try {
+      const { url } = await copyLinkFn({ data: { email: t.email } });
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado! Envie por WhatsApp para o tutor.");
+    } catch (e: any) { toast.error(e.message); }
+  }
+  async function revokeAccess(t: Tutor) {
+    if (!confirm(`Remover o acesso de ${t.full_name}? O cadastro do tutor é mantido.`)) return;
+    try {
+      await revokeFn({ data: { tutorId: t.id } });
+      toast.success("Acesso removido.");
+      qc.invalidateQueries({ queryKey: ["tutors"] });
+    } catch (e: any) { toast.error(e.message); }
+  }
 
   const tutorsQuery = useQuery({
     queryKey: ["tutors", sort],
