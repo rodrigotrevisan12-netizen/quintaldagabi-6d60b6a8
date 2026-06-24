@@ -253,7 +253,22 @@ function TutoresPage() {
                     <p className="text-xs text-muted-foreground">CPF {t.cpf}</p>
                   ) : null}
                 </div>
-                <div className="flex shrink-0 gap-1">
+                <div className="flex shrink-0 flex-wrap gap-1">
+                  {t.email && (
+                    <Button size="sm" variant="outline" onClick={() => quickInvite(t)} disabled={busyId === t.id} title={t.user_id ? "Reenviar acesso" : "Criar acesso"}>
+                      {busyId === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                    </Button>
+                  )}
+                  {t.email && (
+                    <Button size="sm" variant="outline" onClick={() => copyPwLink(t)} title="Copiar link de definição de senha">
+                      <Link2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {t.user_id && (
+                    <Button size="sm" variant="outline" onClick={() => revokeAccess(t)} title="Remover acesso do tutor ao app">
+                      <ShieldOff className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button size="icon" variant="ghost" onClick={() => setEditing(t)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
