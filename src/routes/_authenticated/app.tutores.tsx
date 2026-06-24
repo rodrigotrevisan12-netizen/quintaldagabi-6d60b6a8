@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Plus, Search, Pencil, Trash2, Mail, Phone, MapPin, UserPlus, Loader2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Mail, Phone, MapPin, UserPlus, Loader2, Link2, ShieldOff } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { inviteTutor } from "@/lib/tutors.functions";
+import { getPasswordSetupLink, revokeTutorAccess } from "@/lib/access.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
