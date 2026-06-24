@@ -1949,6 +1949,7 @@ export type Database = {
           default_unit_id: string | null
           full_name: string | null
           id: string
+          must_set_password: boolean
           phone: string | null
           updated_at: string
         }
@@ -1958,6 +1959,7 @@ export type Database = {
           default_unit_id?: string | null
           full_name?: string | null
           id: string
+          must_set_password?: boolean
           phone?: string | null
           updated_at?: string
         }
@@ -1967,6 +1969,7 @@ export type Database = {
           default_unit_id?: string | null
           full_name?: string | null
           id?: string
+          must_set_password?: boolean
           phone?: string | null
           updated_at?: string
         }

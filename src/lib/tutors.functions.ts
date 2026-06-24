@@ -9,8 +9,8 @@ const inviteSchema = z.object({
 
 /**
  * Convida um tutor: cria/garante o usuário no Auth com o e-mail dele,
- * vincula o user_id no registro do tutor e dispara o link de definir senha.
- * Só admin pode chamar.
+ * vincula o user_id no registro do tutor, marca "precisa definir senha"
+ * e dispara o link de definir senha. Só admin pode chamar.
  */
 export const inviteTutor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -26,7 +26,6 @@ export const inviteTutor = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // 1) Tentar criar o usuário (email_confirm true para já permitir login)
     let authUserId: string | null = null;
     const created = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -39,7 +38,6 @@ export const inviteTutor = createServerFn({ method: "POST" })
         created.error.status === 422 || msg.includes("already") || msg.includes("registered");
       if (!alreadyExists) throw new Error(created.error.message);
 
-      // já existe → buscar
       let page = 1;
       while (!authUserId) {
         const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
@@ -58,34 +56,35 @@ export const inviteTutor = createServerFn({ method: "POST" })
     }
     if (!authUserId) throw new Error("Falha ao obter o id do usuário.");
 
-    // 2) Garantir o papel "tutor"
+    // Garante papel "tutor" (não remove outros — admin/funcionario podem ser também tutor da própria casa)
     await supabaseAdmin
       .from("user_roles")
       .upsert(
         { user_id: authUserId, role: "tutor" },
-        { onConflict: "user_id,role", ignoreDuplicates: true },
+        { onConflict: "user_id,role,unit_id", ignoreDuplicates: true },
       );
 
-    // 3) Vincular ao registro do tutor
+    // Marca obrigação de definir senha no 1º acesso
+    await supabaseAdmin.from("profiles").upsert(
+      { id: authUserId, must_set_password: true },
+      { onConflict: "id" },
+    );
+
     const { error: updErr } = await supabaseAdmin
       .from("tutors")
       .update({ user_id: authUserId, email: data.email })
       .eq("id", data.tutorId);
     if (updErr) throw new Error(updErr.message);
 
-    // 4) Enviar link "definir senha" (usa reset password)
-    const siteUrl = process.env.SUPABASE_URL ? undefined : undefined;
-    const redirectTo = process.env.PUBLIC_SITE_URL
-      ? `${process.env.PUBLIC_SITE_URL}/reset-password`
-      : undefined;
+    const siteUrl = process.env.PUBLIC_SITE_URL ?? "https://quintaldagabi.lovable.app";
+    const redirectTo = `${siteUrl}/reset-password`;
 
     const { error: linkErr } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, {
       redirectTo,
     });
     if (linkErr) {
-      // Não falhar duro — o tutor pode usar "esqueci a senha" depois
-      return { ok: true, message: "Tutor vinculado, mas o e-mail não saiu. Peça para ele usar 'esqueci a senha'." };
+      return { ok: true, message: "Tutor vinculado. O e-mail não saiu — use 'Copiar link de senha' para enviar manualmente." };
     }
 
-    return { ok: true, message: "Convite enviado! O tutor vai receber um e-mail para definir a senha." };
+    return { ok: true, message: "Convite enviado! O tutor receberá e-mail para definir a senha." };
   });

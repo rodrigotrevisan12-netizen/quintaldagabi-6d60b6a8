@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.clear_must_set_password() FROM PUBLIC, anon, authenticated;

@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Plus, Search, Pencil, Trash2, Mail, Phone, MapPin, UserPlus, Loader2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Mail, Phone, MapPin, UserPlus, Loader2, Link2, ShieldOff } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { inviteTutor } from "@/lib/tutors.functions";
+import { getPasswordSetupLink, revokeTutorAccess } from "@/lib/access.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -120,6 +121,36 @@ function TutoresPage() {
   const [editing, setEditing] = useState<Tutor | null>(null);
   const [creating, setCreating] = useState(false);
   const [toDelete, setToDelete] = useState<Tutor | null>(null);
+  const inviteFn = useServerFn(inviteTutor);
+  const copyLinkFn = useServerFn(getPasswordSetupLink);
+  const revokeFn = useServerFn(revokeTutorAccess);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function quickInvite(t: Tutor) {
+    if (!t.email) { toast.error("Tutor sem e-mail."); return; }
+    setBusyId(t.id);
+    try {
+      const r = await inviteFn({ data: { tutorId: t.id, email: t.email } });
+      toast.success(r.message);
+      qc.invalidateQueries({ queryKey: ["tutors"] });
+    } catch (e: any) { toast.error(e.message); } finally { setBusyId(null); }
+  }
+  async function copyPwLink(t: Tutor) {
+    if (!t.email) { toast.error("Tutor sem e-mail."); return; }
+    try {
+      const { url } = await copyLinkFn({ data: { email: t.email } });
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado! Envie por WhatsApp para o tutor.");
+    } catch (e: any) { toast.error(e.message); }
+  }
+  async function revokeAccess(t: Tutor) {
+    if (!confirm(`Remover o acesso de ${t.full_name}? O cadastro do tutor é mantido.`)) return;
+    try {
+      await revokeFn({ data: { tutorId: t.id } });
+      toast.success("Acesso removido.");
+      qc.invalidateQueries({ queryKey: ["tutors"] });
+    } catch (e: any) { toast.error(e.message); }
+  }
 
   const tutorsQuery = useQuery({
     queryKey: ["tutors", sort],
@@ -222,7 +253,22 @@ function TutoresPage() {
                     <p className="text-xs text-muted-foreground">CPF {t.cpf}</p>
                   ) : null}
                 </div>
-                <div className="flex shrink-0 gap-1">
+                <div className="flex shrink-0 flex-wrap gap-1">
+                  {t.email && (
+                    <Button size="sm" variant="outline" onClick={() => quickInvite(t)} disabled={busyId === t.id} title={t.user_id ? "Reenviar acesso" : "Criar acesso"}>
+                      {busyId === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                    </Button>
+                  )}
+                  {t.email && (
+                    <Button size="sm" variant="outline" onClick={() => copyPwLink(t)} title="Copiar link de definição de senha">
+                      <Link2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {t.user_id && (
+                    <Button size="sm" variant="outline" onClick={() => revokeAccess(t)} title="Remover acesso do tutor ao app">
+                      <ShieldOff className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button size="icon" variant="ghost" onClick={() => setEditing(t)}>
                     <Pencil className="h-4 w-4" />
                   </Button>

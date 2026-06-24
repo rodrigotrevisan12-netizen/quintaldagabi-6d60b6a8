@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, UserPlus, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, UserPlus, Loader2, Link2, ShieldOff } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { inviteEmployee } from "@/lib/employees.functions";
+import { getPasswordSetupLink, revokeEmployeeAccess } from "@/lib/access.functions";
 
 export const Route = createFileRoute("/_authenticated/app/funcionarios")({
   head: () => ({ meta: [{ title: "Funcionários — Quintal da Gabi" }] }),
@@ -41,6 +42,8 @@ function Employees() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Emp | null>(null);
   const invite = useServerFn(inviteEmployee);
+  const copyLink = useServerFn(getPasswordSetupLink);
+  const revoke = useServerFn(revokeEmployeeAccess);
   const [invitingId, setInvitingId] = useState<string | null>(null);
 
   const { data: list } = useQuery({
@@ -103,6 +106,24 @@ function Employees() {
     finally { setInvitingId(null); }
   }
 
+  async function copyPwLink(e: Emp) {
+    if (!e.email) { toast.error("Sem e-mail."); return; }
+    try {
+      const { url } = await copyLink({ data: { email: e.email } });
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado! Envie por WhatsApp para o funcionário.");
+    } catch (err: any) { toast.error(err.message); }
+  }
+
+  async function revokeAccess(e: Emp) {
+    if (!confirm(`Remover o acesso de ${e.full_name}? Isso apaga o login dele.`)) return;
+    try {
+      await revoke({ data: { employeeId: e.id } });
+      toast.success("Acesso removido.");
+      qc.invalidateQueries({ queryKey: ["employees"] });
+    } catch (err: any) { toast.error(err.message); }
+  }
+
   function applyRolePreset(role: string) {
     const preset = ROLES.find((r) => r.v === role)?.perms ?? {};
     setForm((f: any) => ({ ...f, job_role: role, permissions: { ...preset } }));
@@ -127,11 +148,21 @@ function Employees() {
               </p>
               <p className="text-xs text-muted-foreground truncate">{ROLES.find((r) => r.v === e.job_role)?.label} · {e.email ?? "—"} · {e.phone ?? "—"}</p>
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex flex-wrap gap-1 shrink-0">
               {e.email && (
                 <Button size="sm" variant="outline" onClick={() => resendInvite(e)} disabled={invitingId === e.id}>
                   {invitingId === e.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
                   <span className="ml-1 hidden sm:inline">{e.user_id ? "Reenviar acesso" : "Criar acesso"}</span>
+                </Button>
+              )}
+              {e.email && (
+                <Button size="sm" variant="outline" onClick={() => copyPwLink(e)} title="Copiar link de definição de senha">
+                  <Link2 className="h-4 w-4" /><span className="ml-1 hidden sm:inline">Copiar link</span>
+                </Button>
+              )}
+              {e.user_id && (
+                <Button size="sm" variant="outline" onClick={() => revokeAccess(e)} title="Remover acesso ao app">
+                  <ShieldOff className="h-4 w-4" /><span className="ml-1 hidden sm:inline">Remover acesso</span>
                 </Button>
               )}
               <Button size="icon" variant="ghost" onClick={() => startEdit(e)}><Pencil className="h-4 w-4" /></Button>
