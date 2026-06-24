@@ -106,6 +106,24 @@ function Employees() {
     finally { setInvitingId(null); }
   }
 
+  async function copyPwLink(e: Emp) {
+    if (!e.email) { toast.error("Sem e-mail."); return; }
+    try {
+      const { url } = await copyLink({ data: { email: e.email } });
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado! Envie por WhatsApp para o funcionário.");
+    } catch (err: any) { toast.error(err.message); }
+  }
+
+  async function revokeAccess(e: Emp) {
+    if (!confirm(`Remover o acesso de ${e.full_name}? Isso apaga o login dele.`)) return;
+    try {
+      await revoke({ data: { employeeId: e.id } });
+      toast.success("Acesso removido.");
+      qc.invalidateQueries({ queryKey: ["employees"] });
+    } catch (err: any) { toast.error(err.message); }
+  }
+
   function applyRolePreset(role: string) {
     const preset = ROLES.find((r) => r.v === role)?.perms ?? {};
     setForm((f: any) => ({ ...f, job_role: role, permissions: { ...preset } }));
