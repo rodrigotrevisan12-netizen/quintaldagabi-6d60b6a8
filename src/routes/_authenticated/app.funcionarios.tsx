@@ -148,11 +148,21 @@ function Employees() {
               </p>
               <p className="text-xs text-muted-foreground truncate">{ROLES.find((r) => r.v === e.job_role)?.label} · {e.email ?? "—"} · {e.phone ?? "—"}</p>
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex flex-wrap gap-1 shrink-0">
               {e.email && (
                 <Button size="sm" variant="outline" onClick={() => resendInvite(e)} disabled={invitingId === e.id}>
                   {invitingId === e.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
                   <span className="ml-1 hidden sm:inline">{e.user_id ? "Reenviar acesso" : "Criar acesso"}</span>
+                </Button>
+              )}
+              {e.email && (
+                <Button size="sm" variant="outline" onClick={() => copyPwLink(e)} title="Copiar link de definição de senha">
+                  <Link2 className="h-4 w-4" /><span className="ml-1 hidden sm:inline">Copiar link</span>
+                </Button>
+              )}
+              {e.user_id && (
+                <Button size="sm" variant="outline" onClick={() => revokeAccess(e)} title="Remover acesso ao app">
+                  <ShieldOff className="h-4 w-4" /><span className="ml-1 hidden sm:inline">Remover acesso</span>
                 </Button>
               )}
               <Button size="icon" variant="ghost" onClick={() => startEdit(e)}><Pencil className="h-4 w-4" /></Button>
