@@ -64,6 +64,38 @@ function Dashboard() {
   });
   const v = (n?: number) => (counts.isLoading ? "…" : String(n ?? 0));
 
+  const alertsQ = useQuery({
+    queryKey: ["health-alerts-dashboard"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("v_health_alerts")
+        .select("*")
+        .neq("status", "em_dia")
+        .order("next_due_date", { ascending: true })
+        .limit(6);
+      if (error) throw error;
+      return (data ?? []) as HealthAlert[];
+    },
+  });
+
+  const paymentsQ = useQuery({
+    queryKey: ["payments-alerts-dashboard"],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from("financial_transactions")
+        .select("id, description, amount, due_date, status")
+        .eq("kind", "receita")
+        .in("status", ["pendente", "atrasado"])
+        .lte("due_date", today)
+        .order("due_date", { ascending: true })
+        .limit(6);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const v = (n?: number) => (counts.isLoading ? "…" : String(n ?? 0));
+
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div>
