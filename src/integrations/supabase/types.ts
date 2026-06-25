@@ -2532,6 +2532,36 @@ export type Database = {
         }
         Relationships: []
       }
+      v_health_alerts: {
+        Row: {
+          days_remaining: number | null
+          dog_id: string | null
+          dog_name: string | null
+          item: string | null
+          kind: string | null
+          next_due_date: string | null
+          record_id: string | null
+          status: string | null
+          tutor_id: string | null
+          tutor_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dogs_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "tutors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dogs_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
+          },
+        ]
+      }
       v_tutor_balances: {
         Row: {
           full_name: string | null
