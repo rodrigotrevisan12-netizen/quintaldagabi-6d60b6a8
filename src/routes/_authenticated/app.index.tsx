@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
@@ -15,11 +15,23 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Início — Quintal da Gabi" }] }),
   component: Dashboard,
 });
+
+type HealthAlert = {
+  record_id: string;
+  dog_id: string;
+  dog_name: string;
+  kind: "vacina" | "vermifugo" | "antipulgas";
+  item: string;
+  next_due_date: string;
+  days_remaining: number;
+  status: "vencido" | "proximo" | "em_dia";
+};
 
 function Dashboard() {
   const { data: me } = useCurrentUser();
