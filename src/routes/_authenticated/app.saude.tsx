@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/app/saude")({
   head: () => ({ meta: [{ title: "Saúde — Quintal da Gabi" }] }),
@@ -58,8 +59,10 @@ function SaudePage() {
         </div>
       </header>
 
+      <HealthAlertsPanel />
+
       {!dogId ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">Selecione um cão para gerenciar os registros de saúde.</CardContent></Card>
+        <Card><CardContent className="py-12 text-center text-muted-foreground">Selecione um cão acima para gerenciar registros individuais.</CardContent></Card>
       ) : (
         <Tabs defaultValue="vacinas" className="w-full">
           <TabsList className="flex-wrap">
@@ -300,6 +303,88 @@ function HistorySection({ dogId }: { dogId: string }) {
               </li>
             ))}
           </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+type HealthAlertRow = {
+  record_id: string;
+  dog_id: string;
+  dog_name: string;
+  tutor_name: string | null;
+  kind: "vacina" | "vermifugo" | "antipulgas";
+  item: string;
+  next_due_date: string;
+  days_remaining: number;
+  status: "vencido" | "proximo" | "em_dia";
+};
+
+function HealthAlertsPanel() {
+  const q = useQuery({
+    queryKey: ["health-alerts-all"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("v_health_alerts").select("*").neq("status", "em_dia")
+        .order("next_due_date", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as HealthAlertRow[];
+    },
+  });
+
+  const rows = q.data ?? [];
+  const overdue = rows.filter((r) => r.status === "vencido");
+  const soon = rows.filter((r) => r.status === "proximo");
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <ShieldAlert className="h-5 w-5 text-amber-500" />
+          Alertas de saúde
+        </CardTitle>
+        <div className="flex gap-2 text-xs">
+          <Badge variant="destructive">{overdue.length} vencidos</Badge>
+          <Badge variant="secondary">{soon.length} próximos</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {q.isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum alerta — todos os cães estão em dia.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Cão</TableHead>
+                <TableHead>Tutor</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Item</TableHead>
+                <TableHead>Vencimento</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={`${r.kind}-${r.record_id}`}>
+                  <TableCell className="font-medium">{r.dog_name}</TableCell>
+                  <TableCell className="text-muted-foreground">{r.tutor_name ?? "—"}</TableCell>
+                  <TableCell>{r.kind === "vacina" ? "Vacina" : r.kind === "vermifugo" ? "Vermífugo" : "Antipulgas"}</TableCell>
+                  <TableCell>{r.item}</TableCell>
+                  <TableCell>{new Date(r.next_due_date).toLocaleDateString("pt-BR")}</TableCell>
+                  <TableCell>
+                    {r.status === "vencido" ? (
+                      <Badge variant="destructive">{Math.abs(r.days_remaining)}d atrasado</Badge>
+                    ) : (
+                      <Badge variant="secondary">em {r.days_remaining}d</Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
