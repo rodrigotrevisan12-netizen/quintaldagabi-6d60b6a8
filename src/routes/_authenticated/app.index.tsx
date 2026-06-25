@@ -86,7 +86,7 @@ function Dashboard() {
         .from("financial_transactions")
         .select("id, description, amount, due_date, status")
         .eq("kind", "receita")
-        .in("status", ["pendente", "atrasado"])
+        .in("status", ["pendente", "vencido"])
         .lte("due_date", today)
         .order("due_date", { ascending: true })
         .limit(6);
@@ -94,7 +94,6 @@ function Dashboard() {
       return data ?? [];
     },
   });
-  const v = (n?: number) => (counts.isLoading ? "…" : String(n ?? 0));
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
