@@ -59,8 +59,10 @@ function SaudePage() {
         </div>
       </header>
 
+      <HealthAlertsPanel />
+
       {!dogId ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">Selecione um cão para gerenciar os registros de saúde.</CardContent></Card>
+        <Card><CardContent className="py-12 text-center text-muted-foreground">Selecione um cão acima para gerenciar registros individuais.</CardContent></Card>
       ) : (
         <Tabs defaultValue="vacinas" className="w-full">
           <TabsList className="flex-wrap">
