@@ -210,6 +210,7 @@ function FinanceiroPage() {
           <TabsTrigger value="fluxo">Fluxo de caixa</TabsTrigger>
           <TabsTrigger value="receber">A receber</TabsTrigger>
           <TabsTrigger value="pagar">A pagar</TabsTrigger>
+          <TabsTrigger value="debitos">Débitos por tutor</TabsTrigger>
           <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
         </TabsList>
 
