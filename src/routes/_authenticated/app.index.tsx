@@ -224,7 +224,7 @@ function AlertsBlock({
           <h3 className="font-display text-lg font-semibold">{title}</h3>
         </div>
         {to && list.length > 0 ? (
-          <Link to={to} className="text-xs text-primary hover:underline">Ver todos</Link>
+          <Link to={to as any} className="text-xs text-primary hover:underline">Ver todos</Link>
         ) : null}
       </div>
       {list.length === 0 ? (
