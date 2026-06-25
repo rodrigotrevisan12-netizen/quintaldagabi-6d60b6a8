@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "documents tutor sign own" ON public.documents;
