@@ -44,12 +44,45 @@ function TutorHome() {
     },
   });
 
+  const { data: alerts } = useQuery({
+    queryKey: ["tutor-health-alerts", tutor?.id],
+    enabled: !!tutor?.id,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("v_health_alerts").select("*")
+        .eq("tutor_id", tutor!.id).neq("status", "em_dia")
+        .order("next_due_date", { ascending: true }).limit(5);
+      return data ?? [];
+    },
+  });
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <header>
         <h1 className="font-display text-2xl font-semibold">Olá, {tutor?.full_name?.split(" ")[0] ?? "tutor"}!</h1>
         <p className="text-sm text-muted-foreground">Acompanhe seus cães, boletins e documentos.</p>
       </header>
+
+      {alerts && alerts.length > 0 ? (
+        <Card className="border-amber-500/40">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Syringe className="h-4 w-4 text-amber-600" />
+              Atenção à saúde do seu pet
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5 pt-0">
+            {alerts.map((a: any) => (
+              <div key={`${a.kind}-${a.record_id}`} className="flex items-center justify-between text-sm">
+                <span><strong>{a.dog_name}</strong> — {a.item}</span>
+                <Badge variant={a.status === "vencido" ? "destructive" : "secondary"}>
+                  {a.status === "vencido" ? `${Math.abs(a.days_remaining)}d atrasado` : `em ${a.days_remaining}d`}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
 
       {arrival ? (
         <Card className="border-primary">
