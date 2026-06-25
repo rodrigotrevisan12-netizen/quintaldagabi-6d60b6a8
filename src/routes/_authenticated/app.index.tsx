@@ -140,15 +140,35 @@ function Dashboard() {
           icon={<Syringe className="h-5 w-5" />}
           title="Alertas de vacinas"
           empty="Quando você cadastrar vacinas dos cães, os vencimentos próximos aparecem aqui."
+          to="/app/saude"
+          items={(alertsQ.data ?? []).map((a) => ({
+            id: a.record_id,
+            title: `${a.dog_name} — ${a.item}`,
+            subtitle: `${labelKind(a.kind)} • vence ${new Date(a.next_due_date).toLocaleDateString("pt-BR")}`,
+            tone: a.status === "vencido" ? "danger" : "warning",
+            badge: a.status === "vencido" ? `${Math.abs(a.days_remaining)}d atrasado` : `em ${a.days_remaining}d`,
+          }))}
         />
         <AlertsBlock
           icon={<CreditCard className="h-5 w-5" />}
           title="Alertas de pagamentos"
-          empty="Quando o financeiro estiver ativo, mensalidades e contas em atraso aparecem aqui."
+          empty="Sem cobranças pendentes hoje."
+          to="/app/financeiro"
+          items={(paymentsQ.data ?? []).map((p: any) => ({
+            id: p.id,
+            title: p.description ?? "Cobrança",
+            subtitle: `Vence ${new Date(p.due_date).toLocaleDateString("pt-BR")}`,
+            tone: p.status === "vencido" ? "danger" : "warning",
+            badge: `R$ ${Number(p.amount ?? 0).toFixed(2)}`,
+          }))}
         />
       </div>
     </div>
   );
+}
+
+function labelKind(k: string) {
+  return k === "vacina" ? "Vacina" : k === "vermifugo" ? "Vermífugo" : "Antipulgas";
 }
 
 function Card({
