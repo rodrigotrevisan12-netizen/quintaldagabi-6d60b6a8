@@ -244,6 +244,9 @@ function FinanceiroPage() {
             onReceipt={() => null}
           />
         </TabsContent>
+        <TabsContent value="debitos">
+          <TutorBalances />
+        </TabsContent>
         <TabsContent value="relatorios">
           <Reports txs={txs} />
         </TabsContent>
