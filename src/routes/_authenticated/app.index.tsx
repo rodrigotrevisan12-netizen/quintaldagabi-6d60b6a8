@@ -200,24 +200,48 @@ function Card({
   );
 }
 
+type AlertItem = { id: string; title: string; subtitle: string; tone: "danger" | "warning"; badge: string };
+
 function AlertsBlock({
   icon,
   title,
   empty,
+  items,
+  to,
 }: {
   icon: React.ReactNode;
   title: string;
   empty: string;
+  items?: AlertItem[];
+  to?: string;
 }) {
+  const list = items ?? [];
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center gap-2">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent/15 text-accent">
-          {icon}
-        </span>
-        <h3 className="font-display text-lg font-semibold">{title}</h3>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent/15 text-accent">{icon}</span>
+          <h3 className="font-display text-lg font-semibold">{title}</h3>
+        </div>
+        {to && list.length > 0 ? (
+          <Link to={to} className="text-xs text-primary hover:underline">Ver todos</Link>
+        ) : null}
       </div>
-      <p className="mt-4 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{empty}</p>
+      {list.length === 0 ? (
+        <p className="mt-4 rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <ul className="mt-4 divide-y">
+          {list.map((it) => (
+            <li key={it.id} className="flex items-center justify-between gap-3 py-2.5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{it.title}</p>
+                <p className="truncate text-xs text-muted-foreground">{it.subtitle}</p>
+              </div>
+              <Badge variant={it.tone === "danger" ? "destructive" : "secondary"}>{it.badge}</Badge>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
