@@ -210,6 +210,7 @@ function FinanceiroPage() {
           <TabsTrigger value="fluxo">Fluxo de caixa</TabsTrigger>
           <TabsTrigger value="receber">A receber</TabsTrigger>
           <TabsTrigger value="pagar">A pagar</TabsTrigger>
+          <TabsTrigger value="debitos">Débitos por tutor</TabsTrigger>
           <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
         </TabsList>
 
@@ -242,6 +243,9 @@ function FinanceiroPage() {
             onPay={(t) => markPaid.mutate(t)}
             onReceipt={() => null}
           />
+        </TabsContent>
+        <TabsContent value="debitos">
+          <TutorBalances />
         </TabsContent>
         <TabsContent value="relatorios">
           <Reports txs={txs} />
@@ -811,6 +815,78 @@ function printReceipt(r: {
   <div style="margin-top:24px;text-align:right"><button onclick="window.print()">Imprimir</button></div>
   </body></html>`);
   w.document.close();
+}
+
+type TutorBalance = {
+  tutor_id: string;
+  full_name: string;
+  open_amount: number;
+  open_count: number;
+  last_due: string | null;
+};
+
+function TutorBalances() {
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["tutor-balances"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("v_tutor_balances")
+        .select("*")
+        .order("open_amount", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as TutorBalance[];
+    },
+  });
+
+  const withDebt = data.filter((r) => Number(r.open_amount) > 0);
+  const total = withDebt.reduce((s, r) => s + Number(r.open_amount), 0);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Débitos por tutor</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            Total em aberto: <strong className="text-foreground">{brl(total)}</strong>
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
+          </div>
+        ) : withDebt.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum tutor com débito em aberto.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tutor</TableHead>
+                <TableHead>Lançamentos abertos</TableHead>
+                <TableHead>Último vencimento</TableHead>
+                <TableHead className="text-right">Total em aberto</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {withDebt.map((r) => (
+                <TableRow key={r.tutor_id}>
+                  <TableCell className="font-medium">{r.full_name}</TableCell>
+                  <TableCell>{r.open_count}</TableCell>
+                  <TableCell>
+                    {r.last_due ? format(parseISO(r.last_due), "dd/MM/yyyy", { locale: ptBR }) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-rose-700">
+                    {brl(Number(r.open_amount))}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 function escapeHtml(s: string) {

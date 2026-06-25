@@ -76,6 +76,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "arrival_notifications_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
+          },
+          {
             foreignKeyName: "arrival_notifications_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -991,6 +998,13 @@ export type Database = {
             referencedRelation: "tutors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "documents_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
+          },
         ]
       }
       dog_allergies: {
@@ -1447,6 +1461,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dogs_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
+          },
+          {
             foreignKeyName: "dogs_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -1591,6 +1612,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tutors"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
           },
           {
             foreignKeyName: "financial_transactions_unit_id_fkey"
@@ -2261,6 +2289,13 @@ export type Database = {
             referencedRelation: "tutors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tutor_authorized_pickups_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
+          },
         ]
       }
       tutor_emergency_contacts: {
@@ -2298,6 +2333,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tutors"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutor_emergency_contacts_tutor_id_fkey"
+            columns: ["tutor_id"]
+            isOneToOne: false
+            referencedRelation: "v_tutor_balances"
+            referencedColumns: ["tutor_id"]
           },
         ]
       }
@@ -2490,14 +2532,39 @@ export type Database = {
         }
         Relationships: []
       }
+      v_tutor_balances: {
+        Row: {
+          full_name: string | null
+          last_due: string | null
+          open_amount: number | null
+          open_count: number | null
+          tutor_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      default_unit_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      tutor_of_dog: { Args: { _dog_id: string }; Returns: string }
+      upsert_service_charge: {
+        Args: {
+          _amount: number
+          _category: Database["public"]["Enums"]["fin_revenue_category"]
+          _description: string
+          _due: string
+          _ref_id: string
+          _ref_type: string
+          _tutor_id: string
+          _unit_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
