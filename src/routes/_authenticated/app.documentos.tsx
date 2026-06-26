@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, FileText, Download, X, PenLine } from "lucide-react";
+import { Plus, Loader2, FileText, Download, X, PenLine, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +43,7 @@ import {
   DOCUMENT_TYPE_LABEL,
   DOCUMENT_STATUS_LABEL,
   generatePdfFromText,
+  type SignatureBlock,
 } from "@/lib/document-templates";
 
 export const Route = createFileRoute("/_authenticated/app/documentos")({
@@ -335,7 +337,7 @@ function CreateDocumentSheet({
       return data as unknown as Doc;
     },
     onSuccess: (doc) => {
-      toast.success("Documento criado.");
+      toast.success("Documento criado. O tutor já pode visualizá-lo no app.");
       setTemplateId("");
       setTutorId("");
       setDogId("");
@@ -350,13 +352,13 @@ function CreateDocumentSheet({
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-xl">
-        <SheetHeader>
+      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-xl">
+        <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>Novo documento</SheetTitle>
           <SheetDescription>Escolha o modelo, o tutor e (opcional) o cão.</SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           <div className="space-y-2">
             <Label>Modelo</Label>
             <Select value={templateId} onValueChange={setTemplateId}>
@@ -419,7 +421,7 @@ function CreateDocumentSheet({
           </div>
         </div>
 
-        <SheetFooter>
+        <SheetFooter className="border-t bg-background px-6 py-4">
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
           <Button onClick={() => create.mutate()} disabled={create.isPending || !templateId || !tutorId}>
             {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -429,6 +431,17 @@ function CreateDocumentSheet({
       </SheetContent>
     </Sheet>
   );
+}
+
+function sigsToBlocks(rows: any[]): SignatureBlock[] {
+  return rows.map((s) => ({
+    role: s.signer_role as "admin" | "tutor",
+    name: s.signer_name,
+    email: s.signer_email,
+    signedAt: format(new Date(s.signed_at), "dd/MM/yyyy HH:mm"),
+    method: s.method,
+    image: s.method === "drawn" ? s.signature_data : undefined,
+  })).sort((a, b) => (a.role === "admin" ? -1 : 1));
 }
 
 function DocumentDetail({
@@ -476,15 +489,7 @@ function DocumentDetail({
 
   async function downloadPdf() {
     if (!doc) return;
-    const sig = sigsQuery.data?.[0];
-    const blob = await generatePdfFromText(doc.title, doc.body, sig
-      ? {
-          name: sig.signer_name,
-          signedAt: format(new Date(sig.signed_at), "dd/MM/yyyy HH:mm"),
-          method: sig.method === "drawn" ? "desenhada" : "digitada",
-          image: sig.method === "drawn" ? sig.signature_data : undefined,
-        }
-      : undefined);
+    const blob = await generatePdfFromText(doc.title, doc.body, sigsToBlocks(sigsQuery.data ?? []));
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -493,80 +498,96 @@ function DocumentDetail({
     URL.revokeObjectURL(url);
   }
 
+  const adminSigned = (sigsQuery.data ?? []).some((s: any) => s.signer_role === "admin");
+  const tutorSigned = (sigsQuery.data ?? []).some((s: any) => s.signer_role === "tutor");
+
   return (
     <Sheet open={!!doc} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-2xl">
+      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
         {doc && (
           <>
-            <SheetHeader>
+            <SheetHeader className="border-b px-6 py-4">
               <SheetTitle>{doc.title}</SheetTitle>
               <SheetDescription>
                 {doc.tutor?.full_name} {doc.dog?.name ? `· ${doc.dog.name}` : ""}
               </SheetDescription>
             </SheetHeader>
 
-            <Tabs defaultValue="documento" className="mt-4">
-              <TabsList>
-                <TabsTrigger value="documento">Documento</TabsTrigger>
-                <TabsTrigger value="assinaturas">Assinaturas ({sigsQuery.data?.length ?? 0})</TabsTrigger>
-              </TabsList>
-              <TabsContent value="documento" className="mt-4">
-                <div className="max-h-[55vh] overflow-y-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/40 p-4 text-sm leading-relaxed">
-                  {doc.body}
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={downloadPdf}>
-                    <Download className="mr-2 h-4 w-4" />Baixar PDF
-                  </Button>
-                  {doc.status !== "signed" && doc.status !== "cancelled" && (
-                    <Button onClick={() => setSignOpen(true)}>
-                      <PenLine className="mr-2 h-4 w-4" />Assinar
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <Tabs defaultValue="documento">
+                <TabsList>
+                  <TabsTrigger value="documento">Documento</TabsTrigger>
+                  <TabsTrigger value="assinaturas">
+                    Assinaturas
+                    <span className="ml-1 inline-flex items-center gap-1">
+                      <CheckCircle2 className={`h-3.5 w-3.5 ${adminSigned ? "text-emerald-500" : "text-muted-foreground/40"}`} />
+                      <CheckCircle2 className={`h-3.5 w-3.5 ${tutorSigned ? "text-emerald-500" : "text-muted-foreground/40"}`} />
+                    </span>
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="documento" className="mt-4">
+                  <div className="whitespace-pre-wrap rounded-xl border border-border bg-muted/40 p-4 text-sm leading-relaxed">
+                    {doc.body}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button variant="outline" onClick={downloadPdf}>
+                      <Download className="mr-2 h-4 w-4" />Baixar PDF
                     </Button>
-                  )}
-                  {doc.status !== "cancelled" && (
-                    <Button variant="ghost" onClick={() => cancel.mutate()} disabled={cancel.isPending}>
-                      <X className="mr-2 h-4 w-4" />Cancelar documento
+                    {doc.status !== "signed" && doc.status !== "cancelled" && !adminSigned && (
+                      <Button onClick={() => setSignOpen(true)}>
+                        <PenLine className="mr-2 h-4 w-4" />Assinar como empresa
+                      </Button>
+                    )}
+                    {adminSigned && !tutorSigned && (
+                      <Badge variant="secondary">Aguardando assinatura do tutor</Badge>
+                    )}
+                    {doc.status !== "cancelled" && (
+                      <Button variant="ghost" onClick={() => cancel.mutate()} disabled={cancel.isPending}>
+                        <X className="mr-2 h-4 w-4" />Cancelar documento
+                      </Button>
+                    )}
+                    <Button variant="ghost" className="text-destructive" onClick={() => { if (confirm("Excluir definitivamente este documento?")) remove.mutate(); }} disabled={remove.isPending}>
+                      <X className="mr-2 h-4 w-4" />Excluir
                     </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="assinaturas" className="mt-4 space-y-2">
+                  {(sigsQuery.data ?? []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Sem assinaturas ainda.</p>
+                  ) : (
+                    (sigsQuery.data ?? []).map((s: any) => (
+                      <div key={s.id} className="rounded-xl border border-border p-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={s.signer_role === "admin" ? "default" : "secondary"}>
+                            {s.signer_role === "admin" ? "Empresa" : "Tutor"}
+                          </Badge>
+                          <p className="font-medium">{s.signer_name}</p>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {s.signer_email ? `${s.signer_email} · ` : ""}
+                          {format(new Date(s.signed_at), "dd/MM/yyyy HH:mm")} · {s.method === "drawn" ? "desenhada" : "digitada"}
+                        </p>
+                        {s.method === "drawn" && s.signature_data?.startsWith("data:image") && (
+                          <img src={s.signature_data} alt="" className="mt-2 h-16 rounded border border-border bg-white" />
+                        )}
+                      </div>
+                    ))
                   )}
-                  {doc.status !== "cancelled" && (
-                    <Button variant="ghost" onClick={() => cancel.mutate()} disabled={cancel.isPending}>
-                      <X className="mr-2 h-4 w-4" />Cancelar documento
-                    </Button>
-                  )}
-                  <Button variant="ghost" className="text-destructive" onClick={() => { if (confirm("Excluir definitivamente este documento?")) remove.mutate(); }} disabled={remove.isPending}>
-                    <X className="mr-2 h-4 w-4" />Excluir
-                  </Button>
-                </div>
-              </TabsContent>
-              <TabsContent value="assinaturas" className="mt-4 space-y-2">
-                {(sigsQuery.data ?? []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Sem assinaturas ainda.</p>
-                ) : (
-                  (sigsQuery.data ?? []).map((s: any) => (
-                    <div key={s.id} className="rounded-xl border border-border p-3 text-sm">
-                      <p className="font-medium">{s.signer_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(s.signed_at), "dd/MM/yyyy HH:mm")} · {s.method === "drawn" ? "desenhada" : "digitada"}
-                        {s.ip_address ? ` · IP ${s.ip_address}` : ""}
-                      </p>
-                      {s.method === "drawn" && s.signature_data?.startsWith("data:image") && (
-                        <img src={s.signature_data} alt="" className="mt-2 h-16 rounded border border-border bg-white" />
-                      )}
-                    </div>
-                  ))
-                )}
-              </TabsContent>
-            </Tabs>
+                  <p className="pt-2 text-xs text-muted-foreground">
+                    Assinaturas realizadas eletronicamente através da plataforma Central Pet.
+                  </p>
+                </TabsContent>
+              </Tabs>
+            </div>
 
-            <SignDialog
+            <SignAdminDialog
               open={signOpen}
               docId={doc.id}
-              defaultName={doc.tutor?.full_name ?? ""}
               onClose={() => setSignOpen(false)}
               onSigned={() => {
                 setSignOpen(false);
                 onChanged();
-                onClose();
+                sigsQuery.refetch();
               }}
             />
           </>
@@ -576,22 +597,21 @@ function DocumentDetail({
   );
 }
 
-function SignDialog({
+function SignAdminDialog({
   open,
   docId,
-  defaultName,
   onClose,
   onSigned,
 }: {
   open: boolean;
   docId: string;
-  defaultName: string;
   onClose: () => void;
   onSigned: () => void;
 }) {
+  const { data: me } = useCurrentUser();
   const [tab, setTab] = useState<"typed" | "drawn">("typed");
-  const [name, setName] = useState(defaultName);
-  const [typedSig, setTypedSig] = useState(defaultName);
+  const [name, setName] = useState("");
+  const [typedSig, setTypedSig] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
 
@@ -621,9 +641,11 @@ function SignDialog({
     c.getContext("2d")!.clearRect(0, 0, c.width, c.height);
   }
 
+  const effectiveName = name || me?.fullName || me?.email || "";
+
   const sign = useMutation({
     mutationFn: async () => {
-      if (!name.trim()) throw new Error("Informe seu nome.");
+      if (!effectiveName.trim()) throw new Error("Informe seu nome.");
       const method = tab;
       let data: string;
       if (method === "drawn") {
@@ -637,34 +659,32 @@ function SignDialog({
       const { error: sErr } = await supabase.from("document_signatures").insert({
         document_id: docId,
         signer_user_id: user.user?.id,
-        signer_name: name,
+        signer_role: "admin",
+        signer_name: effectiveName,
         signer_email: user.user?.email,
         method,
         signature_data: data,
         user_agent: navigator.userAgent,
-      });
+      } as any);
       if (sErr) throw sErr;
-      const { error: dErr } = await supabase
-        .from("documents")
-        .update({ status: "signed", signed_at: new Date().toISOString() })
-        .eq("id", docId);
-      if (dErr) throw dErr;
     },
-    onSuccess: () => { toast.success("Documento assinado."); onSigned(); },
+    onSuccess: () => { toast.success("Assinatura da empresa registrada."); onSigned(); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Assinar documento</DialogTitle>
-          <DialogDescription>Sua assinatura será registrada com data, hora e navegador.</DialogDescription>
+          <DialogTitle>Assinar como empresa</DialogTitle>
+          <DialogDescription>
+            Esta assinatura é registrada em nome da Central Pet. O tutor deverá assinar separadamente pela área dele.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label>Nome completo</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
+            <Label>Nome do responsável</Label>
+            <Input value={effectiveName} onChange={(e) => setName(e.target.value)} />
           </div>
 
           <Tabs value={tab} onValueChange={(v) => setTab(v as "typed" | "drawn")}>
