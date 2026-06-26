@@ -56,6 +56,43 @@ function TutorHome() {
     },
   });
 
+  const dogIds = (dogs ?? []).map((d) => d.id);
+
+  const todayInfo = useQuery({
+    queryKey: ["tutor-today", dogIds.join(",")],
+    enabled: dogIds.length > 0,
+    queryFn: async () => {
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+      const nowIso = new Date().toISOString();
+      const upcomingFrom = new Date(); // a partir de agora
+      const [present, boarding, upcoming, bulletin] = await Promise.all([
+        supabase.from("daycare_stays")
+          .select("id, check_in_at, dog:dogs(name)")
+          .in("dog_id", dogIds).is("check_out_at", null),
+        supabase.from("boarding_stays")
+          .select("id, check_in_at, check_out_at, dog:dogs(name)")
+          .in("dog_id", dogIds).is("check_out_at", null).lte("check_in_at", nowIso),
+        supabase.from("grooming_appointments")
+          .select("id, scheduled_at, status, dog:dogs(name)")
+          .in("dog_id", dogIds)
+          .gte("scheduled_at", upcomingFrom.toISOString())
+          .in("status", ["scheduled", "in_progress"])
+          .order("scheduled_at", { ascending: true }).limit(5),
+        supabase.from("daily_reports")
+          .select("id, dog_id, report_date, dog:dogs(name)")
+          .in("dog_id", dogIds)
+          .eq("report_date", startToday.toISOString().slice(0, 10))
+          .limit(5),
+      ]);
+      return {
+        present: present.data ?? [],
+        boarding: boarding.data ?? [],
+        upcoming: upcoming.data ?? [],
+        bulletin: bulletin.data ?? [],
+      };
+    },
+  });
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <header>
