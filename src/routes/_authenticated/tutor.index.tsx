@@ -140,6 +140,42 @@ function TutorHome() {
         <QuickCard to="/tutor/financeiro" icon={Receipt} label="Recibos" />
       </div>
 
+      {(todayInfo.data && (todayInfo.data.present.length + todayInfo.data.boarding.length + todayInfo.data.upcoming.length + todayInfo.data.bulletin.length > 0)) ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="h-4 w-4 text-primary" /> Hoje
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 pt-0 text-sm">
+            {todayInfo.data.present.map((s: any) => (
+              <div key={`p-${s.id}`} className="flex items-center justify-between">
+                <span><strong>{s.dog?.name}</strong> está na creche</span>
+                <Badge variant="secondary">desde {new Date(s.check_in_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</Badge>
+              </div>
+            ))}
+            {todayInfo.data.boarding.map((s: any) => (
+              <div key={`b-${s.id}`} className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><BedDouble className="h-3.5 w-3.5" /><strong>{s.dog?.name}</strong> hospedado</span>
+                <Badge variant="secondary">desde {new Date(s.check_in_at).toLocaleDateString("pt-BR")}</Badge>
+              </div>
+            ))}
+            {todayInfo.data.upcoming.map((g: any) => (
+              <div key={`g-${g.id}`} className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><Bath className="h-3.5 w-3.5" /><strong>{g.dog?.name}</strong> — banho/tosa</span>
+                <Badge>{new Date(g.scheduled_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</Badge>
+              </div>
+            ))}
+            {todayInfo.data.bulletin.length > 0 && (
+              <Link to="/tutor/boletins" className="block pt-1 text-xs text-primary hover:underline">
+                Ver boletim do dia ({todayInfo.data.bulletin.length}) →
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+
+
       <section>
         <h2 className="mb-3 font-display text-lg font-semibold">Meus cães</h2>
         {!dogs?.length ? (
