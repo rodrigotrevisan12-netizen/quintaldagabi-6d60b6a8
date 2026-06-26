@@ -22,6 +22,7 @@ import { Route as AuthenticatedTutorDocumentosRouteImport } from './routes/_auth
 import { Route as AuthenticatedTutorChegadaRouteImport } from './routes/_authenticated/tutor.chegada'
 import { Route as AuthenticatedTutorCaesRouteImport } from './routes/_authenticated/tutor.caes'
 import { Route as AuthenticatedTutorBoletinsRouteImport } from './routes/_authenticated/tutor.boletins'
+import { Route as AuthenticatedTutorBanhoTosaRouteImport } from './routes/_authenticated/tutor.banho-tosa'
 import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
 import { Route as AuthenticatedAppTreinamentoRouteImport } from './routes/_authenticated/app.treinamento'
 import { Route as AuthenticatedAppTarefasRouteImport } from './routes/_authenticated/app.tarefas'
@@ -110,6 +111,12 @@ const AuthenticatedTutorBoletinsRoute =
   AuthenticatedTutorBoletinsRouteImport.update({
     id: '/boletins',
     path: '/boletins',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
+const AuthenticatedTutorBanhoTosaRoute =
+  AuthenticatedTutorBanhoTosaRouteImport.update({
+    id: '/banho-tosa',
+    path: '/banho-tosa',
     getParentRoute: () => AuthenticatedTutorRoute,
   } as any)
 const AuthenticatedAppTutoresRoute = AuthenticatedAppTutoresRouteImport.update({
@@ -258,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
+  '/tutor/banho-tosa': typeof AuthenticatedTutorBanhoTosaRoute
   '/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
   '/tutor/caes': typeof AuthenticatedTutorCaesRouteWithChildren
   '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
@@ -291,6 +299,7 @@ export interface FileRoutesByTo {
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
+  '/tutor/banho-tosa': typeof AuthenticatedTutorBanhoTosaRoute
   '/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
   '/tutor/caes': typeof AuthenticatedTutorCaesRouteWithChildren
   '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
@@ -328,6 +337,7 @@ export interface FileRoutesById {
   '/_authenticated/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/_authenticated/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
+  '/_authenticated/tutor/banho-tosa': typeof AuthenticatedTutorBanhoTosaRoute
   '/_authenticated/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
   '/_authenticated/tutor/caes': typeof AuthenticatedTutorCaesRouteWithChildren
   '/_authenticated/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
@@ -365,6 +375,7 @@ export interface FileRouteTypes {
     | '/app/tarefas'
     | '/app/treinamento'
     | '/app/tutores'
+    | '/tutor/banho-tosa'
     | '/tutor/boletins'
     | '/tutor/caes'
     | '/tutor/chegada'
@@ -398,6 +409,7 @@ export interface FileRouteTypes {
     | '/app/tarefas'
     | '/app/treinamento'
     | '/app/tutores'
+    | '/tutor/banho-tosa'
     | '/tutor/boletins'
     | '/tutor/caes'
     | '/tutor/chegada'
@@ -434,6 +446,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/tarefas'
     | '/_authenticated/app/treinamento'
     | '/_authenticated/app/tutores'
+    | '/_authenticated/tutor/banho-tosa'
     | '/_authenticated/tutor/boletins'
     | '/_authenticated/tutor/caes'
     | '/_authenticated/tutor/chegada'
@@ -544,6 +557,13 @@ declare module '@tanstack/react-router' {
       path: '/boletins'
       fullPath: '/tutor/boletins'
       preLoaderRoute: typeof AuthenticatedTutorBoletinsRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/_authenticated/tutor/banho-tosa': {
+      id: '/_authenticated/tutor/banho-tosa'
+      path: '/banho-tosa'
+      fullPath: '/tutor/banho-tosa'
+      preLoaderRoute: typeof AuthenticatedTutorBanhoTosaRouteImport
       parentRoute: typeof AuthenticatedTutorRoute
     }
     '/_authenticated/app/tutores': {
@@ -784,6 +804,7 @@ const AuthenticatedTutorCaesRouteWithChildren =
   )
 
 interface AuthenticatedTutorRouteChildren {
+  AuthenticatedTutorBanhoTosaRoute: typeof AuthenticatedTutorBanhoTosaRoute
   AuthenticatedTutorBoletinsRoute: typeof AuthenticatedTutorBoletinsRoute
   AuthenticatedTutorCaesRoute: typeof AuthenticatedTutorCaesRouteWithChildren
   AuthenticatedTutorChegadaRoute: typeof AuthenticatedTutorChegadaRoute
@@ -793,6 +814,7 @@ interface AuthenticatedTutorRouteChildren {
 }
 
 const AuthenticatedTutorRouteChildren: AuthenticatedTutorRouteChildren = {
+  AuthenticatedTutorBanhoTosaRoute: AuthenticatedTutorBanhoTosaRoute,
   AuthenticatedTutorBoletinsRoute: AuthenticatedTutorBoletinsRoute,
   AuthenticatedTutorCaesRoute: AuthenticatedTutorCaesRouteWithChildren,
   AuthenticatedTutorChegadaRoute: AuthenticatedTutorChegadaRoute,
