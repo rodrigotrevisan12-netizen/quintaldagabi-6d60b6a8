@@ -65,6 +65,37 @@ function Dashboard() {
   });
   const v = (n?: number) => (counts.isLoading ? "…" : String(n ?? 0));
 
+  const todayMetrics = useQuery({
+    queryKey: ["today-metrics"],
+    queryFn: async () => {
+      const today = new Date();
+      const startToday = new Date(today); startToday.setHours(0, 0, 0, 0);
+      const endToday = new Date(today); endToday.setHours(23, 59, 59, 999);
+      const todayStr = today.toISOString().slice(0, 10);
+
+      const [occ, tasks, receivable] = await Promise.all([
+        supabase.from("occurrences").select("*", { count: "exact", head: true })
+          .gte("occurred_at", startToday.toISOString())
+          .lte("occurred_at", endToday.toISOString()),
+        supabase.from("tasks").select("*", { count: "exact", head: true })
+          .in("status", ["pending", "in_progress"]),
+        supabase.from("financial_transactions")
+          .select("amount")
+          .eq("kind", "receita")
+          .in("status", ["pendente", "vencido"])
+          .lte("due_date", todayStr),
+      ]);
+      const receivableSum = (receivable.data ?? []).reduce(
+        (acc: number, r: any) => acc + Number(r.amount ?? 0), 0,
+      );
+      return {
+        occurrences: occ.count ?? 0,
+        tasks: tasks.count ?? 0,
+        receivable: receivableSum,
+      };
+    },
+  });
+
   const alertsQ = useQuery({
     queryKey: ["health-alerts-dashboard"],
     queryFn: async () => {
@@ -93,6 +124,37 @@ function Dashboard() {
         .limit(6);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+
+  const todayPanel = useQuery({
+    queryKey: ["today-panel"],
+    queryFn: async () => {
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+      const endToday = new Date(); endToday.setHours(23, 59, 59, 999);
+      const [present, boarding, grooming] = await Promise.all([
+        supabase.from("daycare_stays")
+          .select("id, check_in_at, dog:dogs(name)")
+          .is("check_out_at", null)
+          .order("check_in_at", { ascending: true })
+          .limit(8),
+        supabase.from("boarding_stays")
+          .select("id, check_in_at, check_out_at, dog:dogs(name)")
+          .is("check_out_at", null)
+          .order("check_in_at", { ascending: true })
+          .limit(8),
+        supabase.from("grooming_appointments")
+          .select("id, scheduled_at, status, dog:dogs(name)")
+          .gte("scheduled_at", startToday.toISOString())
+          .lte("scheduled_at", endToday.toISOString())
+          .order("scheduled_at", { ascending: true })
+          .limit(8),
+      ]);
+      return {
+        present: present.data ?? [],
+        boarding: boarding.data ?? [],
+        grooming: grooming.data ?? [],
+      };
     },
   });
 
