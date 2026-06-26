@@ -192,9 +192,67 @@ function Dashboard() {
           label="Tutores cadastrados"
           value={counts.isLoading ? "…" : String(counts.data?.tutors ?? 0)}
         />
-        <Card icon={<AlertCircle className="h-5 w-5" />} label="Ocorrências do dia" value="—" hint="em breve" />
-        <Card icon={<ListChecks className="h-5 w-5" />} label="Tarefas pendentes" value="—" hint="em breve" />
-        <Card icon={<Wallet className="h-5 w-5" />} label="A receber hoje" value="—" hint="em breve" />
+        <Card
+          icon={<AlertCircle className="h-5 w-5" />}
+          label="Ocorrências do dia"
+          value={todayMetrics.isLoading ? "…" : String(todayMetrics.data?.occurrences ?? 0)}
+        />
+        <Card
+          icon={<ListChecks className="h-5 w-5" />}
+          label="Tarefas pendentes"
+          value={todayMetrics.isLoading ? "…" : String(todayMetrics.data?.tasks ?? 0)}
+        />
+        <Card
+          icon={<Wallet className="h-5 w-5" />}
+          label="A receber hoje"
+          value={
+            todayMetrics.isLoading
+              ? "…"
+              : `R$ ${Number(todayMetrics.data?.receivable ?? 0).toFixed(2)}`
+          }
+        />
+      </div>
+
+      {/* Hoje no Quintal */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary">
+            <Activity className="h-5 w-5" />
+          </span>
+          <h3 className="font-display text-lg font-semibold">Hoje no Quintal</h3>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <TodayList
+            title="Cães na creche"
+            empty="Nenhum cão no momento."
+            to="/app/caes"
+            items={(todayPanel.data?.present ?? []).map((r: any) => ({
+              id: r.id,
+              title: r.dog?.name ?? "Cão",
+              subtitle: `entrou ${new Date(r.check_in_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
+            }))}
+          />
+          <TodayList
+            title="Hospedagens ativas"
+            empty="Sem hospedagens em andamento."
+            to="/app/hospedagem"
+            items={(todayPanel.data?.boarding ?? []).map((r: any) => ({
+              id: r.id,
+              title: r.dog?.name ?? "Cão",
+              subtitle: `desde ${new Date(r.check_in_at).toLocaleDateString("pt-BR")}`,
+            }))}
+          />
+          <TodayList
+            title="Banho & tosa hoje"
+            empty="Sem agendamentos hoje."
+            to="/app/banho-tosa"
+            items={(todayPanel.data?.grooming ?? []).map((r: any) => ({
+              id: r.id,
+              title: r.dog?.name ?? "Cão",
+              subtitle: `${new Date(r.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} • ${r.status}`,
+            }))}
+          />
+        </div>
       </div>
 
       {/* Alertas */}
@@ -226,6 +284,41 @@ function Dashboard() {
           }))}
         />
       </div>
+    </div>
+  );
+}
+
+function TodayList({
+  title,
+  empty,
+  items,
+  to,
+}: {
+  title: string;
+  empty: string;
+  items: { id: string; title: string; subtitle: string }[];
+  to?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-background p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-sm font-semibold">{title}</p>
+        {to && items.length > 0 ? (
+          <Link to={to as any} className="text-xs text-primary hover:underline">Ver</Link>
+        ) : null}
+      </div>
+      {items.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{empty}</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {items.slice(0, 5).map((it) => (
+            <li key={it.id} className="flex items-center justify-between gap-2 text-sm">
+              <span className="truncate">{it.title}</span>
+              <span className="shrink-0 text-xs text-muted-foreground">{it.subtitle}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
