@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send } from "lucide-react";
+import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send, Scissors } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/tutor")({
 const ITEMS = [
   { to: "/tutor", label: "Início", icon: Home, exact: true },
   { to: "/tutor/caes", label: "Meus cães", icon: Dog },
+  { to: "/tutor/banho-tosa", label: "Banho & Tosa", icon: Scissors },
   { to: "/tutor/boletins", label: "Boletins", icon: Newspaper },
   { to: "/tutor/documentos", label: "Contratos", icon: FileText },
   { to: "/tutor/financeiro", label: "Recibos", icon: Receipt },

@@ -38,6 +38,8 @@ export const DOCUMENT_TYPE_LABEL: Record<string, string> = {
   contrato_banho_tosa: "Contrato de Banho e Tosa",
   termo_responsabilidade: "Termo de Responsabilidade",
   autorizacao_imagem: "Autorização de Uso de Imagem",
+  autorizacao_atendimento_veterinario: "Autorização — Atendimento Veterinário Emergencial",
+  autorizacao_medicamentos: "Autorização — Administração de Medicamentos",
 };
 
 export const DOCUMENT_STATUS_LABEL: Record<string, string> = {
@@ -47,11 +49,26 @@ export const DOCUMENT_STATUS_LABEL: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
-export function generatePdfFromText(title: string, body: string, signature?: { name: string; signedAt: string; method: string; image?: string }): Promise<Blob> {
+export type SignatureBlock = {
+  role: "admin" | "tutor";
+  name: string;
+  email?: string | null;
+  signedAt: string;
+  method: "typed" | "drawn";
+  image?: string;
+};
+
+export function generatePdfFromText(
+  title: string,
+  body: string,
+  signatures?: SignatureBlock[],
+): Promise<Blob> {
   return import("jspdf").then(({ jsPDF }) => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 48;
-    const width = doc.internal.pageSize.getWidth() - margin * 2;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const width = pageWidth - margin * 2;
 
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
@@ -61,42 +78,79 @@ export function generatePdfFromText(title: string, body: string, signature?: { n
     doc.setFont("helvetica", "normal");
     const lines = doc.splitTextToSize(body, width);
     let y = margin + 30;
-    const pageHeight = doc.internal.pageSize.getHeight();
-    for (const line of lines) {
-      if (y > pageHeight - margin - 60) {
+    const ensure = (need: number) => {
+      if (y > pageHeight - margin - need) {
         doc.addPage();
         y = margin;
       }
+    };
+    for (const line of lines) {
+      ensure(20);
       doc.text(line, margin, y);
       y += 15;
     }
 
-    if (signature) {
-      if (y > pageHeight - margin - 120) {
-        doc.addPage();
-        y = margin;
-      }
-      y += 30;
+    if (signatures && signatures.length) {
+      ensure(80);
+      y += 24;
       doc.setFont("helvetica", "bold");
-      doc.text("Assinatura", margin, y);
-      y += 18;
-      doc.setFont("helvetica", "normal");
-      if (signature.image && signature.image.startsWith("data:image")) {
-        try {
-          doc.addImage(signature.image, "PNG", margin, y, 180, 60);
-          y += 70;
-        } catch {
-          // ignore
+      doc.setFontSize(12);
+      doc.text("Assinaturas", margin, y);
+      y += 14;
+      doc.setDrawColor(180);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 14;
+
+      for (const sig of signatures) {
+        ensure(110);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text(
+          sig.role === "admin" ? "EMPRESA (Central Pet)" : "TUTOR(A)",
+          margin,
+          y,
+        );
+        y += 14;
+        if (sig.image && sig.image.startsWith("data:image")) {
+          try { doc.addImage(sig.image, "PNG", margin, y, 160, 50); } catch { /* ignore */ }
+          y += 56;
+        } else {
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(16);
+          doc.text(sig.name, margin, y + 18);
+          y += 34;
         }
-      } else {
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(16);
-        doc.text(signature.name, margin, y + 20);
-        y += 40;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text(`${sig.name}${sig.email ? ` — ${sig.email}` : ""}`, margin, y);
+        y += 12;
+        doc.text(
+          `Assinado em ${sig.signedAt} (${sig.method === "drawn" ? "desenhada" : "digitada"})`,
+          margin,
+          y,
+        );
+        y += 18;
       }
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`${signature.name} — assinado em ${signature.signedAt} (${signature.method})`, margin, y);
+
+      ensure(40);
+      y += 6;
+      doc.setDrawColor(180);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 14;
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(110);
+      const note =
+        "Assinatura realizada eletronicamente através da plataforma Central Pet. " +
+        "Cada parte foi autenticada pelo e-mail de acesso e pela data/hora registradas acima, " +
+        "garantindo a validade e a rastreabilidade do documento.";
+      const noteLines = doc.splitTextToSize(note, width);
+      for (const l of noteLines) {
+        ensure(14);
+        doc.text(l, margin, y);
+        y += 11;
+      }
+      doc.setTextColor(0);
     }
 
     return doc.output("blob");

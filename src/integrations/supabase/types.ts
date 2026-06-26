@@ -845,6 +845,7 @@ export type Database = {
           signed_at: string
           signer_email: string | null
           signer_name: string
+          signer_role: Database["public"]["Enums"]["signer_role"]
           signer_user_id: string | null
           user_agent: string | null
         }
@@ -857,6 +858,7 @@ export type Database = {
           signed_at?: string
           signer_email?: string | null
           signer_name: string
+          signer_role: Database["public"]["Enums"]["signer_role"]
           signer_user_id?: string | null
           user_agent?: string | null
         }
@@ -869,6 +871,7 @@ export type Database = {
           signed_at?: string
           signer_email?: string | null
           signer_name?: string
+          signer_role?: Database["public"]["Enums"]["signer_role"]
           signer_user_id?: string | null
           user_agent?: string | null
         }
@@ -2627,6 +2630,8 @@ export type Database = {
         | "contrato_banho_tosa"
         | "termo_responsabilidade"
         | "autorizacao_imagem"
+        | "autorizacao_atendimento_veterinario"
+        | "autorizacao_medicamentos"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
       employee_role:
@@ -2669,6 +2674,7 @@ export type Database = {
       report_media_type: "photo" | "video"
       schedule_status: "pending" | "done" | "not_done"
       signature_method: "typed" | "drawn"
+      signer_role: "admin" | "tutor"
       training_material_type:
         | "video"
         | "pdf"
@@ -2835,6 +2841,8 @@ export const Constants = {
         "contrato_banho_tosa",
         "termo_responsabilidade",
         "autorizacao_imagem",
+        "autorizacao_atendimento_veterinario",
+        "autorizacao_medicamentos",
       ],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
@@ -2883,6 +2891,7 @@ export const Constants = {
       report_media_type: ["photo", "video"],
       schedule_status: ["pending", "done", "not_done"],
       signature_method: ["typed", "drawn"],
+      signer_role: ["admin", "tutor"],
       training_material_type: [
         "video",
         "pdf",
