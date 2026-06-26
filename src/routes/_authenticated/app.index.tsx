@@ -11,6 +11,7 @@ import {
   Wallet,
   Syringe,
   CreditCard,
+  Activity,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
