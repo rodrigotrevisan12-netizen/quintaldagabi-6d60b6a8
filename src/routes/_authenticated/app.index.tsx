@@ -78,7 +78,7 @@ function Dashboard() {
           .gte("occurred_at", startToday.toISOString())
           .lte("occurred_at", endToday.toISOString()),
         supabase.from("tasks").select("*", { count: "exact", head: true })
-          .in("status", ["pending", "in_progress"]),
+          .in("status", ["pendente", "em_andamento"]),
         supabase.from("financial_transactions")
           .select("amount")
           .eq("kind", "receita")
