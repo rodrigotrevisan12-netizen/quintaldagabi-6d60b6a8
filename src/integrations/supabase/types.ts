@@ -2627,6 +2627,8 @@ export type Database = {
         | "contrato_banho_tosa"
         | "termo_responsabilidade"
         | "autorizacao_imagem"
+        | "autorizacao_atendimento_veterinario"
+        | "autorizacao_medicamentos"
       dog_sex: "macho" | "femea"
       dog_size: "mini" | "pequeno" | "medio" | "grande" | "gigante"
       employee_role:
@@ -2835,6 +2837,8 @@ export const Constants = {
         "contrato_banho_tosa",
         "termo_responsabilidade",
         "autorizacao_imagem",
+        "autorizacao_atendimento_veterinario",
+        "autorizacao_medicamentos",
       ],
       dog_sex: ["macho", "femea"],
       dog_size: ["mini", "pequeno", "medio", "grande", "gigante"],
