@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Dog, Newspaper, FileText, Receipt, Send, Syringe } from "lucide-react";
+import { Dog, Newspaper, FileText, Receipt, Send, Syringe, Activity, Bath, BedDouble } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -56,6 +56,43 @@ function TutorHome() {
     },
   });
 
+  const dogIds = (dogs ?? []).map((d) => d.id);
+
+  const todayInfo = useQuery({
+    queryKey: ["tutor-today", dogIds.join(",")],
+    enabled: dogIds.length > 0,
+    queryFn: async () => {
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+      const nowIso = new Date().toISOString();
+      const upcomingFrom = new Date(); // a partir de agora
+      const [present, boarding, upcoming, bulletin] = await Promise.all([
+        supabase.from("daycare_stays")
+          .select("id, check_in_at, dog:dogs(name)")
+          .in("dog_id", dogIds).is("check_out_at", null),
+        supabase.from("boarding_stays")
+          .select("id, check_in_at, check_out_at, dog:dogs(name)")
+          .in("dog_id", dogIds).is("check_out_at", null).lte("check_in_at", nowIso),
+        supabase.from("grooming_appointments")
+          .select("id, scheduled_at, status, dog:dogs(name)")
+          .in("dog_id", dogIds)
+          .gte("scheduled_at", upcomingFrom.toISOString())
+          .in("status", ["scheduled", "in_progress"])
+          .order("scheduled_at", { ascending: true }).limit(5),
+        supabase.from("daily_reports")
+          .select("id, dog_id, date, dog:dogs(name)")
+          .in("dog_id", dogIds)
+          .eq("date", startToday.toISOString().slice(0, 10))
+          .limit(5),
+      ]);
+      return {
+        present: present.data ?? [],
+        boarding: boarding.data ?? [],
+        upcoming: upcoming.data ?? [],
+        bulletin: bulletin.data ?? [],
+      };
+    },
+  });
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <header>
@@ -102,6 +139,42 @@ function TutorHome() {
         <QuickCard to="/tutor/documentos" icon={FileText} label="Contratos" />
         <QuickCard to="/tutor/financeiro" icon={Receipt} label="Recibos" />
       </div>
+
+      {(todayInfo.data && (todayInfo.data.present.length + todayInfo.data.boarding.length + todayInfo.data.upcoming.length + todayInfo.data.bulletin.length > 0)) ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Activity className="h-4 w-4 text-primary" /> Hoje
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 pt-0 text-sm">
+            {todayInfo.data.present.map((s: any) => (
+              <div key={`p-${s.id}`} className="flex items-center justify-between">
+                <span><strong>{s.dog?.name}</strong> está na creche</span>
+                <Badge variant="secondary">desde {new Date(s.check_in_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</Badge>
+              </div>
+            ))}
+            {todayInfo.data.boarding.map((s: any) => (
+              <div key={`b-${s.id}`} className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><BedDouble className="h-3.5 w-3.5" /><strong>{s.dog?.name}</strong> hospedado</span>
+                <Badge variant="secondary">desde {new Date(s.check_in_at).toLocaleDateString("pt-BR")}</Badge>
+              </div>
+            ))}
+            {todayInfo.data.upcoming.map((g: any) => (
+              <div key={`g-${g.id}`} className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5"><Bath className="h-3.5 w-3.5" /><strong>{g.dog?.name}</strong> — banho/tosa</span>
+                <Badge>{new Date(g.scheduled_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</Badge>
+              </div>
+            ))}
+            {todayInfo.data.bulletin.length > 0 && (
+              <Link to="/tutor/boletins" className="block pt-1 text-xs text-primary hover:underline">
+                Ver boletim do dia ({todayInfo.data.bulletin.length}) →
+              </Link>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+
 
       <section>
         <h2 className="mb-3 font-display text-lg font-semibold">Meus cães</h2>
