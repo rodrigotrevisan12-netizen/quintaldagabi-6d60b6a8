@@ -79,9 +79,9 @@ function TutorHome() {
           .in("status", ["scheduled", "in_progress"])
           .order("scheduled_at", { ascending: true }).limit(5),
         supabase.from("daily_reports")
-          .select("id, dog_id, report_date, dog:dogs(name)")
+          .select("id, dog_id, date, dog:dogs(name)")
           .in("dog_id", dogIds)
-          .eq("report_date", startToday.toISOString().slice(0, 10))
+          .eq("date", startToday.toISOString().slice(0, 10))
           .limit(5),
       ]);
       return {
