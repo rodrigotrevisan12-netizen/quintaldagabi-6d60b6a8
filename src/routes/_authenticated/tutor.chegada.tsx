@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Send, Check, X } from "lucide-react";
 
@@ -38,7 +38,23 @@ function Chegada() {
     queryFn: async () => (await supabase.from("arrival_notifications")
       .select("*").eq("tutor_id", tutor!.id).eq("status","on_the_way")
       .order("created_at", { ascending: false }).limit(1).maybeSingle()).data,
+    refetchInterval: 30_000,
   });
+
+  // Realtime + tick para contagem regressiva
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const i = setInterval(() => setTick((x) => x + 1), 30_000);
+    return () => clearInterval(i);
+  }, []);
+  useEffect(() => {
+    if (!tutor?.id) return;
+    const ch = supabase.channel(`arrivals-${tutor.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "arrival_notifications", filter: `tutor_id=eq.${tutor.id}` },
+        () => refetch())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [tutor?.id, refetch]);
 
   const create = useMutation({
     mutationFn: async () => {
@@ -68,20 +84,25 @@ function Chegada() {
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="font-display text-2xl font-semibold">Estou chegando</h1>
 
-      {active ? (
+      {active ? (() => {
+        const elapsed = Math.floor((Date.now() - new Date(active.created_at).getTime()) / 60000);
+        const left = active.eta_minutes - elapsed;
+        const label = left <= 0 ? "Chegando agora" : `${left} min`;
+        return (
         <Card className="border-primary">
           <CardHeader><CardTitle>Você avisou que está a caminho</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <p>Chegada estimada em <Badge>{active.eta_minutes} min</Badge></p>
+            <p>Tempo restante: <Badge variant={left <= 0 ? "destructive" : left <= 3 ? "default" : "secondary"}>{label}</Badge></p>
+            <p className="text-xs text-muted-foreground">Atualiza automaticamente a cada minuto.</p>
             {active.message && <p className="text-sm text-muted-foreground">"{active.message}"</p>}
             <div className="flex gap-2">
               <Button onClick={() => finish.mutate("arrived")} className="flex-1"><Check className="mr-2 h-4 w-4" />Cheguei</Button>
               <Button variant="outline" onClick={() => finish.mutate("cancelled")}><X className="mr-2 h-4 w-4" />Cancelar</Button>
             </div>
-            <p className="text-xs text-muted-foreground">O aviso é encerrado automaticamente quando você confirma a chegada.</p>
           </CardContent>
         </Card>
-      ) : (
+        );
+      })() : (
         <Card>
           <CardHeader><CardTitle>Avisar a equipe</CardTitle></CardHeader>
           <CardContent className="space-y-3">
