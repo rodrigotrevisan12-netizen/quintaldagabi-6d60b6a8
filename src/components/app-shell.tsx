@@ -22,6 +22,8 @@ import {
   GraduationCap,
   MessageSquare,
   Send,
+  Camera,
+  CalendarRange,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -40,9 +42,11 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] },
+  { to: "/app/calendario", label: "Calendário", icon: CalendarRange, roles: ["admin", "funcionario"] },
   { to: "/app/agenda", label: "Creche", icon: CalendarDays, roles: ["admin", "funcionario"] },
   { to: "/app/programacao", label: "Programação do dia", icon: ClipboardList, roles: ["admin", "funcionario"] },
   { to: "/app/chegadas", label: "Chegadas", icon: Send, roles: ["admin", "funcionario"] },
+  { to: "/app/stories", label: "Stories", icon: Camera, roles: ["admin", "funcionario"] },
   { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
   { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
   { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"] },
