@@ -17,6 +17,7 @@ import { Route as AuthenticatedTutorRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedTutorIndexRouteImport } from './routes/_authenticated/tutor.index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedTutorStoriesRouteImport } from './routes/_authenticated/tutor.stories'
 import { Route as AuthenticatedTutorFinanceiroRouteImport } from './routes/_authenticated/tutor.financeiro'
 import { Route as AuthenticatedTutorDocumentosRouteImport } from './routes/_authenticated/tutor.documentos'
 import { Route as AuthenticatedTutorChegadaRouteImport } from './routes/_authenticated/tutor.chegada'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedTutorBanhoTosaRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
 import { Route as AuthenticatedAppTreinamentoRouteImport } from './routes/_authenticated/app.treinamento'
 import { Route as AuthenticatedAppTarefasRouteImport } from './routes/_authenticated/app.tarefas'
+import { Route as AuthenticatedAppStoriesRouteImport } from './routes/_authenticated/app.stories'
 import { Route as AuthenticatedAppSaudeRouteImport } from './routes/_authenticated/app.saude'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
 import { Route as AuthenticatedAppProgramacaoRouteImport } from './routes/_authenticated/app.programacao'
@@ -37,6 +39,7 @@ import { Route as AuthenticatedAppDocumentosRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
 import { Route as AuthenticatedAppComunicacaoRouteImport } from './routes/_authenticated/app.comunicacao'
 import { Route as AuthenticatedAppChegadasRouteImport } from './routes/_authenticated/app.chegadas'
+import { Route as AuthenticatedAppCalendarioRouteImport } from './routes/_authenticated/app.calendario'
 import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticated/app.caes'
 import { Route as AuthenticatedAppBoletinsRouteImport } from './routes/_authenticated/app.boletins'
 import { Route as AuthenticatedAppBanhoTosaRouteImport } from './routes/_authenticated/app.banho-tosa'
@@ -84,6 +87,12 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedTutorStoriesRoute =
+  AuthenticatedTutorStoriesRouteImport.update({
+    id: '/stories',
+    path: '/stories',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
 const AuthenticatedTutorFinanceiroRoute =
   AuthenticatedTutorFinanceiroRouteImport.update({
     id: '/financeiro',
@@ -133,6 +142,11 @@ const AuthenticatedAppTreinamentoRoute =
 const AuthenticatedAppTarefasRoute = AuthenticatedAppTarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppStoriesRoute = AuthenticatedAppStoriesRouteImport.update({
+  id: '/stories',
+  path: '/stories',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppSaudeRoute = AuthenticatedAppSaudeRouteImport.update({
@@ -200,6 +214,12 @@ const AuthenticatedAppChegadasRoute =
     path: '/chegadas',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppCalendarioRoute =
+  AuthenticatedAppCalendarioRouteImport.update({
+    id: '/calendario',
+    path: '/calendario',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppCaesRoute = AuthenticatedAppCaesRouteImport.update({
   id: '/caes',
   path: '/caes',
@@ -251,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
+  '/app/calendario': typeof AuthenticatedAppCalendarioRoute
   '/app/chegadas': typeof AuthenticatedAppChegadasRoute
   '/app/comunicacao': typeof AuthenticatedAppComunicacaoRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
@@ -262,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
+  '/app/stories': typeof AuthenticatedAppStoriesRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
@@ -271,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
   '/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
   '/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
+  '/tutor/stories': typeof AuthenticatedTutorStoriesRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/tutor/': typeof AuthenticatedTutorIndexRoute
   '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
@@ -285,6 +308,7 @@ export interface FileRoutesByTo {
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
+  '/app/calendario': typeof AuthenticatedAppCalendarioRoute
   '/app/chegadas': typeof AuthenticatedAppChegadasRoute
   '/app/comunicacao': typeof AuthenticatedAppComunicacaoRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
@@ -296,6 +320,7 @@ export interface FileRoutesByTo {
   '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/app/saude': typeof AuthenticatedAppSaudeRoute
+  '/app/stories': typeof AuthenticatedAppStoriesRoute
   '/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
@@ -305,6 +330,7 @@ export interface FileRoutesByTo {
   '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
   '/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
   '/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
+  '/tutor/stories': typeof AuthenticatedTutorStoriesRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/tutor': typeof AuthenticatedTutorIndexRoute
   '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
@@ -323,6 +349,7 @@ export interface FileRoutesById {
   '/_authenticated/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/_authenticated/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/_authenticated/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
+  '/_authenticated/app/calendario': typeof AuthenticatedAppCalendarioRoute
   '/_authenticated/app/chegadas': typeof AuthenticatedAppChegadasRoute
   '/_authenticated/app/comunicacao': typeof AuthenticatedAppComunicacaoRoute
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
@@ -334,6 +361,7 @@ export interface FileRoutesById {
   '/_authenticated/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
   '/_authenticated/app/saude': typeof AuthenticatedAppSaudeRoute
+  '/_authenticated/app/stories': typeof AuthenticatedAppStoriesRoute
   '/_authenticated/app/tarefas': typeof AuthenticatedAppTarefasRoute
   '/_authenticated/app/treinamento': typeof AuthenticatedAppTreinamentoRoute
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
@@ -343,6 +371,7 @@ export interface FileRoutesById {
   '/_authenticated/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
   '/_authenticated/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
   '/_authenticated/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
+  '/_authenticated/tutor/stories': typeof AuthenticatedTutorStoriesRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/tutor/': typeof AuthenticatedTutorIndexRoute
   '/_authenticated/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
@@ -361,6 +390,7 @@ export interface FileRouteTypes {
     | '/app/banho-tosa'
     | '/app/boletins'
     | '/app/caes'
+    | '/app/calendario'
     | '/app/chegadas'
     | '/app/comunicacao'
     | '/app/configuracoes'
@@ -372,6 +402,7 @@ export interface FileRouteTypes {
     | '/app/programacao'
     | '/app/relatorios'
     | '/app/saude'
+    | '/app/stories'
     | '/app/tarefas'
     | '/app/treinamento'
     | '/app/tutores'
@@ -381,6 +412,7 @@ export interface FileRouteTypes {
     | '/tutor/chegada'
     | '/tutor/documentos'
     | '/tutor/financeiro'
+    | '/tutor/stories'
     | '/app/'
     | '/tutor/'
     | '/tutor/caes/$id'
@@ -395,6 +427,7 @@ export interface FileRouteTypes {
     | '/app/banho-tosa'
     | '/app/boletins'
     | '/app/caes'
+    | '/app/calendario'
     | '/app/chegadas'
     | '/app/comunicacao'
     | '/app/configuracoes'
@@ -406,6 +439,7 @@ export interface FileRouteTypes {
     | '/app/programacao'
     | '/app/relatorios'
     | '/app/saude'
+    | '/app/stories'
     | '/app/tarefas'
     | '/app/treinamento'
     | '/app/tutores'
@@ -415,6 +449,7 @@ export interface FileRouteTypes {
     | '/tutor/chegada'
     | '/tutor/documentos'
     | '/tutor/financeiro'
+    | '/tutor/stories'
     | '/app'
     | '/tutor'
     | '/tutor/caes/$id'
@@ -432,6 +467,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/banho-tosa'
     | '/_authenticated/app/boletins'
     | '/_authenticated/app/caes'
+    | '/_authenticated/app/calendario'
     | '/_authenticated/app/chegadas'
     | '/_authenticated/app/comunicacao'
     | '/_authenticated/app/configuracoes'
@@ -443,6 +479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/programacao'
     | '/_authenticated/app/relatorios'
     | '/_authenticated/app/saude'
+    | '/_authenticated/app/stories'
     | '/_authenticated/app/tarefas'
     | '/_authenticated/app/treinamento'
     | '/_authenticated/app/tutores'
@@ -452,6 +489,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tutor/chegada'
     | '/_authenticated/tutor/documentos'
     | '/_authenticated/tutor/financeiro'
+    | '/_authenticated/tutor/stories'
     | '/_authenticated/app/'
     | '/_authenticated/tutor/'
     | '/_authenticated/tutor/caes/$id'
@@ -524,6 +562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/tutor/stories': {
+      id: '/_authenticated/tutor/stories'
+      path: '/stories'
+      fullPath: '/tutor/stories'
+      preLoaderRoute: typeof AuthenticatedTutorStoriesRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
     '/_authenticated/tutor/financeiro': {
       id: '/_authenticated/tutor/financeiro'
       path: '/financeiro'
@@ -585,6 +630,13 @@ declare module '@tanstack/react-router' {
       path: '/tarefas'
       fullPath: '/app/tarefas'
       preLoaderRoute: typeof AuthenticatedAppTarefasRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/stories': {
+      id: '/_authenticated/app/stories'
+      path: '/stories'
+      fullPath: '/app/stories'
+      preLoaderRoute: typeof AuthenticatedAppStoriesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/saude': {
@@ -662,6 +714,13 @@ declare module '@tanstack/react-router' {
       path: '/chegadas'
       fullPath: '/app/chegadas'
       preLoaderRoute: typeof AuthenticatedAppChegadasRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/calendario': {
+      id: '/_authenticated/app/calendario'
+      path: '/calendario'
+      fullPath: '/app/calendario'
+      preLoaderRoute: typeof AuthenticatedAppCalendarioRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/caes': {
@@ -747,6 +806,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppBanhoTosaRoute: typeof AuthenticatedAppBanhoTosaRoute
   AuthenticatedAppBoletinsRoute: typeof AuthenticatedAppBoletinsRoute
   AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRouteWithChildren
+  AuthenticatedAppCalendarioRoute: typeof AuthenticatedAppCalendarioRoute
   AuthenticatedAppChegadasRoute: typeof AuthenticatedAppChegadasRoute
   AuthenticatedAppComunicacaoRoute: typeof AuthenticatedAppComunicacaoRoute
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
@@ -758,6 +818,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppProgramacaoRoute: typeof AuthenticatedAppProgramacaoRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
   AuthenticatedAppSaudeRoute: typeof AuthenticatedAppSaudeRoute
+  AuthenticatedAppStoriesRoute: typeof AuthenticatedAppStoriesRoute
   AuthenticatedAppTarefasRoute: typeof AuthenticatedAppTarefasRoute
   AuthenticatedAppTreinamentoRoute: typeof AuthenticatedAppTreinamentoRoute
   AuthenticatedAppTutoresRoute: typeof AuthenticatedAppTutoresRoute
@@ -769,6 +830,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppBanhoTosaRoute: AuthenticatedAppBanhoTosaRoute,
   AuthenticatedAppBoletinsRoute: AuthenticatedAppBoletinsRoute,
   AuthenticatedAppCaesRoute: AuthenticatedAppCaesRouteWithChildren,
+  AuthenticatedAppCalendarioRoute: AuthenticatedAppCalendarioRoute,
   AuthenticatedAppChegadasRoute: AuthenticatedAppChegadasRoute,
   AuthenticatedAppComunicacaoRoute: AuthenticatedAppComunicacaoRoute,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
@@ -780,6 +842,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppProgramacaoRoute: AuthenticatedAppProgramacaoRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
   AuthenticatedAppSaudeRoute: AuthenticatedAppSaudeRoute,
+  AuthenticatedAppStoriesRoute: AuthenticatedAppStoriesRoute,
   AuthenticatedAppTarefasRoute: AuthenticatedAppTarefasRoute,
   AuthenticatedAppTreinamentoRoute: AuthenticatedAppTreinamentoRoute,
   AuthenticatedAppTutoresRoute: AuthenticatedAppTutoresRoute,
@@ -810,6 +873,7 @@ interface AuthenticatedTutorRouteChildren {
   AuthenticatedTutorChegadaRoute: typeof AuthenticatedTutorChegadaRoute
   AuthenticatedTutorDocumentosRoute: typeof AuthenticatedTutorDocumentosRoute
   AuthenticatedTutorFinanceiroRoute: typeof AuthenticatedTutorFinanceiroRoute
+  AuthenticatedTutorStoriesRoute: typeof AuthenticatedTutorStoriesRoute
   AuthenticatedTutorIndexRoute: typeof AuthenticatedTutorIndexRoute
 }
 
@@ -820,6 +884,7 @@ const AuthenticatedTutorRouteChildren: AuthenticatedTutorRouteChildren = {
   AuthenticatedTutorChegadaRoute: AuthenticatedTutorChegadaRoute,
   AuthenticatedTutorDocumentosRoute: AuthenticatedTutorDocumentosRoute,
   AuthenticatedTutorFinanceiroRoute: AuthenticatedTutorFinanceiroRoute,
+  AuthenticatedTutorStoriesRoute: AuthenticatedTutorStoriesRoute,
   AuthenticatedTutorIndexRoute: AuthenticatedTutorIndexRoute,
 }
 
