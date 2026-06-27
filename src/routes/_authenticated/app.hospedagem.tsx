@@ -331,7 +331,9 @@ function StaySheet({
   onClose: () => void;
   onDone: () => void;
 }) {
-  const isEdit = stay !== null;
+  const [createdId, setCreatedId] = useState<string | null>(null);
+  const effectiveStayId = stay?.id ?? createdId;
+  const isEdit = effectiveStayId !== null;
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [dogId, setDogId] = useState<string | null>(null);
@@ -358,6 +360,7 @@ function StaySheet({
   // Pré-preencher quando edita
   useMemo(() => {
     if (open && stay) {
+      setCreatedId(null);
       setDogId(stay.dog_id);
       setCheckIn(toLocalInput(stay.check_in_at));
       setExpected(toLocalInput(stay.expected_check_out_at));
@@ -365,6 +368,7 @@ function StaySheet({
       setRate(String(stay.daily_rate ?? ""));
       setNotes(stay.notes ?? "");
     } else if (open && !stay) {
+      setCreatedId(null);
       setDogId(null);
       setCheckIn("");
       setExpected("");
@@ -397,20 +401,42 @@ function StaySheet({
         daily_rate: rate ? Number(rate) : 0,
         notes: notes.trim() || null,
       };
-      if (isEdit && stay) {
-        const { error } = await supabase.from("boarding_stays").update(payload).eq("id", stay.id);
+      if (isEdit && effectiveStayId) {
+        const { error } = await supabase.from("boarding_stays").update(payload).eq("id", effectiveStayId);
         if (error) throw error;
         toast.success("Hospedagem atualizada.");
+        onDone();
       } else {
-        const { data: userData } = await supabase.auth.getUser();
-        const { error } = await supabase
+        // Verifica estadia anterior em aberto para esse cão
+        const { data: existing } = await supabase
           .from("boarding_stays")
-          .insert({ ...payload, check_in_by: userData.user?.id ?? null });
+          .select("id, check_in_at")
+          .eq("dog_id", dogId)
+          .is("check_out_at", null)
+          .maybeSingle();
+        const { data: userData } = await supabase.auth.getUser();
+        if (existing) {
+          const when = new Date(existing.check_in_at).toLocaleString("pt-BR");
+          const ok = window.confirm(
+            `Existe uma hospedagem em aberto desde ${when}. Deseja encerrá-la agora e iniciar uma nova?`,
+          );
+          if (!ok) { setSaving(false); return; }
+          const { error: closeErr } = await supabase
+            .from("boarding_stays")
+            .update({ check_out_at: new Date().toISOString(), check_out_by: userData.user?.id ?? null })
+            .eq("id", existing.id);
+          if (closeErr) throw closeErr;
+        }
+        const { data: inserted, error } = await supabase
+          .from("boarding_stays")
+          .insert({ ...payload, check_in_by: userData.user?.id ?? null })
+          .select("id")
+          .single();
         if (error) throw error;
-        toast.success("Hospedagem criada.");
+        setCreatedId(inserted.id);
+        toast.success("Hospedagem criada. Agora você pode preencher ração, medicamentos, pertences e diário.");
+        onDone();
       }
-      onDone();
-      onClose();
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -429,10 +455,10 @@ function StaySheet({
         <Tabs defaultValue="geral" className="mt-4">
           <TabsList className="grid grid-cols-5">
             <TabsTrigger value="geral">Geral</TabsTrigger>
-            <TabsTrigger value="racao" disabled={!isEdit}>Ração</TabsTrigger>
-            <TabsTrigger value="meds" disabled={!isEdit}>Medicamentos</TabsTrigger>
-            <TabsTrigger value="pert" disabled={!isEdit}>Pertences</TabsTrigger>
-            <TabsTrigger value="diario" disabled={!isEdit}>Diário</TabsTrigger>
+            <TabsTrigger value="racao" disabled={!isEdit} title={!isEdit ? "Salve a hospedagem primeiro" : undefined}>Ração</TabsTrigger>
+            <TabsTrigger value="meds" disabled={!isEdit} title={!isEdit ? "Salve a hospedagem primeiro" : undefined}>Medicamentos</TabsTrigger>
+            <TabsTrigger value="pert" disabled={!isEdit} title={!isEdit ? "Salve a hospedagem primeiro" : undefined}>Pertences</TabsTrigger>
+            <TabsTrigger value="diario" disabled={!isEdit} title={!isEdit ? "Salve a hospedagem primeiro" : undefined}>Diário</TabsTrigger>
           </TabsList>
 
           <TabsContent value="geral" className="space-y-4 pt-4">
@@ -492,19 +518,19 @@ function StaySheet({
             </div>
           </TabsContent>
 
-          {isEdit && stay ? (
+          {isEdit && effectiveStayId ? (
             <>
               <TabsContent value="racao" className="pt-4">
-                <FoodSection stayId={stay.id} />
+                <FoodSection stayId={effectiveStayId} />
               </TabsContent>
               <TabsContent value="meds" className="pt-4">
-                <BoardingMedsSection stayId={stay.id} />
+                <BoardingMedsSection stayId={effectiveStayId} />
               </TabsContent>
               <TabsContent value="pert" className="pt-4">
-                <BelongingsSection stayId={stay.id} />
+                <BelongingsSection stayId={effectiveStayId} />
               </TabsContent>
               <TabsContent value="diario" className="pt-4">
-                <DailyLogSection stayId={stay.id} />
+                <DailyLogSection stayId={effectiveStayId} />
               </TabsContent>
             </>
           ) : null}

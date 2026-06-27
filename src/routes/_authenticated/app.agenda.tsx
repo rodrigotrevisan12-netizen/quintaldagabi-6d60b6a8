@@ -81,12 +81,13 @@ function CrechePage() {
     queryFn: async () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      // Inclui estadias abertas (qualquer data) + estadias finalizadas hoje
       const { data, error } = await supabase
         .from("daycare_stays")
         .select(
           "id,dog_id,check_in_at,check_out_at,drop_off_person,pickup_person,notes,dog:dogs(id,name,photo_url,tutor:tutors(full_name))",
         )
-        .gte("check_in_at", today.toISOString())
+        .or(`check_out_at.is.null,check_in_at.gte.${today.toISOString()}`)
         .order("check_in_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as Stay[];
@@ -294,6 +295,29 @@ function CheckInDialog({
     setSaving(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
+      // Verifica se já existe estadia aberta para o cão e oferece encerrar
+      const { data: existing } = await supabase
+        .from("daycare_stays")
+        .select("id, check_in_at")
+        .eq("dog_id", dogId)
+        .is("check_out_at", null)
+        .maybeSingle();
+      if (existing) {
+        const when = new Date(existing.check_in_at).toLocaleString("pt-BR");
+        const ok = window.confirm(
+          `Existe uma estadia em aberto desde ${when}. Deseja finalizá-la agora e iniciar um novo check-in?`,
+        );
+        if (!ok) { setSaving(false); return; }
+        const { error: closeErr } = await supabase
+          .from("daycare_stays")
+          .update({
+            check_out_at: new Date().toISOString(),
+            check_out_by: userData.user?.id ?? null,
+            pickup_person: "Encerrada automaticamente",
+          })
+          .eq("id", existing.id);
+        if (closeErr) throw closeErr;
+      }
       const { error } = await supabase.from("daycare_stays").insert({
         dog_id: dogId,
         drop_off_person: dropOff.trim() || null,
