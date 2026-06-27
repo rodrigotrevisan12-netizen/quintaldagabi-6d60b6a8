@@ -1344,6 +1344,47 @@ export type Database = {
           },
         ]
       }
+      dog_stories: {
+        Row: {
+          caption: string | null
+          created_at: string
+          created_by: string | null
+          dog_id: string
+          expires_at: string
+          id: string
+          media_type: string
+          media_url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id: string
+          expires_at?: string
+          id?: string
+          media_type: string
+          media_url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          dog_id?: string
+          expires_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_stories_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dogs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dog_vaccines: {
         Row: {
           applied_date: string
