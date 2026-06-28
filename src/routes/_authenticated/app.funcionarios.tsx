@@ -54,7 +54,7 @@ function Employees() {
   });
 
   function emptyForm() {
-    return { full_name: "", job_role: "outro", phone: "", email: "", hired_at: "", active: true, permissions: {}, notes: "" };
+    return { full_name: "", job_role: "outro", phone: "", email: "", hired_at: "", active: true, permissions: {}, notes: "", salary: "", work_schedule: "" };
   }
   const [form, setForm] = useState<any>(emptyForm());
 
