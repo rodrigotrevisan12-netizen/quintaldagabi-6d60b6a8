@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { inviteEmployee } from "@/lib/employees.functions";
 import { getPasswordSetupLink, revokeEmployeeAccess } from "@/lib/access.functions";
+import { useCanDelete } from "@/hooks/use-can-delete";
 
 export const Route = createFileRoute("/_authenticated/app/funcionarios")({
   head: () => ({ meta: [{ title: "Funcionários — Quintal da Gabi" }] }),
@@ -39,6 +40,7 @@ type Emp = any;
 
 function Employees() {
   const qc = useQueryClient();
+  const canDelete = useCanDelete();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Emp | null>(null);
   const invite = useServerFn(inviteEmployee);
@@ -52,7 +54,7 @@ function Employees() {
   });
 
   function emptyForm() {
-    return { full_name: "", job_role: "outro", phone: "", email: "", hired_at: "", active: true, permissions: {}, notes: "" };
+    return { full_name: "", job_role: "outro", phone: "", email: "", hired_at: "", active: true, permissions: {}, notes: "", salary: "", work_schedule: "" };
   }
   const [form, setForm] = useState<any>(emptyForm());
 
@@ -64,7 +66,7 @@ function Employees() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, hired_at: form.hired_at || null };
+      const payload = { ...form, hired_at: form.hired_at || null, salary: form.salary === "" || form.salary == null ? null : Number(form.salary), work_schedule: form.work_schedule || null };
       if (editing) {
         const { error } = await supabase.from("employees").update(payload).eq("id", editing.id);
         if (error) throw error;
@@ -166,7 +168,9 @@ function Employees() {
                 </Button>
               )}
               <Button size="icon" variant="ghost" onClick={() => startEdit(e)}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" onClick={() => { if (confirm("Remover?")) del.mutate(e.id); }}><Trash2 className="h-4 w-4" /></Button>
+              {canDelete && (
+                <Button size="icon" variant="ghost" onClick={() => { if (confirm("Remover?")) del.mutate(e.id); }}><Trash2 className="h-4 w-4" /></Button>
+              )}
             </div>
           </CardContent></Card>
         ))}
@@ -189,6 +193,10 @@ function Employees() {
             </div>
             <p className="text-xs text-muted-foreground">Ao salvar com e-mail, o acesso ao app é criado e o link de senha é enviado por e-mail.</p>
             <div><Label>Data de admissão</Label><Input type="date" value={form.hired_at ?? ""} onChange={(e) => setForm({ ...form, hired_at: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Salário (R$)</Label><Input type="number" step="0.01" min="0" value={form.salary ?? ""} onChange={(e) => setForm({ ...form, salary: e.target.value })} /></div>
+              <div><Label>Jornada de trabalho</Label><Input value={form.work_schedule ?? ""} onChange={(e) => setForm({ ...form, work_schedule: e.target.value })} placeholder="Ex: Seg-Sex 08h-17h" /></div>
+            </div>
             <div className="space-y-2">
               <Label>Permissões individuais (ajustes finos)</Label>
               <div className="grid grid-cols-2 gap-2 rounded-md border p-3">

@@ -44,7 +44,7 @@ function StoriesPage() {
 
   const remove = useMutation({
     mutationFn: async (s: Story) => {
-      const path = s.media_url.split("/stories/")[1];
+      const path = s.media_url.replace(/^stories\//, "");
       if (path) await supabase.storage.from("stories").remove([path]);
       const { error } = await supabase.from("dog_stories").delete().eq("id", s.id);
       if (error) throw error;
@@ -111,7 +111,7 @@ function MediaThumb({ story }: { story: Story }) {
   const { data } = useQuery({
     queryKey: ["story-signed", story.id],
     queryFn: async () => {
-      const path = story.media_url.split("/stories/")[1];
+      const path = story.media_url.replace(/^stories\//, "");
       const { data } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
       return data?.signedUrl ?? null;
     },

@@ -26,8 +26,15 @@ export const Route = createFileRoute("/_authenticated/tutor/banho-tosa")({
   component: TutorBanhoTosa,
 });
 
-// Working window: 09:00 - 17:00, 1h slots
-const SLOTS = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+// Working window: 09:00 - 17:30, 30-min slots
+const SLOTS = (() => {
+  const out: string[] = [];
+  for (let h = 9; h <= 17; h++) {
+    out.push(`${String(h).padStart(2, "0")}:00`);
+    out.push(`${String(h).padStart(2, "0")}:30`);
+  }
+  return out;
+})();
 
 function TutorBanhoTosa() {
   const { data: me } = useCurrentUser();

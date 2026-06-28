@@ -76,16 +76,20 @@ function TeamChat() {
     return () => { supabase.removeChannel(ch); };
   }, [qc]);
 
-  // Mapa de nomes dos autores
-  const { data: profiles } = useQuery({
+  // Mapa de nomes dos autores — prioriza nome cadastrado em "funcionários"
+  const { data: nameMap } = useQuery({
     queryKey: ["chat-authors", messages?.length],
     enabled: !!messages?.length,
     queryFn: async () => {
       const ids = Array.from(new Set((messages ?? []).map((m: any) => m.author_id as string))) as string[];
       if (!ids.length) return {};
-      const { data } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+      const [{ data: emps }, { data: profs }] = await Promise.all([
+        supabase.from("employees").select("user_id, full_name").in("user_id", ids),
+        supabase.from("profiles").select("id, full_name").in("id", ids),
+      ]);
       const map: Record<string, string> = {};
-      (data ?? []).forEach((p: any) => { map[p.id] = p.full_name ?? "—"; });
+      (profs ?? []).forEach((p: any) => { if (p.full_name) map[p.id] = p.full_name; });
+      (emps ?? []).forEach((e: any) => { if (e.full_name) map[e.user_id] = e.full_name; });
       return map;
     },
   });
@@ -125,7 +129,7 @@ function TeamChat() {
         <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto pr-1">
           {(messages ?? []).map((m: any) => {
             const mine = m.author_id === me?.userId;
-            const name = profiles?.[m.author_id] ?? "—";
+            const name = nameMap?.[m.author_id] ?? "—";
             return (
               <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div className={`group max-w-[80%] rounded-2xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
