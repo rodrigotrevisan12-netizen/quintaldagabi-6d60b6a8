@@ -76,16 +76,20 @@ function TeamChat() {
     return () => { supabase.removeChannel(ch); };
   }, [qc]);
 
-  // Mapa de nomes dos autores
-  const { data: profiles } = useQuery({
+  // Mapa de nomes dos autores — prioriza nome cadastrado em "funcionários"
+  const { data: nameMap } = useQuery({
     queryKey: ["chat-authors", messages?.length],
     enabled: !!messages?.length,
     queryFn: async () => {
       const ids = Array.from(new Set((messages ?? []).map((m: any) => m.author_id as string))) as string[];
       if (!ids.length) return {};
-      const { data } = await supabase.from("profiles").select("id, full_name").in("id", ids);
+      const [{ data: emps }, { data: profs }] = await Promise.all([
+        supabase.from("employees").select("user_id, full_name").in("user_id", ids),
+        supabase.from("profiles").select("id, full_name").in("id", ids),
+      ]);
       const map: Record<string, string> = {};
-      (data ?? []).forEach((p: any) => { map[p.id] = p.full_name ?? "—"; });
+      (profs ?? []).forEach((p: any) => { if (p.full_name) map[p.id] = p.full_name; });
+      (emps ?? []).forEach((e: any) => { if (e.full_name) map[e.user_id] = e.full_name; });
       return map;
     },
   });
