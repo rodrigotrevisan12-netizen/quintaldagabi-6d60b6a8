@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { inviteEmployee } from "@/lib/employees.functions";
 import { getPasswordSetupLink, revokeEmployeeAccess } from "@/lib/access.functions";
+import { useCanDelete } from "@/hooks/use-can-delete";
 
 export const Route = createFileRoute("/_authenticated/app/funcionarios")({
   head: () => ({ meta: [{ title: "Funcionários — Quintal da Gabi" }] }),
