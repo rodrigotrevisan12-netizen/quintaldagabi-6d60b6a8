@@ -78,7 +78,7 @@ function StoryViewer({ items, onClose }: { items: Story[]; onClose: () => void }
   const { data: url } = useQuery({
     queryKey: ["story-url", cur.id],
     queryFn: async () => {
-      const path = cur.media_url.split("/stories/")[1];
+      const path = cur.media_url.replace(/^stories\//, "");
       const { data } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
       return data?.signedUrl ?? null;
     },
