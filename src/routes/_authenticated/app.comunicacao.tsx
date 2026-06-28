@@ -129,7 +129,7 @@ function TeamChat() {
         <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto pr-1">
           {(messages ?? []).map((m: any) => {
             const mine = m.author_id === me?.userId;
-            const name = profiles?.[m.author_id] ?? "—";
+            const name = nameMap?.[m.author_id] ?? "—";
             return (
               <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div className={`group max-w-[80%] rounded-2xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
