@@ -66,7 +66,7 @@ function Employees() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, hired_at: form.hired_at || null };
+      const payload = { ...form, hired_at: form.hired_at || null, salary: form.salary === "" || form.salary == null ? null : Number(form.salary), work_schedule: form.work_schedule || null };
       if (editing) {
         const { error } = await supabase.from("employees").update(payload).eq("id", editing.id);
         if (error) throw error;
