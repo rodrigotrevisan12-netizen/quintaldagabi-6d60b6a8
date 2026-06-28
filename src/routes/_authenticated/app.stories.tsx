@@ -111,7 +111,7 @@ function MediaThumb({ story }: { story: Story }) {
   const { data } = useQuery({
     queryKey: ["story-signed", story.id],
     queryFn: async () => {
-      const path = story.media_url.split("/stories/")[1];
+      const path = story.media_url.replace(/^stories\//, "");
       const { data } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
       return data?.signedUrl ?? null;
     },
