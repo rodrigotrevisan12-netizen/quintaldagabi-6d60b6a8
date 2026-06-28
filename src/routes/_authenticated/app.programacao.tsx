@@ -266,7 +266,7 @@ function CreateItemSheet({ open, date, onClose, onCreated }: { open: boolean; da
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Nova tarefa</SheetTitle>
-          <SheetDescription>{format(new Date(date), "EEEE, dd 'de' MMMM", { locale: ptBR })}</SheetDescription>
+          <SheetDescription>{format(new Date(`${date}T12:00:00`), "EEEE, dd 'de' MMMM", { locale: ptBR })}</SheetDescription>
         </SheetHeader>
         <div className="space-y-3 py-4">
           <div className="grid grid-cols-2 gap-3">
