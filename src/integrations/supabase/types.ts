@@ -1389,6 +1389,7 @@ export type Database = {
         Row: {
           applied_date: string
           batch: string | null
+          card_photo_url: string | null
           created_at: string
           dog_id: string
           id: string
@@ -1401,6 +1402,7 @@ export type Database = {
         Insert: {
           applied_date: string
           batch?: string | null
+          card_photo_url?: string | null
           created_at?: string
           dog_id: string
           id?: string
@@ -1413,6 +1415,7 @@ export type Database = {
         Update: {
           applied_date?: string
           batch?: string | null
+          card_photo_url?: string | null
           created_at?: string
           dog_id?: string
           id?: string
@@ -1532,9 +1535,11 @@ export type Database = {
           notes: string | null
           permissions: Json
           phone: string | null
+          salary: number | null
           unit_id: string | null
           updated_at: string
           user_id: string | null
+          work_schedule: string | null
         }
         Insert: {
           active?: boolean
@@ -1547,9 +1552,11 @@ export type Database = {
           notes?: string | null
           permissions?: Json
           phone?: string | null
+          salary?: number | null
           unit_id?: string | null
           updated_at?: string
           user_id?: string | null
+          work_schedule?: string | null
         }
         Update: {
           active?: boolean
@@ -1562,9 +1569,11 @@ export type Database = {
           notes?: string | null
           permissions?: Json
           phone?: string | null
+          salary?: number | null
           unit_id?: string | null
           updated_at?: string
           user_id?: string | null
+          work_schedule?: string | null
         }
         Relationships: [
           {
@@ -2472,6 +2481,7 @@ export type Database = {
           boarding_capacity: number
           created_at: string
           daycare_capacity: number
+          daycare_daily_rate: number | null
           unit_id: string
           updated_at: string
         }
@@ -2479,6 +2489,7 @@ export type Database = {
           boarding_capacity?: number
           created_at?: string
           daycare_capacity?: number
+          daycare_daily_rate?: number | null
           unit_id: string
           updated_at?: string
         }
@@ -2486,6 +2497,7 @@ export type Database = {
           boarding_capacity?: number
           created_at?: string
           daycare_capacity?: number
+          daycare_daily_rate?: number | null
           unit_id?: string
           updated_at?: string
         }
