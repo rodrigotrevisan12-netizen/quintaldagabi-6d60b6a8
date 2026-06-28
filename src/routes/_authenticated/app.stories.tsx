@@ -44,7 +44,7 @@ function StoriesPage() {
 
   const remove = useMutation({
     mutationFn: async (s: Story) => {
-      const path = s.media_url.split("/stories/")[1];
+      const path = s.media_url.replace(/^stories\//, "");
       if (path) await supabase.storage.from("stories").remove([path]);
       const { error } = await supabase.from("dog_stories").delete().eq("id", s.id);
       if (error) throw error;
