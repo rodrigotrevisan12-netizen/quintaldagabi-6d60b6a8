@@ -40,6 +40,7 @@ type Emp = any;
 
 function Employees() {
   const qc = useQueryClient();
+  const canDelete = useCanDelete();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Emp | null>(null);
   const invite = useServerFn(inviteEmployee);
