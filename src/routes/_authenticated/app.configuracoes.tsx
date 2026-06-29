@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, Building2, Scissors } from "lucide-react";
+import { Plus, Loader2, Building2, Scissors, CalendarRange } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,9 +30,11 @@ function ConfiguracoesPage() {
         <TabsList>
           <TabsTrigger value="unidades"><Building2 className="mr-1 h-4 w-4" />Unidades</TabsTrigger>
           <TabsTrigger value="servicos"><Scissors className="mr-1 h-4 w-4" />Serviços de banho & tosa</TabsTrigger>
+          <TabsTrigger value="pacotes"><CalendarRange className="mr-1 h-4 w-4" />Pacotes de creche</TabsTrigger>
         </TabsList>
         <TabsContent value="unidades"><UnitsPanel /></TabsContent>
         <TabsContent value="servicos"><ServicesPanel /></TabsContent>
+        <TabsContent value="pacotes"><DaycarePackagesPanel /></TabsContent>
       </Tabs>
     </div>
   );
