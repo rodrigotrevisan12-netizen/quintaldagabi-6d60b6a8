@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Syringe, BedDouble, Stethoscope, Upload, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Syringe, BedDouble, Upload, Image as ImageIcon } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -103,7 +103,6 @@ function DogDetail() {
         <TabsList>
           <TabsTrigger value="vaccines"><Syringe className="mr-2 h-4 w-4" />Vacinas</TabsTrigger>
           <TabsTrigger value="stays"><BedDouble className="mr-2 h-4 w-4" />Hospedagens</TabsTrigger>
-          <TabsTrigger value="timeline"><Stethoscope className="mr-2 h-4 w-4" />Timeline</TabsTrigger>
         </TabsList>
 
         <TabsContent value="vaccines" className="space-y-3">
@@ -154,12 +153,6 @@ function DogDetail() {
               </CardContent>
             </Card>
           )) : <p className="text-sm text-muted-foreground">Sem hospedagens.</p>}
-        </TabsContent>
-
-        <TabsContent value="timeline">
-          <Card><CardContent className="p-4 text-sm">
-            <Link to="/app/caes/$id/timeline" params={{ id }} className="text-primary underline">Abrir timeline completa</Link>
-          </CardContent></Card>
         </TabsContent>
       </Tabs>
     </div>

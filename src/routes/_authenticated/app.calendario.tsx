@@ -24,7 +24,7 @@ function CalendarPage() {
       const from = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString();
       const to = new Date(today.getFullYear(), today.getMonth() + 2, 0).toISOString();
 
-      const [groom, board, day, sched, arr] = await Promise.all([
+      const [groom, board, day] = await Promise.all([
         supabase.from("grooming_appointments")
           .select("id,scheduled_at,status,dog:dogs(name)")
           .gte("scheduled_at", from).lte("scheduled_at", to),
@@ -34,12 +34,6 @@ function CalendarPage() {
         supabase.from("daycare_stays")
           .select("id,check_in_at,check_out_at,dog:dogs(name)")
           .gte("check_in_at", from).lte("check_in_at", to),
-        supabase.from("daily_schedule_items")
-          .select("id,title,scheduled_for,status")
-          .gte("scheduled_for", from.slice(0,10)).lte("scheduled_for", to.slice(0,10)),
-        supabase.from("arrival_notifications")
-          .select("id,created_at,eta_minutes,purpose,tutors:tutor_id(full_name)")
-          .gte("created_at", from).lte("created_at", to),
       ]);
 
       const list: any[] = [];
@@ -60,17 +54,6 @@ function CalendarPage() {
         backgroundColor: "#10b981", borderColor: "#10b981",
         extendedProps: { route: "/app/agenda" },
       }));
-      (sched.data ?? []).forEach((s: any) => list.push({
-        id: `s-${s.id}`, title: `📋 ${s.title}`,
-        start: s.scheduled_for, allDay: true,
-        backgroundColor: "#f59e0b", borderColor: "#f59e0b",
-        extendedProps: { route: "/app/programacao" },
-      }));
-      (arr.data ?? []).forEach((a: any) => list.push({
-        id: `a-${a.id}`, title: `📍 ${a.tutors?.full_name ?? "Tutor"} (${a.purpose === "pickup" ? "buscar" : "trazer"})`,
-        start: a.created_at, backgroundColor: "#ef4444", borderColor: "#ef4444",
-        extendedProps: { route: "/app/chegadas" },
-      }));
       return list;
     },
   });
@@ -80,7 +63,7 @@ function CalendarPage() {
       <header>
         <h1 className="font-display text-3xl">Calendário</h1>
         <p className="text-sm text-muted-foreground">
-          Banhos, hospedagens, reservas, programação e chegadas em uma única visão.
+          Hospedagem, creche e banho & tosa em uma única visão.
         </p>
       </header>
 
@@ -88,8 +71,6 @@ function CalendarPage() {
         <Legend color="#3b82f6" label="Banho & tosa" />
         <Legend color="#a855f7" label="Hospedagem" />
         <Legend color="#10b981" label="Creche" />
-        <Legend color="#f59e0b" label="Programação" />
-        <Legend color="#ef4444" label="Chegadas" />
       </div>
 
       <Card>
