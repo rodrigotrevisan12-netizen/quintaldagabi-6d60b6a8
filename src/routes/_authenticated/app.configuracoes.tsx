@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, Building2, Scissors } from "lucide-react";
+import { Plus, Loader2, Building2, Scissors, CalendarRange } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,9 +30,11 @@ function ConfiguracoesPage() {
         <TabsList>
           <TabsTrigger value="unidades"><Building2 className="mr-1 h-4 w-4" />Unidades</TabsTrigger>
           <TabsTrigger value="servicos"><Scissors className="mr-1 h-4 w-4" />Serviços de banho & tosa</TabsTrigger>
+          <TabsTrigger value="pacotes"><CalendarRange className="mr-1 h-4 w-4" />Pacotes de creche</TabsTrigger>
         </TabsList>
         <TabsContent value="unidades"><UnitsPanel /></TabsContent>
         <TabsContent value="servicos"><ServicesPanel /></TabsContent>
+        <TabsContent value="pacotes"><DaycarePackagesPanel /></TabsContent>
       </Tabs>
     </div>
   );
@@ -239,5 +241,130 @@ function ServicesPanel() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function DaycarePackagesPanel() {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", days_per_week: "3", monthly_price: "0", extra_day_price: "0" });
+
+  const pkgsQ = useQuery({
+    queryKey: ["daycare-packages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("daycare_packages").select("*").order("days_per_week");
+      if (error) throw error; return data ?? [];
+    },
+  });
+
+  const dogsQ = useQuery({
+    queryKey: ["dogs-pkg-assign"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("dogs").select("id,name,daycare_package_id,tutor:tutors(full_name)").order("name");
+      if (error) throw error; return data ?? [];
+    },
+  });
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("daycare_packages").insert({
+        name: form.name,
+        days_per_week: Number(form.days_per_week),
+        monthly_price: Number(form.monthly_price),
+        extra_day_price: Number(form.extra_day_price),
+        is_active: true,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Pacote criado"); setOpen(false); setForm({ name: "", days_per_week: "3", monthly_price: "0", extra_day_price: "0" }); qc.invalidateQueries({ queryKey: ["daycare-packages"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const update = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: any }) => { const { error } = await supabase.from("daycare_packages").update(patch).eq("id", id); if (error) throw error; },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["daycare-packages"] }),
+  });
+  const del = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("daycare_packages").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["daycare-packages"] }),
+  });
+  const assignDog = useMutation({
+    mutationFn: async ({ dog_id, daycare_package_id }: { dog_id: string; daycare_package_id: string | null }) => {
+      const { error } = await supabase.from("dogs").update({ daycare_package_id }).eq("id", dog_id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Pacote vinculado"); qc.invalidateQueries({ queryKey: ["dogs-pkg-assign"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Pacotes mensais de creche</CardTitle>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" />Novo pacote</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Novo pacote</DialogTitle></DialogHeader>
+              <div className="grid gap-3">
+                <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: 3x na semana" /></div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div><Label>Dias/semana</Label><Input type="number" min={1} max={7} value={form.days_per_week} onChange={(e) => setForm({ ...form, days_per_week: e.target.value })} /></div>
+                  <div><Label>Mensalidade (R$)</Label><Input type="number" step="0.01" value={form.monthly_price} onChange={(e) => setForm({ ...form, monthly_price: e.target.value })} /></div>
+                  <div><Label>Dia extra (R$)</Label><Input type="number" step="0.01" value={form.extra_day_price} onChange={(e) => setForm({ ...form, extra_day_price: e.target.value })} /></div>
+                </div>
+              </div>
+              <DialogFooter><Button onClick={() => create.mutate()} disabled={create.isPending || !form.name}>{create.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Criar</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {(pkgsQ.data ?? []).length === 0 ? <p className="text-muted-foreground">Nenhum pacote cadastrado.</p> : (
+            <ul className="divide-y">
+              {(pkgsQ.data ?? []).map((p: any) => (
+                <li key={p.id} className="grid grid-cols-1 items-center gap-2 py-2 sm:grid-cols-[1fr_90px_120px_120px_auto]">
+                  <Input defaultValue={p.name} onBlur={(e) => e.target.value !== p.name && update.mutate({ id: p.id, patch: { name: e.target.value } })} />
+                  <Input type="number" min={1} max={7} defaultValue={p.days_per_week} onBlur={(e) => Number(e.target.value) !== p.days_per_week && update.mutate({ id: p.id, patch: { days_per_week: Number(e.target.value) } })} />
+                  <Input type="number" step="0.01" defaultValue={p.monthly_price} onBlur={(e) => Number(e.target.value) !== Number(p.monthly_price) && update.mutate({ id: p.id, patch: { monthly_price: Number(e.target.value) } })} />
+                  <Input type="number" step="0.01" defaultValue={p.extra_day_price} onBlur={(e) => Number(e.target.value) !== Number(p.extra_day_price) && update.mutate({ id: p.id, patch: { extra_day_price: Number(e.target.value) } })} />
+                  <div className="flex items-center gap-2">
+                    <Switch checked={p.is_active} onCheckedChange={(v) => update.mutate({ id: p.id, patch: { is_active: v } })} />
+                    <Button variant="ghost" size="sm" onClick={() => { if (confirm("Remover pacote?")) del.mutate(p.id); }}>Remover</Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-xs text-muted-foreground">A mensalidade é cobrada automaticamente no primeiro check-out do mês. Dias acima da franquia (dias/semana × 4) geram cobrança de dia extra.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Pacote por cão</CardTitle></CardHeader>
+        <CardContent>
+          {(dogsQ.data ?? []).length === 0 ? <p className="text-muted-foreground">Nenhum cão cadastrado.</p> : (
+            <ul className="divide-y">
+              {(dogsQ.data ?? []).map((d: any) => (
+                <li key={d.id} className="flex items-center justify-between gap-3 py-2">
+                  <div>
+                    <p className="font-medium">{d.name}</p>
+                    <p className="text-xs text-muted-foreground">{d.tutor?.full_name ?? "—"}</p>
+                  </div>
+                  <select
+                    className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                    value={d.daycare_package_id ?? ""}
+                    onChange={(e) => assignDog.mutate({ dog_id: d.id, daycare_package_id: e.target.value || null })}
+                  >
+                    <option value="">Sem pacote (diária avulsa)</option>
+                    {(pkgsQ.data ?? []).filter((p: any) => p.is_active).map((p: any) => (
+                      <option key={p.id} value={p.id}>{p.name} — R$ {Number(p.monthly_price).toFixed(2)}/mês</option>
+                    ))}
+                  </select>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

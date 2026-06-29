@@ -395,30 +395,59 @@ function CreateDocumentSheet({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Entrada (estadia)</Label>
-              <Input type="date" value={entrada} onChange={(e) => setEntrada(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Saída (estadia)</Label>
-              <Input type="date" value={saida} onChange={(e) => setSaida(e.target.value)} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Valor diária (R$)</Label>
-            <Input type="number" step="0.01" value={valorDiaria} onChange={(e) => setValorDiaria(e.target.value)} />
-          </div>
-
-          <div className="rounded-lg border p-3 space-y-2">
-            <p className="text-sm font-medium">Pacote contratado (opcional)</p>
-            <p className="text-xs text-muted-foreground">Use no contrato de creche/hospedagem com <code>{`{{pacote.nome}}`}</code>, <code>{`{{pacote.valor}}`}</code>, <code>{`{{pacote.descricao}}`}</code>.</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Nome do pacote</Label><Input value={pacoteNome} onChange={(e) => setPacoteNome(e.target.value)} placeholder="Ex: 10 diárias creche" /></div>
-              <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={pacoteValor} onChange={(e) => setPacoteValor(e.target.value)} /></div>
-            </div>
-            <div><Label>Descrição</Label><Textarea rows={2} value={pacoteDesc} onChange={(e) => setPacoteDesc(e.target.value)} /></div>
-          </div>
+          {(() => {
+            const tpl = templatesQuery.data?.find((t) => t.id === templateId);
+            if (!tpl) {
+              return (
+                <p className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+                  Selecione um modelo acima para ver os campos específicos do contrato.
+                </p>
+              );
+            }
+            const isHospedagem = tpl.type === "contrato_hospedagem";
+            const isCreche = tpl.type === "contrato_creche";
+            const needsEstadia = isHospedagem;
+            const needsPacote = isCreche || isHospedagem;
+            if (!needsEstadia && !needsPacote) {
+              return (
+                <p className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+                  Este modelo não exige dados de estadia ou pacote — basta confirmar e criar.
+                </p>
+              );
+            }
+            return (
+              <>
+                {needsEstadia && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label>Entrada (estadia)</Label>
+                        <Input type="date" value={entrada} onChange={(e) => setEntrada(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Saída (estadia)</Label>
+                        <Input type="date" value={saida} onChange={(e) => setSaida(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Valor diária (R$)</Label>
+                      <Input type="number" step="0.01" value={valorDiaria} onChange={(e) => setValorDiaria(e.target.value)} />
+                    </div>
+                  </>
+                )}
+                {needsPacote && (
+                  <div className="rounded-lg border p-3 space-y-2">
+                    <p className="text-sm font-medium">Pacote contratado (opcional)</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>Nome do pacote</Label><Input value={pacoteNome} onChange={(e) => setPacoteNome(e.target.value)} placeholder="Ex: 3x na semana" /></div>
+                      <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={pacoteValor} onChange={(e) => setPacoteValor(e.target.value)} /></div>
+                    </div>
+                    <div><Label>Descrição</Label><Textarea rows={2} value={pacoteDesc} onChange={(e) => setPacoteDesc(e.target.value)} /></div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         <SheetFooter className="border-t bg-background px-6 py-4">

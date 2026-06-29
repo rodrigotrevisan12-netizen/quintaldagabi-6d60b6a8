@@ -76,10 +76,16 @@ function StoryViewer({ items, onClose }: { items: Story[]; onClose: () => void }
   const cur = items[idx];
 
   const { data: url } = useQuery({
-    queryKey: ["story-url", cur.id],
+    queryKey: ["story-url", cur.id, cur.media_url],
     queryFn: async () => {
+      // media_url pode estar salvo como "stories/<dog>/<file>" ou só "<dog>/<file>"
       const path = cur.media_url.replace(/^stories\//, "");
-      const { data } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
+      const { data, error } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
+      if (error) {
+        // tenta usar o caminho exato como fallback
+        const fb = await supabase.storage.from("stories").createSignedUrl(cur.media_url, 3600);
+        return fb.data?.signedUrl ?? null;
+      }
       return data?.signedUrl ?? null;
     },
   });

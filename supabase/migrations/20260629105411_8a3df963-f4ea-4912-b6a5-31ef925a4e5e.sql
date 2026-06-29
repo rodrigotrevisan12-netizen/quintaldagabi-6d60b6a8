@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.trg_daycare_charge_fn() FROM PUBLIC, anon, authenticated;
