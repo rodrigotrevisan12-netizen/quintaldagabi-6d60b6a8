@@ -775,6 +775,47 @@ export type Database = {
           },
         ]
       }
+      daycare_packages: {
+        Row: {
+          created_at: string
+          days_per_week: number
+          extra_day_price: number
+          id: string
+          is_active: boolean
+          monthly_price: number
+          name: string
+          unit_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          days_per_week: number
+          extra_day_price?: number
+          id?: string
+          is_active?: boolean
+          monthly_price?: number
+          name: string
+          unit_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          days_per_week?: number
+          extra_day_price?: number
+          id?: string
+          is_active?: boolean
+          monthly_price?: number
+          name?: string
+          unit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daycare_packages_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daycare_stays: {
         Row: {
           check_in_at: string
@@ -1441,6 +1482,7 @@ export type Database = {
           breed: string | null
           created_at: string
           created_by: string | null
+          daycare_package_id: string | null
           id: string
           microchip: string | null
           name: string
@@ -1462,6 +1504,7 @@ export type Database = {
           breed?: string | null
           created_at?: string
           created_by?: string | null
+          daycare_package_id?: string | null
           id?: string
           microchip?: string | null
           name: string
@@ -1483,6 +1526,7 @@ export type Database = {
           breed?: string | null
           created_at?: string
           created_by?: string | null
+          daycare_package_id?: string | null
           id?: string
           microchip?: string | null
           name?: string
@@ -1500,6 +1544,13 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "dogs_daycare_package_id_fkey"
+            columns: ["daycare_package_id"]
+            isOneToOne: false
+            referencedRelation: "daycare_packages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dogs_tutor_id_fkey"
             columns: ["tutor_id"]
@@ -1601,6 +1652,7 @@ export type Database = {
           paid_at: string | null
           payment_method: string | null
           reference_id: string | null
+          reference_month: string | null
           reference_type: string | null
           revenue_category:
             | Database["public"]["Enums"]["fin_revenue_category"]
@@ -1625,6 +1677,7 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string | null
           reference_id?: string | null
+          reference_month?: string | null
           reference_type?: string | null
           revenue_category?:
             | Database["public"]["Enums"]["fin_revenue_category"]
@@ -1649,6 +1702,7 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string | null
           reference_id?: string | null
+          reference_month?: string | null
           reference_type?: string | null
           revenue_category?:
             | Database["public"]["Enums"]["fin_revenue_category"]
