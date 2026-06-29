@@ -55,7 +55,8 @@ function ReportPage() {
 
   const { stay, food, meds, belongings, logs } = stayQuery.data;
   const start = new Date(stay.check_in_at);
-  const end = new Date(stay.check_out_at ?? stay.expected_check_out_at);
+  const endIso = stay.check_out_at ?? stay.expected_check_out_at;
+  const end = endIso ? new Date(endIso) : new Date();
   const days = Math.max(1, differenceInCalendarDays(end, start));
   const total = (Number(stay.daily_rate) || 0) * days;
 
@@ -79,7 +80,9 @@ function ReportPage() {
 
       <Section title="Estadia">
         <Row label="Entrada" value={format(start, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} />
-        <Row label="Saída prevista" value={format(new Date(stay.expected_check_out_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} />
+        {stay.expected_check_out_at ? (
+          <Row label="Saída prevista" value={format(new Date(stay.expected_check_out_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} />
+        ) : null}
         <Row label="Saída efetiva" value={stay.check_out_at ? format(new Date(stay.check_out_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) : "Em andamento"} />
         {stay.kennel ? <Row label="Baia" value={stay.kennel} /> : null}
         <Row label="Dias" value={String(days)} />

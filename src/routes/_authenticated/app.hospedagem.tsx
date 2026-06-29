@@ -536,8 +536,15 @@ function StaySheet({
           ) : null}
         </Tabs>
 
-        <SheetFooter className="mt-6">
+        <SheetFooter className="mt-6 gap-2">
           <Button variant="outline" onClick={onClose}>Fechar</Button>
+          {isEdit && effectiveStayId ? (
+            <Button variant="secondary" asChild>
+              <a href={`/app/hospedagem/${effectiveStayId}/relatorio`} target="_blank" rel="noreferrer">
+                Relatório
+              </a>
+            </Button>
+          ) : null}
           <Button onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
             {isEdit ? "Salvar" : "Criar hospedagem"}
