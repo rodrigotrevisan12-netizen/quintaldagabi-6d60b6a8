@@ -75,29 +75,31 @@ function StoryViewer({ items, onClose }: { items: Story[]; onClose: () => void }
   const [idx, setIdx] = useState(0);
   const cur = items[idx];
 
-  const { data: url } = useQuery({
+  const { data: url, isError } = useQuery({
     queryKey: ["story-url", cur.id, cur.media_url],
     queryFn: async () => {
-      // media_url pode estar salvo como "stories/<dog>/<file>" ou só "<dog>/<file>"
-      const path = cur.media_url.replace(/^stories\//, "");
-      const { data, error } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
-      if (error) {
-        // tenta usar o caminho exato como fallback
-        const fb = await supabase.storage.from("stories").createSignedUrl(cur.media_url, 3600);
-        return fb.data?.signedUrl ?? null;
+      const tries = [
+        cur.media_url.replace(/^stories\//, ""),
+        cur.media_url,
+      ];
+      for (const path of tries) {
+        const { data } = await supabase.storage.from("stories").createSignedUrl(path, 3600);
+        if (data?.signedUrl) return data.signedUrl;
       }
-      return data?.signedUrl ?? null;
+      throw new Error("no-url");
     },
+    retry: false,
   });
 
   useEffect(() => {
     if (cur.media_type !== "photo") return;
+    if (!url) return; // only start the timer once the photo is loaded
     const t = setTimeout(() => {
       if (idx < items.length - 1) setIdx(idx + 1);
       else onClose();
     }, 5000);
     return () => clearTimeout(t);
-  }, [idx, cur, items.length, onClose]);
+  }, [idx, cur, items.length, onClose, url]);
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4">
@@ -111,7 +113,15 @@ function StoryViewer({ items, onClose }: { items: Story[]; onClose: () => void }
             <span key={i} className={`h-1 flex-1 rounded ${i<=idx?"bg-white":"bg-white/30"}`} />
           ))}
         </div>
-        {url ? (cur.media_type === "video"
+        {isError ? (
+          <div className="rounded-lg bg-white/10 p-6 text-center text-sm text-white">
+            Não foi possível carregar este story.
+            <br />
+            <button className="mt-2 underline" onClick={() => idx<items.length-1 ? setIdx(idx+1) : onClose()}>
+              {idx<items.length-1 ? "Próximo" : "Fechar"}
+            </button>
+          </div>
+        ) : url ? (cur.media_type === "video"
           ? <video src={url} controls autoPlay onEnded={() => idx<items.length-1 ? setIdx(idx+1) : onClose()} className="max-h-[70vh] rounded-lg" />
           : <img src={url} className="max-h-[70vh] rounded-lg" alt={cur.caption ?? ""} />
         ) : <p className="text-white">Carregando…</p>}

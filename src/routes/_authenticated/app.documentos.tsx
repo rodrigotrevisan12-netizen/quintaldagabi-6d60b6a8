@@ -260,9 +260,23 @@ function CreateDocumentSheet({
   const [valorDiaria, setValorDiaria] = useState<string>("");
   const [entrada, setEntrada] = useState<string>("");
   const [saida, setSaida] = useState<string>("");
+  const [pacoteId, setPacoteId] = useState<string>("");
   const [pacoteNome, setPacoteNome] = useState<string>("");
   const [pacoteValor, setPacoteValor] = useState<string>("");
   const [pacoteDesc, setPacoteDesc] = useState<string>("");
+
+  const packagesQuery = useQuery({
+    queryKey: ["daycare-packages-active"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("daycare_packages")
+        .select("id,name,days_per_week,monthly_price,extra_day_price,description")
+        .order("days_per_week");
+      if (error) throw error;
+      return (data ?? []) as Array<{ id: string; name: string; days_per_week: number; monthly_price: number; extra_day_price: number; description: string | null }>;
+    },
+    enabled: open,
+  });
 
   const templatesQuery = useQuery({
     queryKey: ["document_templates"],
@@ -344,7 +358,7 @@ function CreateDocumentSheet({
       setValorDiaria("");
       setEntrada("");
       setSaida("");
-      setPacoteNome(""); setPacoteValor(""); setPacoteDesc("");
+      setPacoteId(""); setPacoteNome(""); setPacoteValor(""); setPacoteDesc("");
       onCreated(doc);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -407,8 +421,7 @@ function CreateDocumentSheet({
             const isHospedagem = tpl.type === "contrato_hospedagem";
             const isCreche = tpl.type === "contrato_creche";
             const needsEstadia = isHospedagem;
-            const needsPacote = isCreche || isHospedagem;
-            if (!needsEstadia && !needsPacote) {
+            if (!needsEstadia && !isCreche) {
               return (
                 <p className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
                   Este modelo não exige dados de estadia ou pacote — basta confirmar e criar.
@@ -433,16 +446,48 @@ function CreateDocumentSheet({
                       <Label>Valor diária (R$)</Label>
                       <Input type="number" step="0.01" value={valorDiaria} onChange={(e) => setValorDiaria(e.target.value)} />
                     </div>
+                    <div className="rounded-lg border p-3 space-y-2">
+                      <p className="text-sm font-medium">Pacote contratado (opcional)</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>Nome do pacote</Label><Input value={pacoteNome} onChange={(e) => setPacoteNome(e.target.value)} placeholder="Ex: Diária avulsa" /></div>
+                        <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={pacoteValor} onChange={(e) => setPacoteValor(e.target.value)} /></div>
+                      </div>
+                      <div><Label>Descrição</Label><Textarea rows={2} value={pacoteDesc} onChange={(e) => setPacoteDesc(e.target.value)} /></div>
+                    </div>
                   </>
                 )}
-                {needsPacote && (
+                {isCreche && (
                   <div className="rounded-lg border p-3 space-y-2">
-                    <p className="text-sm font-medium">Pacote contratado (opcional)</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Nome do pacote</Label><Input value={pacoteNome} onChange={(e) => setPacoteNome(e.target.value)} placeholder="Ex: 3x na semana" /></div>
-                      <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={pacoteValor} onChange={(e) => setPacoteValor(e.target.value)} /></div>
-                    </div>
-                    <div><Label>Descrição</Label><Textarea rows={2} value={pacoteDesc} onChange={(e) => setPacoteDesc(e.target.value)} /></div>
+                    <p className="text-sm font-medium">Pacote mensal de creche</p>
+                    <p className="text-xs text-muted-foreground">Selecione um pacote cadastrado em Configurações → Pacotes de creche.</p>
+                    <Select
+                      value={pacoteId}
+                      onValueChange={(v) => {
+                        setPacoteId(v);
+                        const p = packagesQuery.data?.find((x) => x.id === v);
+                        if (p) {
+                          setPacoteNome(p.name);
+                          setPacoteValor(String(p.monthly_price));
+                          setPacoteDesc(
+                            `${p.days_per_week}x na semana · mensalidade ${brl(p.monthly_price)}${p.extra_day_price ? ` · diária extra ${brl(p.extra_day_price)}` : ""}${p.description ? ` — ${p.description}` : ""}`,
+                          );
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={(packagesQuery.data ?? []).length ? "Selecione o pacote" : "Nenhum pacote cadastrado"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(packagesQuery.data ?? []).map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name} — {p.days_per_week}x/sem · {brl(p.monthly_price)}/mês
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {pacoteId && (
+                      <p className="rounded-md bg-muted p-2 text-xs">{pacoteDesc}</p>
+                    )}
                   </div>
                 )}
               </>
@@ -460,6 +505,10 @@ function CreateDocumentSheet({
       </SheetContent>
     </Sheet>
   );
+}
+
+function brl(n: number) {
+  return Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function sigsToBlocks(rows: any[]): SignatureBlock[] {

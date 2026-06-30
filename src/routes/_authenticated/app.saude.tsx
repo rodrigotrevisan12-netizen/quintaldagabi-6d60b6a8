@@ -145,11 +145,23 @@ function DateProductSection({ dogId, table, titleSingular, fields }: { dogId: st
         {q.isLoading ? <p className="text-muted-foreground">Carregando…</p> : (q.data ?? []).length === 0 ? <p className="text-muted-foreground">Nenhum registro.</p> : (
           <ul className="divide-y">
             {(q.data ?? []).map((r: any) => (
-              <li key={r.id} className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-medium">{fields.map(f => r[f.k]).filter(Boolean).join(" • ") || "—"}</p>
-                  <p className="text-xs text-muted-foreground">Aplicado: {r.applied_date} {r.next_due_date && `• Próxima: ${r.next_due_date}`}</p>
-                  {r.notes && <p className="text-xs">{r.notes}</p>}
+              <li key={r.id} className="flex items-center justify-between gap-3 py-2">
+                <div className="flex flex-1 items-center gap-3">
+                  {r.card_photo_url && (
+                    <a href={r.card_photo_url} target="_blank" rel="noreferrer" className="shrink-0">
+                      <img src={r.card_photo_url} alt="carteira de vacinação" className="h-14 w-14 rounded-md border object-cover" />
+                    </a>
+                  )}
+                  <div>
+                    <p className="font-medium">{fields.map(f => r[f.k]).filter(Boolean).join(" • ") || "—"}</p>
+                    <p className="text-xs text-muted-foreground">Aplicado: {r.applied_date} {r.next_due_date && `• Próxima: ${r.next_due_date}`}</p>
+                    {r.notes && <p className="text-xs">{r.notes}</p>}
+                    {r.card_photo_url && (
+                      <a href={r.card_photo_url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">
+                        Ver carteira de vacinação (enviada pelo tutor)
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => del.mutate(r.id)}>Remover</Button>
               </li>
