@@ -197,6 +197,7 @@ function ReportPage() {
       <footer className="mt-8 border-t pt-4 text-xs text-gray-500">
         Emitido em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
       </footer>
+      </div>
     </div>
   );
 }
