@@ -1,12 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Printer } from "lucide-react";
+import { Loader2, Printer, Download } from "lucide-react";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+
+async function downloadReportPdf(filename: string) {
+  const node = document.getElementById("boarding-report");
+  if (!node) return;
+  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+    import("html2canvas"),
+    import("jspdf"),
+  ]);
+  const canvas = await html2canvas(node, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+  const img = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const imgW = pageW - 20;
+  const imgH = (canvas.height * imgW) / canvas.width;
+  let heightLeft = imgH;
+  let y = 10;
+  pdf.addImage(img, "PNG", 10, y, imgW, imgH);
+  heightLeft -= pageH - 20;
+  while (heightLeft > 0) {
+    pdf.addPage();
+    y = -(imgH - heightLeft) + 10;
+    pdf.addImage(img, "PNG", 10, y, imgW, imgH);
+    heightLeft -= pageH - 20;
+  }
+  pdf.save(filename);
+}
 
 export const Route = createFileRoute("/_authenticated/app/hospedagem/$id/relatorio")({
   head: () => ({ meta: [{ title: "Relatório de hospedagem" }] }),
@@ -60,15 +88,32 @@ function ReportPage() {
   const days = Math.max(1, differenceInCalendarDays(end, start));
   const total = (Number(stay.daily_rate) || 0) * days;
 
+  const [downloading, setDownloading] = useState(false);
+  const filename = `relatorio-${((stay as any).dog?.name ?? "cao").toLowerCase().replace(/\s+/g,"-")}-${format(start,"yyyy-MM-dd")}.pdf`;
+
   return (
-    <div className="mx-auto max-w-3xl bg-white p-8 text-black print:p-0">
+    <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-start justify-between border-b pb-4 print:hidden">
         <h1 className="font-display text-2xl font-semibold">Relatório de hospedagem</h1>
-        <Button onClick={() => window.print()}>
-          <Printer className="mr-1 h-4 w-4" /> Imprimir / Salvar PDF
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => window.print()}>
+            <Printer className="mr-1 h-4 w-4" /> Imprimir
+          </Button>
+          <Button
+            disabled={downloading}
+            onClick={async () => {
+              try { setDownloading(true); await downloadReportPdf(filename); }
+              catch (e: any) { toast.error(e?.message ?? "Falha ao gerar PDF"); }
+              finally { setDownloading(false); }
+            }}
+          >
+            {downloading ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Download className="mr-1 h-4 w-4" />}
+            Baixar PDF
+          </Button>
+        </div>
       </div>
 
+      <div id="boarding-report" className="bg-white p-8 text-black">
       <header className="mb-6 border-b pb-4">
         <p className="text-xs uppercase tracking-wide text-gray-500">Quintal da Gabi · Hotel para cães</p>
         <h2 className="mt-2 text-xl font-semibold">{(stay as any).dog?.name}</h2>
