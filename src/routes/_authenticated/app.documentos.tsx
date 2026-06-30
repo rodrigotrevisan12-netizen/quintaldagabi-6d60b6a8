@@ -260,9 +260,23 @@ function CreateDocumentSheet({
   const [valorDiaria, setValorDiaria] = useState<string>("");
   const [entrada, setEntrada] = useState<string>("");
   const [saida, setSaida] = useState<string>("");
+  const [pacoteId, setPacoteId] = useState<string>("");
   const [pacoteNome, setPacoteNome] = useState<string>("");
   const [pacoteValor, setPacoteValor] = useState<string>("");
   const [pacoteDesc, setPacoteDesc] = useState<string>("");
+
+  const packagesQuery = useQuery({
+    queryKey: ["daycare-packages-active"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("daycare_packages")
+        .select("id,name,days_per_week,monthly_price,extra_day_price,description")
+        .order("days_per_week");
+      if (error) throw error;
+      return (data ?? []) as Array<{ id: string; name: string; days_per_week: number; monthly_price: number; extra_day_price: number; description: string | null }>;
+    },
+    enabled: open,
+  });
 
   const templatesQuery = useQuery({
     queryKey: ["document_templates"],
