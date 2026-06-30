@@ -507,6 +507,10 @@ function CreateDocumentSheet({
   );
 }
 
+function brl(n: number) {
+  return Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 function sigsToBlocks(rows: any[]): SignatureBlock[] {
   return rows.map((s) => ({
     role: s.signer_role as "admin" | "tutor",
