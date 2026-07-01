@@ -90,7 +90,6 @@ function ReportPage() {
   const days = Math.max(1, differenceInCalendarDays(end, start));
   const total = (Number(stay.daily_rate) || 0) * days;
 
-  const [downloading, setDownloading] = useState(false);
   const filename = `relatorio-${((stay as any).dog?.name ?? "cao").toLowerCase().replace(/\s+/g,"-")}-${format(start,"yyyy-MM-dd")}.pdf`;
 
   return (
