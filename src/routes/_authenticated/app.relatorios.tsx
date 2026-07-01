@@ -339,7 +339,7 @@ function RelatoriosPage() {
                     <div>
                       <CardTitle>{r.title}</CardTitle>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Período: {format(new Date(from), "dd/MM/yyyy")} – {format(new Date(to), "dd/MM/yyyy")} ·{" "}
+                        Período: {format(new Date(from + "T00:00:00"), "dd/MM/yyyy")} – {format(new Date(to + "T00:00:00"), "dd/MM/yyyy")} ·{" "}
                         <Badge variant="secondary">{r.rows.length} registros</Badge>
                       </p>
                     </div>
