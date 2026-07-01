@@ -270,7 +270,8 @@ function CreateDocumentSheet({
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("daycare_packages")
-        .select("id,name,days_per_week,monthly_price,extra_day_price,description")
+        .select("id,name,days_per_week,monthly_price,extra_day_price")
+        .eq("is_active", true)
         .order("days_per_week");
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; name: string; days_per_week: number; monthly_price: number; extra_day_price: number; description: string | null }>;

@@ -138,8 +138,8 @@ function RelatoriosPage() {
     }
 
     // Faturamento / lucro
-    const receitas = (d.tx as any[]).filter((t) => t.kind === "revenue");
-    const despesas = (d.tx as any[]).filter((t) => t.kind === "expense");
+    const receitas = (d.tx as any[]).filter((t) => t.kind === "receita" || t.kind === "revenue");
+    const despesas = (d.tx as any[]).filter((t) => t.kind === "despesa" || t.kind === "expense");
     const sumBy = <T,>(arr: T[], fn: (x: T) => number) => arr.reduce((a, b) => a + fn(b), 0);
     const totalReceita = sumBy(receitas, (r: any) => Number(r.amount));
     const totalDespesa = sumBy(despesas, (r: any) => Number(r.amount));
@@ -339,7 +339,7 @@ function RelatoriosPage() {
                     <div>
                       <CardTitle>{r.title}</CardTitle>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Período: {format(new Date(from), "dd/MM/yyyy")} – {format(new Date(to), "dd/MM/yyyy")} ·{" "}
+                        Período: {format(new Date(from + "T00:00:00"), "dd/MM/yyyy")} – {format(new Date(to + "T00:00:00"), "dd/MM/yyyy")} ·{" "}
                         <Badge variant="secondary">{r.rows.length} registros</Badge>
                       </p>
                     </div>
