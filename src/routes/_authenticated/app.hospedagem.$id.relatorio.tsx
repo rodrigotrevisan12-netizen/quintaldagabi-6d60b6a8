@@ -44,6 +44,8 @@ export const Route = createFileRoute("/_authenticated/app/hospedagem/$id/relator
 function ReportPage() {
   const { id } = Route.useParams();
 
+  const [downloading, setDownloading] = useState(false);
+
   const stayQuery = useQuery({
     queryKey: ["boarding-report", id],
     queryFn: async () => {
