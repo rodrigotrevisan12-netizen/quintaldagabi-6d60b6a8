@@ -138,8 +138,8 @@ function RelatoriosPage() {
     }
 
     // Faturamento / lucro
-    const receitas = (d.tx as any[]).filter((t) => t.kind === "revenue");
-    const despesas = (d.tx as any[]).filter((t) => t.kind === "expense");
+    const receitas = (d.tx as any[]).filter((t) => t.kind === "receita" || t.kind === "revenue");
+    const despesas = (d.tx as any[]).filter((t) => t.kind === "despesa" || t.kind === "expense");
     const sumBy = <T,>(arr: T[], fn: (x: T) => number) => arr.reduce((a, b) => a + fn(b), 0);
     const totalReceita = sumBy(receitas, (r: any) => Number(r.amount));
     const totalDespesa = sumBy(despesas, (r: any) => Number(r.amount));
