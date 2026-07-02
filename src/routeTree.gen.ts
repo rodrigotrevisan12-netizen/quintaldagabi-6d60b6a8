@@ -32,6 +32,7 @@ import { Route as AuthenticatedAppSaudeRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
 import { Route as AuthenticatedAppProgramacaoRouteImport } from './routes/_authenticated/app.programacao'
 import { Route as AuthenticatedAppOcorrenciasRouteImport } from './routes/_authenticated/app.ocorrencias'
+import { Route as AuthenticatedAppInteligenciaFinanceiraRouteImport } from './routes/_authenticated/app.inteligencia-financeira'
 import { Route as AuthenticatedAppHospedagemRouteImport } from './routes/_authenticated/app.hospedagem'
 import { Route as AuthenticatedAppFuncionariosRouteImport } from './routes/_authenticated/app.funcionarios'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/app.financeiro'
@@ -172,6 +173,12 @@ const AuthenticatedAppOcorrenciasRoute =
     path: '/ocorrencias',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppInteligenciaFinanceiraRoute =
+  AuthenticatedAppInteligenciaFinanceiraRouteImport.update({
+    id: '/inteligencia-financeira',
+    path: '/inteligencia-financeira',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppHospedagemRoute =
   AuthenticatedAppHospedagemRouteImport.update({
     id: '/hospedagem',
@@ -279,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/funcionarios': typeof AuthenticatedAppFuncionariosRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
+  '/app/inteligencia-financeira': typeof AuthenticatedAppInteligenciaFinanceiraRoute
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
   '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -316,6 +324,7 @@ export interface FileRoutesByTo {
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/funcionarios': typeof AuthenticatedAppFuncionariosRoute
   '/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
+  '/app/inteligencia-financeira': typeof AuthenticatedAppInteligenciaFinanceiraRoute
   '/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
   '/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -357,6 +366,7 @@ export interface FileRoutesById {
   '/_authenticated/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/_authenticated/app/funcionarios': typeof AuthenticatedAppFuncionariosRoute
   '/_authenticated/app/hospedagem': typeof AuthenticatedAppHospedagemRouteWithChildren
+  '/_authenticated/app/inteligencia-financeira': typeof AuthenticatedAppInteligenciaFinanceiraRoute
   '/_authenticated/app/ocorrencias': typeof AuthenticatedAppOcorrenciasRoute
   '/_authenticated/app/programacao': typeof AuthenticatedAppProgramacaoRoute
   '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/app/financeiro'
     | '/app/funcionarios'
     | '/app/hospedagem'
+    | '/app/inteligencia-financeira'
     | '/app/ocorrencias'
     | '/app/programacao'
     | '/app/relatorios'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/app/financeiro'
     | '/app/funcionarios'
     | '/app/hospedagem'
+    | '/app/inteligencia-financeira'
     | '/app/ocorrencias'
     | '/app/programacao'
     | '/app/relatorios'
@@ -475,6 +487,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/financeiro'
     | '/_authenticated/app/funcionarios'
     | '/_authenticated/app/hospedagem'
+    | '/_authenticated/app/inteligencia-financeira'
     | '/_authenticated/app/ocorrencias'
     | '/_authenticated/app/programacao'
     | '/_authenticated/app/relatorios'
@@ -667,6 +680,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOcorrenciasRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/inteligencia-financeira': {
+      id: '/_authenticated/app/inteligencia-financeira'
+      path: '/inteligencia-financeira'
+      fullPath: '/app/inteligencia-financeira'
+      preLoaderRoute: typeof AuthenticatedAppInteligenciaFinanceiraRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/hospedagem': {
       id: '/_authenticated/app/hospedagem'
       path: '/hospedagem'
@@ -814,6 +834,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
   AuthenticatedAppFuncionariosRoute: typeof AuthenticatedAppFuncionariosRoute
   AuthenticatedAppHospedagemRoute: typeof AuthenticatedAppHospedagemRouteWithChildren
+  AuthenticatedAppInteligenciaFinanceiraRoute: typeof AuthenticatedAppInteligenciaFinanceiraRoute
   AuthenticatedAppOcorrenciasRoute: typeof AuthenticatedAppOcorrenciasRoute
   AuthenticatedAppProgramacaoRoute: typeof AuthenticatedAppProgramacaoRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
@@ -838,6 +859,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
   AuthenticatedAppFuncionariosRoute: AuthenticatedAppFuncionariosRoute,
   AuthenticatedAppHospedagemRoute: AuthenticatedAppHospedagemRouteWithChildren,
+  AuthenticatedAppInteligenciaFinanceiraRoute:
+    AuthenticatedAppInteligenciaFinanceiraRoute,
   AuthenticatedAppOcorrenciasRoute: AuthenticatedAppOcorrenciasRoute,
   AuthenticatedAppProgramacaoRoute: AuthenticatedAppProgramacaoRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
@@ -913,3 +936,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

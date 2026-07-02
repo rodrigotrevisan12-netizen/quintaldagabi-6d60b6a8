@@ -24,6 +24,7 @@ import {
   Send,
   Camera,
   CalendarRange,
+  BrainCircuit,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -61,6 +62,7 @@ const NAV: NavItem[] = [
   { to: "/app/funcionarios", label: "Funcionários", icon: UserCog, roles: ["admin"] },
   { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"] },
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, roles: ["admin"] },
+  { to: "/app/inteligencia-financeira", label: "Inteligência Financeira", icon: BrainCircuit, roles: ["admin"] },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
 ];
 
