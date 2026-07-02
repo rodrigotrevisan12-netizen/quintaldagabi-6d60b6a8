@@ -179,11 +179,11 @@ function InteligenciaFinanceiraPage() {
   // Separação de receitas e despesas no financeiro
   const transactions = transactionsQuery.data ?? [];
   const incomeTransactions = useMemo(
-    () => transactions.filter((t) => t.kind === "receita" || t.kind === "revenue"),
+    () => transactions.filter((t) => (t.kind as string) === "receita" || (t.kind as string) === "revenue"),
     [transactions],
   );
   const expenseTransactions = useMemo(
-    () => transactions.filter((t) => t.kind === "despesa" || t.kind === "expense"),
+    () => transactions.filter((t) => (t.kind as string) === "despesa" || (t.kind as string) === "expense"),
     [transactions],
   );
 
