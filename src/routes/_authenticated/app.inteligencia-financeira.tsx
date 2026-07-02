@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   LayoutDashboard,
   Tags,
@@ -11,13 +12,12 @@ import {
   Wallet,
   Users,
   Calendar,
-  Settings,
-  Shield,
   Loader2,
   DollarSign,
   Activity,
   Maximize2,
   Building,
+  Plus,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -32,11 +32,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  FIXED_CATEGORIES,
+  VARIABLE_CATEGORIES,
+  CATEGORY_LABELS,
+  classifyCategory,
+} from "@/lib/cost-engine";
 
 export const Route = createFileRoute("/_authenticated/app/inteligencia-financeira")({
   head: () => ({ meta: [{ title: "Inteligência Financeira — Quintal da Gabi" }] }),
   component: InteligenciaFinanceiraPage,
 });
+
 
 /* ------------------------------------------------------------------ */
 /*  Formatadores auxiliares                                           */
