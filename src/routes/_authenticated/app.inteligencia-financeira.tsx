@@ -500,92 +500,13 @@ function InteligenciaFinanceiraPage() {
         {/*  3. CUSTOS                                                         */}
         {/* ================================================================== */}
         <TabsContent value="custos" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Folha de Pagamento (Custos de Pessoal)</CardTitle>
-              <CardDescription>
-                Funcionários ativos e salários base carregados diretamente do módulo Funcionários
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome Completo</TableHead>
-                    <TableHead>Cargo / Função</TableHead>
-                    <TableHead>Salário Base</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(employeesQuery.data ?? []).map((emp: any) => (
-                    <TableRow key={emp.id}>
-                      <TableCell className="font-medium">{emp.fullName || emp.full_name}</TableCell>
-                      <TableCell className="capitalize">{emp.jobRole || emp.job_role}</TableCell>
-                      <TableCell>{fmtBRL(emp.salary)}</TableCell>
-                      <TableCell>
-                        <Badge variant={emp.active ? "default" : "secondary"}>
-                          {emp.active ? "Ativo" : "Desligado"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(employeesQuery.data ?? []).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        Nenhum funcionário cadastrado.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Despesas e Custos Gerais</CardTitle>
-              <CardDescription>
-                Despesas registradas integradas em tempo real do módulo Financeiro
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {expenseTransactions.map((tx: any) => (
-                    <TableRow key={tx.id}>
-                      <TableCell className="font-medium">{tx.description}</TableCell>
-                      <TableCell className="capitalize">
-                        {tx.expense_category || tx.expenseCategory || "Outros"}
-                      </TableCell>
-                      <TableCell>{fmtDate(tx.due_date || tx.dueDate)}</TableCell>
-                      <TableCell className="text-red-600 font-medium">-{fmtBRL(tx.amount)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{tx.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {expenseTransactions.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        Nenhuma despesa registrada.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <CostEngine
+            employees={employeesQuery.data ?? []}
+            expenses={expenseTransactions}
+            unitSettings={unitSettingsQuery.data ?? []}
+          />
         </TabsContent>
+
 
         {/* ================================================================== */}
         {/*  4. SIMULAÇÕES                                                     */}
