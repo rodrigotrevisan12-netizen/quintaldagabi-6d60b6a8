@@ -2757,6 +2757,23 @@ export type Database = {
         | "energia"
         | "veterinario"
         | "outros"
+        | "internet"
+        | "contabilidade"
+        | "sistema"
+        | "marketing"
+        | "pro_labore"
+        | "seguros"
+        | "impostos"
+        | "outras_fixas"
+        | "racao"
+        | "petiscos"
+        | "shampoo"
+        | "condicionador"
+        | "produtos_limpeza"
+        | "medicamentos"
+        | "lavanderia"
+        | "materiais_descartaveis"
+        | "outros_insumos"
       fin_kind: "receita" | "despesa"
       fin_revenue_category:
         | "creche"
@@ -2970,6 +2987,23 @@ export const Constants = {
         "energia",
         "veterinario",
         "outros",
+        "internet",
+        "contabilidade",
+        "sistema",
+        "marketing",
+        "pro_labore",
+        "seguros",
+        "impostos",
+        "outras_fixas",
+        "racao",
+        "petiscos",
+        "shampoo",
+        "condicionador",
+        "produtos_limpeza",
+        "medicamentos",
+        "lavanderia",
+        "materiais_descartaveis",
+        "outros_insumos",
       ],
       fin_kind: ["receita", "despesa"],
       fin_revenue_category: [
