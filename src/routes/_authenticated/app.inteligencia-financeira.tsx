@@ -50,6 +50,7 @@ import {
   CATEGORY_LABELS,
   classifyCategory,
 } from "@/lib/cost-engine";
+import { PricingTab } from "@/components/pricing-tab";
 
 export const Route = createFileRoute("/_authenticated/app/inteligencia-financeira")({
   head: () => ({ meta: [{ title: "Inteligência Financeira — Quintal da Gabi" }] }),
