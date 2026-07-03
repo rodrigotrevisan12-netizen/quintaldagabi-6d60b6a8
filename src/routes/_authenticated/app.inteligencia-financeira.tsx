@@ -409,92 +409,13 @@ function InteligenciaFinanceiraPage() {
         {/*  2. PRECIFICAÇÃO                                                   */}
         {/* ================================================================== */}
         <TabsContent value="precificacao" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Valores de Pacotes de Creche</CardTitle>
-              <CardDescription>
-                Tabela de preços de pacotes mensais atualmente cadastrados no módulo Configurações
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome do Pacote</TableHead>
-                    <TableHead>Dias por Semana</TableHead>
-                    <TableHead>Preço Mensal</TableHead>
-                    <TableHead>Preço Dia Extra</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(daycarePackagesQuery.data ?? []).map((pkg: any) => (
-                    <TableRow key={pkg.id}>
-                      <TableCell className="font-medium">{pkg.name}</TableCell>
-                      <TableCell>{pkg.days_per_week} dias</TableCell>
-                      <TableCell>{fmtBRL(pkg.monthly_price)}</TableCell>
-                      <TableCell>{fmtBRL(pkg.extra_day_price)}</TableCell>
-                      <TableCell>
-                        <Badge variant={pkg.is_active ? "default" : "secondary"}>
-                          {pkg.is_active ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(daycarePackagesQuery.data ?? []).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        Nenhum pacote de creche cadastrado.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Serviços de Banho & Tosa</CardTitle>
-              <CardDescription>
-                Serviços e preços base integrados do módulo de Banho e Tosa / Configurações
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Serviço</TableHead>
-                    <TableHead>Duração Estimada</TableHead>
-                    <TableHead>Preço Base</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(groomingServicesQuery.data ?? []).map((service: any) => (
-                    <TableRow key={service.id}>
-                      <TableCell className="font-medium">{service.name}</TableCell>
-                      <TableCell>{service.duration_min} min</TableCell>
-                      <TableCell>{fmtBRL(service.base_price)}</TableCell>
-                      <TableCell>
-                        <Badge variant={service.is_active ? "default" : "secondary"}>
-                          {service.is_active ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(groomingServicesQuery.data ?? []).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        Nenhum serviço de banho & tosa cadastrado.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <PricingTab
+            employees={employeesQuery.data ?? []}
+            expenses={expenseTransactions}
+            unitSettings={unitSettingsQuery.data ?? []}
+          />
         </TabsContent>
+
 
         {/* ================================================================== */}
         {/*  3. CUSTOS                                                         */}
