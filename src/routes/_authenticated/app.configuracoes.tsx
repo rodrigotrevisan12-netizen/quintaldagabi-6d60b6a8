@@ -80,21 +80,9 @@ function UnitsPanel() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Unidades</CardTitle>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" />Nova unidade</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Nova unidade</DialogTitle></DialogHeader>
-            <div className="grid gap-3">
-              <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-              <div><Label>Cidade</Label><Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} /></div>
-              <div><Label>Endereço</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-              <div><Label>Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
-            </div>
-            <DialogFooter><Button onClick={() => create.mutate()} disabled={create.isPending || !form.name}>{create.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Criar</Button></DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <CardTitle>Unidade</CardTitle>
       </CardHeader>
+
       <CardContent className="space-y-4">
         {(q.data ?? []).map((u: any) => {
           const s = (u.settings && u.settings[0]) || {};
