@@ -436,111 +436,29 @@ function InteligenciaFinanceiraPage() {
         {/*  4. SIMULAÇÕES                                                     */}
         {/* ================================================================== */}
         <TabsContent value="simulacoes" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Base de Dados de Entrada para Simulações</CardTitle>
-              <CardDescription>
-                Dados em tempo real prontos para alimentar futuros cenários hipotéticos
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-xl border p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Custo Pessoal Real</span>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {fmtBRL(
-                      (employeesQuery.data ?? [])
-                        .filter((e: any) => e.active)
-                        .reduce((acc: number, cur: any) => acc + (Number(cur.salary) || 0), 0)
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Soma de todos os salários de funcionários ativos.
-                  </p>
-                </div>
-
-                <div className="rounded-xl border p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Capacidade Creche</span>
-                    <Building className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(unitSettingsQuery.data ?? []).reduce(
-                      (acc: number, cur: any) => acc + (cur.daycare_capacity ?? 0),
-                      0
-                    )}{" "}
-                    vagas
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Soma de capacidades de creche registradas.
-                  </p>
-                </div>
-
-                <div className="rounded-xl border p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Capacidade Hospedagem</span>
-                    <Maximize2 className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(unitSettingsQuery.data ?? []).reduce(
-                      (acc: number, cur: any) => acc + (cur.boarding_capacity ?? 0),
-                      0
-                    )}{" "}
-                    vagas
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Soma de capacidades de hospedagem registradas.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-dashed p-6 text-center">
-                <FlaskConical className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                <h4 className="font-semibold mb-1">Área Pronta para Regras de Simulação</h4>
-                <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                  A estrutura da página já consome as capacidades e os salários. A próxima etapa irá introduzir a modelagem matemática para simulações de reajustes, projeção de folha de pagamento e alteração de margens de lucro.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <SimulationsTab
+            employees={employeesQuery.data ?? []}
+            expenses={expenseTransactions}
+            income={incomeTransactions}
+            unitSettings={unitSettingsQuery.data ?? []}
+          />
         </TabsContent>
 
         {/* ================================================================== */}
         {/*  5. INDICADORES                                                    */}
         {/* ================================================================== */}
         <TabsContent value="indicadores" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Métricas Operacionais & de Ocupação</CardTitle>
-              <CardDescription>
-                Indicadores derivados das tabelas de estadias e cadastros ativos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-xl border p-4 space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">Estadias de Creche</span>
-                  <div className="text-2xl font-bold">{daycareStaysQuery.data?.length ?? 0}</div>
-                  <span className="text-xs text-muted-foreground">Estadias registradas na base de dados.</span>
-                </div>
-
-                <div className="rounded-xl border p-4 space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">Estadias de Hospedagem</span>
-                  <div className="text-2xl font-bold">{boardingStaysQuery.data?.length ?? 0}</div>
-                  <span className="text-xs text-muted-foreground">Diárias e pernoites registradas na base de dados.</span>
-                </div>
-
-                <div className="rounded-xl border p-4 space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">Agendamentos Banho & Tosa</span>
-                  <div className="text-2xl font-bold">{groomingAppointmentsQuery.data?.length ?? 0}</div>
-                  <span className="text-xs text-muted-foreground">Serviços solicitados e agendados no calendário.</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <IndicatorsTab
+            employees={employeesQuery.data ?? []}
+            expenses={expenseTransactions}
+            income={incomeTransactions}
+            unitSettings={unitSettingsQuery.data ?? []}
+            daycareStays={daycareStaysQuery.data ?? []}
+            boardingStays={boardingStaysQuery.data ?? []}
+            groomingAppointments={groomingAppointmentsQuery.data ?? []}
+            daycarePackages={daycarePackagesQuery.data ?? []}
+            groomingServices={groomingServicesQuery.data ?? []}
+          />
         </TabsContent>
 
         {/* ================================================================== */}
