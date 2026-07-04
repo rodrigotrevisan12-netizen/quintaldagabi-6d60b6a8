@@ -51,6 +51,8 @@ import {
   classifyCategory,
 } from "@/lib/cost-engine";
 import { PricingTab } from "@/components/pricing-tab";
+import { SimulationsTab } from "@/components/simulations-tab";
+import { IndicatorsTab } from "@/components/indicators-tab";
 
 export const Route = createFileRoute("/_authenticated/app/inteligencia-financeira")({
   head: () => ({ meta: [{ title: "Inteligência Financeira — Quintal da Gabi" }] }),
