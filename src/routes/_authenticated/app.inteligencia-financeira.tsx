@@ -190,6 +190,18 @@ function InteligenciaFinanceiraPage() {
     },
   });
 
+  // 9. Dogs (contagem)
+  const dogsCountQuery = useQuery({
+    queryKey: ["inteligencia-financeira-dogs-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("dogs")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const isLoading =
     transactionsQuery.isLoading ||
     employeesQuery.isLoading ||
