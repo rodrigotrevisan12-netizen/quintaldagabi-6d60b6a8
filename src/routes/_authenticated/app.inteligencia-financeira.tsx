@@ -53,6 +53,8 @@ import {
 import { PricingTab } from "@/components/pricing-tab";
 import { SimulationsTab } from "@/components/simulations-tab";
 import { IndicatorsTab } from "@/components/indicators-tab";
+import { DashboardTab } from "@/components/dashboard-tab";
+import { ReportsTab } from "@/components/reports-tab";
 
 export const Route = createFileRoute("/_authenticated/app/inteligencia-financeira")({
   head: () => ({ meta: [{ title: "Inteligência Financeira — Quintal da Gabi" }] }),
@@ -188,6 +190,18 @@ function InteligenciaFinanceiraPage() {
     },
   });
 
+  // 9. Dogs (contagem)
+  const dogsCountQuery = useQuery({
+    queryKey: ["inteligencia-financeira-dogs-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("dogs")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const isLoading =
     transactionsQuery.isLoading ||
     employeesQuery.isLoading ||
@@ -261,151 +275,16 @@ function InteligenciaFinanceiraPage() {
         {/*  1. DASHBOARD                                                      */}
         {/* ================================================================== */}
         <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Transações Financeiras
-                </CardTitle>
-                <Wallet className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{transactions.length}</div>
-                <p className="text-xs text-muted-foreground">
-                  {incomeTransactions.length} receitas e {expenseTransactions.length} despesas integradas.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Quadro de Funcionários
-                </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{employeesQuery.data?.length ?? 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  Colaboradores cadastrados na folha de pagamento.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Hospedagens & Creches
-                </CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {(daycareStaysQuery.data?.length ?? 0) + (boardingStaysQuery.data?.length ?? 0)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {daycareStaysQuery.data?.length ?? 0} estadias de creche e{" "}
-                  {boardingStaysQuery.data?.length ?? 0} de hospedagem integradas.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Serviços Realizados
-                </CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {groomingAppointmentsQuery.data?.length ?? 0}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Agendamentos de banho e tosa vinculados.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados de Operação Integrados</CardTitle>
-                <CardDescription>
-                  Fontes de dados alimentando o Centro de Inteligência
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm font-medium">Módulo Financeiro</span>
-                  </div>
-                  <Badge variant="outline">Conectado</Badge>
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm font-medium">Módulo de Creche & Hospedagem</span>
-                  </div>
-                  <Badge variant="outline">Conectado</Badge>
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm font-medium">Módulo de Banho & Tosa</span>
-                  </div>
-                  <Badge variant="outline">Conectado</Badge>
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-sm font-medium">Módulo de Funcionários</span>
-                  </div>
-                  <Badge variant="outline">Conectado</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações de Unidade & Capacidades</CardTitle>
-                <CardDescription>
-                  Parâmetros de ocupação máxima definidos nas configurações
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Unidade</TableHead>
-                      <TableHead>Capacidade Creche</TableHead>
-                      <TableHead>Capacidade Hospedagem</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(unitSettingsQuery.data ?? []).map((setting: any) => (
-                      <TableRow key={setting.unit_id}>
-                        <TableCell className="font-medium">
-                          {setting.unit?.name ?? "Principal"}
-                        </TableCell>
-                        <TableCell>{setting.daycare_capacity ?? 0} cães</TableCell>
-                        <TableCell>{setting.boarding_capacity ?? 0} cães</TableCell>
-                      </TableRow>
-                    ))}
-                    {(unitSettingsQuery.data ?? []).length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={3} className="text-center text-muted-foreground">
-                          Nenhuma unidade configurada.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
+          <DashboardTab
+            income={incomeTransactions}
+            expenses={expenseTransactions}
+            employees={employeesQuery.data ?? []}
+            unitSettings={unitSettingsQuery.data ?? []}
+            daycareStays={daycareStaysQuery.data ?? []}
+            boardingStays={boardingStaysQuery.data ?? []}
+            groomingAppointments={groomingAppointmentsQuery.data ?? []}
+            dogsCount={dogsCountQuery.data ?? 0}
+          />
         </TabsContent>
 
         {/* ================================================================== */}
@@ -465,49 +344,15 @@ function InteligenciaFinanceiraPage() {
         {/*  6. RELATÓRIOS                                                     */}
         {/* ================================================================== */}
         <TabsContent value="relatorios" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Consolidação de Receitas</CardTitle>
-              <CardDescription>
-                Todas as receitas do módulo Financeiro que alimentam a análise de faturamento
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Data de Entrada</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {incomeTransactions.map((tx: any) => (
-                    <TableRow key={tx.id}>
-                      <TableCell className="font-medium">{tx.description}</TableCell>
-                      <TableCell className="capitalize">
-                        {tx.revenue_category || tx.revenueCategory || "Outros"}
-                      </TableCell>
-                      <TableCell>{fmtDate(tx.paid_at || tx.paidAt || tx.created_at)}</TableCell>
-                      <TableCell className="text-green-600 font-medium">+{fmtBRL(tx.amount)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{tx.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {incomeTransactions.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        Nenhuma receita registrada no módulo Financeiro.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <ReportsTab
+            income={incomeTransactions}
+            expenses={expenseTransactions}
+            employees={employeesQuery.data ?? []}
+            unitSettings={unitSettingsQuery.data ?? []}
+            daycareStays={daycareStaysQuery.data ?? []}
+            boardingStays={boardingStaysQuery.data ?? []}
+            groomingAppointments={groomingAppointmentsQuery.data ?? []}
+          />
         </TabsContent>
       </Tabs>
     </div>
