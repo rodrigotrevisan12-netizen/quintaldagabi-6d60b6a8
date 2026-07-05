@@ -53,6 +53,8 @@ import {
 import { PricingTab } from "@/components/pricing-tab";
 import { SimulationsTab } from "@/components/simulations-tab";
 import { IndicatorsTab } from "@/components/indicators-tab";
+import { DashboardTab } from "@/components/dashboard-tab";
+import { ReportsTab } from "@/components/reports-tab";
 
 export const Route = createFileRoute("/_authenticated/app/inteligencia-financeira")({
   head: () => ({ meta: [{ title: "Inteligência Financeira — Quintal da Gabi" }] }),
