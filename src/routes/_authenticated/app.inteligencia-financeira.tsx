@@ -344,49 +344,15 @@ function InteligenciaFinanceiraPage() {
         {/*  6. RELATÓRIOS                                                     */}
         {/* ================================================================== */}
         <TabsContent value="relatorios" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Consolidação de Receitas</CardTitle>
-              <CardDescription>
-                Todas as receitas do módulo Financeiro que alimentam a análise de faturamento
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Categoria</TableHead>
-                    <TableHead>Data de Entrada</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {incomeTransactions.map((tx: any) => (
-                    <TableRow key={tx.id}>
-                      <TableCell className="font-medium">{tx.description}</TableCell>
-                      <TableCell className="capitalize">
-                        {tx.revenue_category || tx.revenueCategory || "Outros"}
-                      </TableCell>
-                      <TableCell>{fmtDate(tx.paid_at || tx.paidAt || tx.created_at)}</TableCell>
-                      <TableCell className="text-green-600 font-medium">+{fmtBRL(tx.amount)}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{tx.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {incomeTransactions.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
-                        Nenhuma receita registrada no módulo Financeiro.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <ReportsTab
+            income={incomeTransactions}
+            expenses={expenseTransactions}
+            employees={employeesQuery.data ?? []}
+            unitSettings={unitSettingsQuery.data ?? []}
+            daycareStays={daycareStaysQuery.data ?? []}
+            boardingStays={boardingStaysQuery.data ?? []}
+            groomingAppointments={groomingAppointmentsQuery.data ?? []}
+          />
         </TabsContent>
       </Tabs>
     </div>
