@@ -25,8 +25,11 @@ import {
   Camera,
   CalendarRange,
   BrainCircuit,
+  ChevronDown,
+  Folder,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useMemo, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
@@ -41,30 +44,144 @@ type NavItem = {
   soon?: boolean;
 };
 
-const NAV: NavItem[] = [
-  { to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] },
-  { to: "/app/calendario", label: "Calendário", icon: CalendarRange, roles: ["admin", "funcionario"] },
-  { to: "/app/agenda", label: "Creche", icon: CalendarDays, roles: ["admin", "funcionario"] },
-  { to: "/app/programacao", label: "Programação do dia", icon: ClipboardList, roles: ["admin", "funcionario"] },
-  { to: "/app/chegadas", label: "Chegadas", icon: Send, roles: ["admin", "funcionario"] },
-  { to: "/app/stories", label: "Stories", icon: Camera, roles: ["admin", "funcionario"] },
-  { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
-  { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
-  { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"] },
-  { to: "/app/hospedagem", label: "Hospedagem", icon: BedDouble, roles: ["admin", "funcionario"] },
-  { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"] },
-  { to: "/app/boletins", label: "Boletins", icon: Newspaper, roles: ["admin", "funcionario"] },
-  { to: "/app/documentos", label: "Documentos", icon: FileText, roles: ["admin", "funcionario"] },
-  { to: "/app/comunicacao", label: "Comunicação", icon: MessageSquare, roles: ["admin", "funcionario"] },
-  { to: "/app/treinamento", label: "Treinamento", icon: GraduationCap, roles: ["admin", "funcionario"] },
-  { to: "/app/ocorrencias", label: "Ocorrências", icon: AlertCircle, roles: ["admin", "funcionario"] },
-  { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"] },
-  { to: "/app/funcionarios", label: "Funcionários", icon: UserCog, roles: ["admin"] },
-  { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"] },
-  { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, roles: ["admin"] },
-  { to: "/app/inteligencia-financeira", label: "Inteligência Financeira", icon: BrainCircuit, roles: ["admin"] },
-  { to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
+type NavGroup = {
+  id: string;
+  label?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  items: NavItem[];
+};
+
+// Itens organizados em grupos que fazem sentido operacional, para reduzir a
+// quantidade de opções soltas na barra lateral. Grupos sem "label" são
+// exibidos como um item único (ex.: Início, Documentos, Configurações).
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: "inicio",
+    items: [{ to: "/app", label: "Início", icon: Home, roles: ["admin", "funcionario", "tutor"] }],
+  },
+  {
+    id: "operacao",
+    label: "Operação do dia",
+    icon: ClipboardList,
+    items: [
+      {
+        to: "/app/calendario",
+        label: "Calendário",
+        icon: CalendarRange,
+        roles: ["admin", "funcionario"],
+      },
+      { to: "/app/agenda", label: "Creche", icon: CalendarDays, roles: ["admin", "funcionario"] },
+      {
+        to: "/app/programacao",
+        label: "Programação do dia",
+        icon: ListChecks,
+        roles: ["admin", "funcionario"],
+      },
+      { to: "/app/chegadas", label: "Chegadas", icon: Send, roles: ["admin", "funcionario"] },
+    ],
+  },
+  {
+    id: "estadias",
+    label: "Hospedagem & Banho",
+    icon: BedDouble,
+    items: [
+      {
+        to: "/app/hospedagem",
+        label: "Hospedagem",
+        icon: BedDouble,
+        roles: ["admin", "funcionario"],
+      },
+      { to: "/app/banho-tosa", label: "Banho & tosa", icon: Bath, roles: ["admin", "funcionario"] },
+    ],
+  },
+  {
+    id: "clientes",
+    label: "Tutores & Cães",
+    icon: Users,
+    items: [
+      { to: "/app/tutores", label: "Tutores", icon: Users, roles: ["admin", "funcionario"] },
+      { to: "/app/caes", label: "Cães", icon: Dog, roles: ["admin", "funcionario", "tutor"] },
+      { to: "/app/saude", label: "Saúde", icon: HeartPulse, roles: ["admin", "funcionario"] },
+    ],
+  },
+  {
+    id: "conteudo",
+    label: "Conteúdo para tutores",
+    icon: Camera,
+    items: [
+      { to: "/app/boletins", label: "Boletins", icon: Newspaper, roles: ["admin", "funcionario"] },
+      { to: "/app/stories", label: "Stories", icon: Camera, roles: ["admin", "funcionario"] },
+    ],
+  },
+  {
+    id: "comunicacao",
+    label: "Comunicação",
+    icon: MessageSquare,
+    items: [
+      {
+        to: "/app/comunicacao",
+        label: "Chat & avisos",
+        icon: MessageSquare,
+        roles: ["admin", "funcionario"],
+      },
+      {
+        to: "/app/ocorrencias",
+        label: "Ocorrências",
+        icon: AlertCircle,
+        roles: ["admin", "funcionario"],
+      },
+    ],
+  },
+  {
+    id: "equipe",
+    label: "Equipe",
+    icon: UserCog,
+    items: [
+      { to: "/app/funcionarios", label: "Funcionários", icon: UserCog, roles: ["admin"] },
+      { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"] },
+      {
+        to: "/app/treinamento",
+        label: "Treinamento",
+        icon: GraduationCap,
+        roles: ["admin", "funcionario"],
+      },
+    ],
+  },
+  {
+    id: "financeiro",
+    label: "Financeiro",
+    icon: Wallet,
+    items: [
+      { to: "/app/financeiro", label: "Visão geral & caixa", icon: Wallet, roles: ["admin"] },
+      { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, roles: ["admin"] },
+      {
+        to: "/app/inteligencia-financeira",
+        label: "Inteligência & precificação",
+        icon: BrainCircuit,
+        roles: ["admin"],
+      },
+    ],
+  },
+  {
+    id: "documentos",
+    items: [
+      {
+        to: "/app/documentos",
+        label: "Documentos",
+        icon: FileText,
+        roles: ["admin", "funcionario"],
+      },
+    ],
+  },
+  {
+    id: "configuracoes",
+    items: [{ to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] }],
+  },
 ];
+
+// Lista "achatada", usada onde a estrutura em grupos não é necessária
+// (ex.: navegação inferior mobile).
+const NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data: me, isLoading } = useCurrentUser();
@@ -82,6 +199,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   const role = me?.primaryRole ?? "tutor";
   const items = NAV.filter((n) => n.roles.includes(role));
 
+  // Grupos visíveis para o papel atual (só entram grupos com pelo menos 1 item permitido)
+  const visibleGroups = useMemo(
+    () =>
+      NAV_GROUPS.map((g) => ({
+        ...g,
+        items: g.items.filter((i) => i.roles.includes(role)),
+      })).filter((g) => g.items.length > 0),
+    [role],
+  );
+
+  // Expande automaticamente o grupo que contém a rota atual
+  const activeGroupId = visibleGroups.find((g) =>
+    g.items.some((i) => pathname === i.to || (i.to !== "/app" && pathname.startsWith(i.to))),
+  )?.id;
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const isGroupOpen = (id: string) => openGroups[id] ?? id === activeGroupId;
+  const toggleGroup = (id: string) =>
+    setOpenGroups((prev) => ({ ...prev, [id]: !isGroupOpen(id) }));
+
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[260px_1fr]">
       <aside className="hidden border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
@@ -94,33 +230,87 @@ export function AppShell({ children }: { children: ReactNode }) {
               Quintal da Gabi
             </p>
             <p className="text-xs text-sidebar-foreground/70">
-              {role === "admin" ? "Administradora" : role === "funcionario" ? "Funcionário" : "Tutor"}
+              {role === "admin"
+                ? "Administradora"
+                : role === "funcionario"
+                  ? "Funcionário"
+                  : "Tutor"}
             </p>
           </div>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4">
-          {items.map((item) => {
-            const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
-            const Icon = item.icon;
+          {visibleGroups.map((group) => {
+            // Grupo sem label = item único (Início, Documentos, Configurações)
+            if (!group.label) {
+              const item = group.items[0];
+              const active =
+                pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="flex-1">{item.label}</span>
+                </Link>
+              );
+            }
+
+            const GroupIcon = group.icon ?? Folder;
+            const open = isGroupOpen(group.id);
+            const groupActive = group.id === activeGroupId;
+
             return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="flex-1">{item.label}</span>
-                {item.soon ? (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                    em breve
-                  </span>
+              <div key={group.id} className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.id)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                    groupActive
+                      ? "text-sidebar-foreground"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  )}
+                >
+                  <GroupIcon className="h-4 w-4" />
+                  <span className="flex-1 text-left">{group.label}</span>
+                  <ChevronDown
+                    className={cn("h-3.5 w-3.5 transition-transform", open ? "rotate-180" : "")}
+                  />
+                </button>
+                {open ? (
+                  <div className="ml-4 space-y-0.5 border-l border-sidebar-border pl-3">
+                    {group.items.map((item) => {
+                      const active =
+                        pathname === item.to ||
+                        (item.to !== "/app" && pathname.startsWith(item.to));
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                            active
+                              ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                          )}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          <span className="flex-1">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 ) : null}
-              </Link>
+              </div>
             );
           })}
         </nav>
@@ -156,7 +346,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="sticky bottom-0 grid grid-cols-4 border-t border-border bg-card lg:hidden">
           {items.slice(0, 4).map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
+            const active =
+              pathname === item.to || (item.to !== "/app" && pathname.startsWith(item.to));
             return (
               <Link
                 key={item.to}
@@ -176,3 +367,4 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+Simplifica menu lateral
