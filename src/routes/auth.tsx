@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — Quintal da Gabi" },
-      { name: "description", content: "Acesse o sistema do Quintal da Gabi." },
+      { title: "Entrar — Central Pet" },
+      { name: "description", content: "Acesse o sistema Central Pet." },
     ],
   }),
   component: AuthPage,
@@ -84,34 +84,39 @@ function AuthPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Lado decorativo */}
-      <div className="relative hidden bg-sidebar lg:block">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/20 to-transparent" />
-        <div className="relative flex h-full flex-col justify-between p-12">
+      {/* Lado decorativo — identidade Central Pet */}
+      <div
+        className="relative hidden lg:block"
+        style={{ background: "linear-gradient(135deg,#FF7F50,#FFCA3A)" }}
+      >
+        <div className="relative flex h-full flex-col justify-between p-12 text-white">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground">
-              <PawPrint className="h-5 w-5" />
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-white/20 text-xl">
+              🐾
             </span>
-            <span className="font-display text-xl font-semibold">Quintal da Gabi</span>
+            <span className="text-2xl font-extrabold">Central Pet</span>
           </Link>
           <div>
-            <p className="font-display text-3xl leading-tight text-sidebar-foreground">
-              "Cada cãozinho tem seu jeitinho. <br /> A gente cuida de tudo —
-              você relaxa."
+            <h2 className="text-4xl font-extrabold leading-tight">Bem-vindo de volta!</h2>
+            <p className="mt-3 text-white/90">
+              Acesse sua empresa ou fale com a gente para criar uma nova.
             </p>
-            <p className="mt-3 text-sm text-sidebar-foreground/70">— Gabi</p>
           </div>
+          <div className="text-sm text-white/80">100% multiempresa · White label · Sem cartão</div>
         </div>
       </div>
 
       {/* Formulário */}
-      <div className="flex items-center justify-center px-6 py-12">
+      <div className="flex items-center justify-center bg-orange-50/40 px-6 py-12">
         <div className="w-full max-w-sm">
           <Link to="/" className="mb-8 inline-flex items-center gap-2 lg:hidden">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
-              <PawPrint className="h-5 w-5" />
+            <span
+              className="grid h-9 w-9 place-items-center rounded-full text-lg text-white"
+              style={{ background: "linear-gradient(135deg,#FF7F50,#FFCA3A)" }}
+            >
+              🐾
             </span>
-            <span className="font-display text-lg font-semibold">Quintal da Gabi</span>
+            <span className="text-lg font-extrabold text-[#E86A3C]">Central Pet</span>
           </Link>
 
           {mode === "login" ? (
