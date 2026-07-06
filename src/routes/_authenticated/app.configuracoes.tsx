@@ -68,7 +68,7 @@ function BrandingPanel() {
 
   const save = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Record<string, string | null> }) => {
-      const { error } = await supabase.from("units").update(patch).eq("id", id);
+      const { error } = await supabase.from("units").update(patch as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
