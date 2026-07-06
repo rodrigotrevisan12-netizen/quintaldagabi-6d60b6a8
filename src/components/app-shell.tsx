@@ -364,3 +364,31 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+function BrandMark({ size = "md" }: { size?: "sm" | "md" }) {
+  const brand = useBrand();
+  const dim = size === "sm" ? "h-8 w-8" : "h-9 w-9";
+  if (brand.logoUrl) {
+    return (
+      <img
+        src={brand.logoUrl}
+        alt={brand.name}
+        className={cn("rounded-full object-cover", dim)}
+      />
+    );
+  }
+  return (
+    <span
+      className={cn("grid place-items-center rounded-full text-white", dim)}
+      style={{ background: `linear-gradient(135deg, ${brand.primary}, ${brand.accent})` }}
+      aria-hidden
+    >
+      <PawPrint className={size === "sm" ? "h-4 w-4" : "h-5 w-5"} />
+    </span>
+  );
+}
+
+function BrandName() {
+  const brand = useBrand();
+  return <>{brand.name}</>;
+}
