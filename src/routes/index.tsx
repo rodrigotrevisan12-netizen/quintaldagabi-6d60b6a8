@@ -1,393 +1,297 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  PawPrint,
   CalendarDays,
-  BedDouble,
-  Bath,
-  FileText,
-  Newspaper,
-  ClipboardList,
-  HeartPulse,
-  ShieldCheck,
+  Dog,
   Users,
+  FileText,
+  Wallet,
   BarChart3,
-  Sparkles,
-  ArrowRight,
-  Check,
-  ChevronDown,
+  Palette,
+  Smartphone,
+  HeartHandshake,
 } from "lucide-react";
-import { useState } from "react";
+import type { ComponentType } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Central Pet — Software de gestão para creche, hospedagem e banho & tosa" },
+      { title: "Central Pet — Gestão completa para creches, hotéis e day cares caninos" },
       {
         name: "description",
         content:
-          "Plataforma completa para pet shops, creches e hospedagens caninas: agenda, check-in, prontuário, contratos digitais, boletins e portal do tutor em um só lugar.",
+          "Central Pet: sistema multiempresa para creches, hotéis e day cares caninos. Agenda, tutores, contratos, boletins, financeiro e portal do tutor em um só lugar.",
       },
       { property: "og:title", content: "Central Pet — Gestão completa para o seu negócio pet" },
       {
         property: "og:description",
-        content: "Tudo que sua creche, hospedagem e banho & tosa precisam para operar sem planilha.",
+        content: "Mais tempo cuidando dos cães, menos tempo com planilha.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://quintaldagabi.lovable.app/" },
     ],
-    links: [{ rel: "canonical", href: "https://quintaldagabi.lovable.app/" }],
   }),
   component: Landing,
 });
 
-const MODULES = [
-  { icon: CalendarDays, title: "Creche & day care", desc: "Check-in, check-out, controle de presença, alimentação, medicação e atividades do dia." },
-  { icon: BedDouble, title: "Hospedagem", desc: "Entrada, saída prevista, pertences, ração, medicação, ocupação e relatório automático." },
-  { icon: Bath, title: "Banho & tosa", desc: "Agendamento, status, fotos antes e depois, produtividade por funcionário." },
-  { icon: ClipboardList, title: "Programação do dia", desc: "A administradora define tarefas, horários, locais e responsáveis. Funcionário só vê o que é dele." },
-  { icon: Newspaper, title: "Boletins diários", desc: "Alimentação, hidratação, passeios, comportamento, fotos e vídeos enviados ao tutor." },
-  { icon: FileText, title: "Documentos automáticos", desc: "Contratos, termos e autorizações com assinatura digital e PDF pronto." },
-  { icon: HeartPulse, title: "Prontuário do pet", desc: "Vacinas, alergias, saúde, comportamento e timeline cronológica completa." },
-  { icon: Users, title: "Cadastro de tutores", desc: "Dados, contato, consentimento LGPD e múltiplos cães por tutor." },
-  { icon: BarChart3, title: "Painel & relatórios", desc: "Ocupação, presentes, vagas, produtividade e indicadores em tempo real." },
+type Feature = { icon: ComponentType<{ className?: string }>; title: string; desc: string };
+
+const FEATURES: Feature[] = [
+  { icon: CalendarDays, title: "Agendamentos", desc: "Controle a agenda de creche, hospedagem, banho e day care." },
+  { icon: Dog, title: "Gestão de cães", desc: "Ficha completa: vacinas, alergias, comportamento e alimentação." },
+  { icon: Users, title: "Tutores", desc: "Cadastro, contatos, autorizações e portal exclusivo." },
+  { icon: FileText, title: "Contratos digitais", desc: "Termos e autorizações com assinatura em minutos." },
+  { icon: Wallet, title: "Financeiro", desc: "Cobranças, planos mensais, recibos e inadimplência." },
+  { icon: BarChart3, title: "Relatórios", desc: "Ocupação, faturamento e performance por unidade." },
+  { icon: Palette, title: "White label", desc: "Cada empresa com seu nome, logo e cores." },
+  { icon: Smartphone, title: "Multiplataforma", desc: "Computador, tablet ou celular, sem instalar nada." },
+  { icon: HeartHandshake, title: "Suporte humano", desc: "Equipe que entende creche e hotel canino de verdade." },
 ];
 
-const BENEFITS = [
-  "Sem planilha, sem WhatsApp bagunçado, sem perda de informação.",
-  "Cada perfil (admin, funcionário, tutor) só enxerga o que precisa.",
-  "Funciona no computador, tablet e celular.",
-  "Backup em nuvem, dados protegidos e adequados à LGPD.",
-  "Assinatura digital de contratos sem precisar imprimir.",
-  "Tutores acompanham o dia do pet sem precisar ligar.",
+const PLANS = [
+  { name: "Mensal", desc: "Pague todo mês", price: "R$ 220,00", per: "/mês", popular: false },
+  { name: "Trimestral", desc: "Economia a cada 3 meses", price: "R$ 620,00", per: "/trimestre", popular: true },
+  { name: "Semestral", desc: "Ainda mais praticidade", price: "R$ 1.200,00", per: "/semestre", popular: false },
+  { name: "Anual", desc: "O melhor custo-benefício", price: "R$ 2.200,00", per: "/ano", popular: false },
 ];
 
-const FAQ = [
-  { q: "Preciso instalar alguma coisa?", a: "Não. Tudo roda no navegador — basta acessar pelo link do seu domínio. Funciona em qualquer computador, tablet ou celular." },
-  { q: "Meus dados ficam seguros?", a: "Sim. Banco de dados em nuvem com regras de acesso por perfil, criptografia e backup automático. Cada funcionário só vê o que é da função dele." },
-  { q: "Consigo personalizar contratos e a programação do dia?", a: "Sim. Os modelos de contrato têm variáveis automáticas (tutor, pet, datas) e a programação do dia é montada pela administradora tarefa a tarefa." },
-  { q: "Quanto custa?", a: "O valor depende do tamanho do seu negócio. Fale com a gente para receber uma proposta personalizada." },
-  { q: "Funciona para rede com mais de uma unidade?", a: "Sim. O sistema já nasceu preparado para múltiplas unidades, com separação de equipe e relatórios consolidados." },
-];
+function Logo({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={
+        "grid h-10 w-10 place-items-center rounded-full text-xl text-white shadow-lg " + className
+      }
+      style={{ background: "linear-gradient(135deg,#FF7F50,#FFCA3A)" }}
+      aria-hidden
+    >
+      🐾
+    </span>
+  );
+}
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-[#fafbfc]">
+    <div className="min-h-screen overflow-x-hidden bg-orange-50/40 font-sans text-gray-700 antialiased">
       {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a1a]/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-orange-100 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <a href="#top" className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-[#6366f1] to-[#4f46e5] shadow-lg shadow-indigo-500/30">
-              <PawPrint className="h-5 w-5 text-white" />
+            <Logo />
+            <span className="bg-gradient-to-r from-[#E86A3C] to-[#FF9F43] bg-clip-text text-2xl font-extrabold text-transparent">
+              Central Pet
             </span>
-            <span className="text-lg font-semibold tracking-tight">Central Pet</span>
           </a>
-          <nav className="hidden items-center gap-8 text-sm text-white/70 md:flex">
-            <a href="#modulos" className="hover:text-white">Módulos</a>
-            <a href="#beneficios" className="hover:text-white">Benefícios</a>
-            <a href="#depoimentos" className="hover:text-white">Depoimentos</a>
-            <a href="#faq" className="hover:text-white">FAQ</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link to="/auth" className="hidden text-sm text-white/80 hover:text-white sm:inline">
-              Entrar
-            </Link>
-            <a
-              href="#contato"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-500/30 transition hover:bg-[#4338ca]"
+          <div className="hidden items-center gap-8 font-medium text-gray-600 md:flex">
+            <a href="#funcionalidades" className="hover:text-[#FF7F50]">Funcionalidades</a>
+            <a href="#planos" className="hover:text-[#FF7F50]">Planos</a>
+            <a href="#depoimentos" className="hover:text-[#FF7F50]">Depoimentos</a>
+            <Link
+              to="/auth"
+              className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-6 py-2.5 font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
             >
-              Falar com vendas <ArrowRight className="h-3.5 w-3.5" />
-            </a>
+              Acessar
+            </Link>
           </div>
+          <Link
+            to="/auth"
+            className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-4 py-2 text-sm font-semibold text-white shadow-lg md:hidden"
+          >
+            Acessar
+          </Link>
         </div>
-      </header>
+      </nav>
 
       {/* Hero */}
-      <section id="top" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 opacity-60">
-          <div className="absolute -left-32 top-0 h-[500px] w-[500px] rounded-full bg-indigo-600/20 blur-[120px]" />
-          <div className="absolute right-0 top-40 h-[400px] w-[400px] rounded-full bg-violet-500/15 blur-[120px]" />
-        </div>
-        <div className="relative mx-auto max-w-6xl px-6 pb-24 pt-20 lg:pt-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
-              <Sparkles className="h-3 w-3 text-indigo-400" /> Software pronto para o seu negócio pet
-            </span>
-            <h1 className="mt-6 text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
-              A operação inteira do seu{" "}
-              <span className="bg-gradient-to-r from-indigo-300 via-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                pet shop
-              </span>{" "}
-              num só sistema.
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
-              Creche, hospedagem, banho & tosa, contratos digitais, boletins diários e portal do tutor.
-              Tudo conectado, em tempo real, sem planilha.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <a
-                href="#contato"
-                className="inline-flex items-center gap-2 rounded-lg bg-[#4f46e5] px-6 py-3 text-sm font-medium text-white shadow-xl shadow-indigo-500/30 transition hover:bg-[#4338ca]"
-              >
-                Solicitar demonstração <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#modulos"
-                className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white hover:bg-white/10"
-              >
-                Ver módulos
-              </a>
-            </div>
-            <p className="mt-5 text-xs text-white/40">
-              Já em uso em operação real · Implantação assistida · Suporte humano
-            </p>
-          </div>
+      <section id="top" className="relative overflow-hidden pt-32 pb-20 lg:pt-44 lg:pb-32">
+        <span
+          className="pointer-events-none absolute -left-16 top-24 h-72 w-72 rounded-full opacity-35 blur-3xl"
+          style={{ background: "#FF7F50" }}
+        />
+        <span
+          className="pointer-events-none absolute -right-16 bottom-24 h-64 w-64 rounded-full opacity-30 blur-3xl"
+          style={{ background: "#FFD66B" }}
+        />
+        <span className="pointer-events-none absolute left-10 top-24 text-6xl opacity-10">🐾</span>
+        <span className="pointer-events-none absolute right-16 bottom-24 text-5xl opacity-10">🐾</span>
 
-          {/* Mock dashboard preview */}
-          <div className="relative mx-auto mt-20 max-w-5xl">
-            <div className="absolute -inset-x-12 -inset-y-4 rounded-[2rem] bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-indigo-500/20 blur-2xl" />
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#141432] shadow-2xl">
-              <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400/60" />
-                <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/60" />
-                <span className="h-2.5 w-2.5 rounded-full bg-green-400/60" />
-                <span className="ml-3 text-xs text-white/40">central-pet · painel</span>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="text-center lg:text-left">
+              <span className="mb-6 inline-block rounded-full bg-orange-100 px-4 py-1.5 text-sm font-semibold text-[#E86A3C]">
+                🐶 Feito para quem ama cachorro
+              </span>
+              <h1 className="mb-6 text-4xl font-extrabold leading-tight text-gray-800 sm:text-5xl lg:text-6xl">
+                A rotina da sua{" "}
+                <span className="bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] bg-clip-text text-transparent">
+                  creche canina
+                </span>{" "}
+                organizada de um jeito lindo
+              </h1>
+              <p className="mb-8 text-lg leading-relaxed text-gray-600">
+                A Central Pet é o sistema mais amigável do mercado para creches, hotéis e day cares de cães.
+                Agendamentos, tutores, contratos, financeiro e muito mais — tudo em um só lugar.
+              </p>
+              <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
+                <a
+                  href="#planos"
+                  className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-8 py-4 text-center text-lg font-bold text-white shadow-xl transition-transform hover:-translate-y-1"
+                >
+                  Ver planos
+                </a>
+                <a
+                  href="#funcionalidades"
+                  className="rounded-full border border-orange-100 bg-white px-8 py-4 text-center text-lg font-bold text-[#FF7F50] shadow-lg transition-transform hover:-translate-y-1"
+                >
+                  Conhecer funcionalidades
+                </a>
               </div>
-              <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-3">
-                {[
-                  { label: "Presentes hoje", value: "24", sub: "de 30 vagas" },
-                  { label: "Hospedagem", value: "8", sub: "ocupando 10 baias" },
-                  { label: "Banhos do dia", value: "12", sub: "9 concluídos" },
-                ].map((s) => (
-                  <div key={s.label} className="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-white/50">{s.label}</p>
-                    <p className="mt-2 text-3xl font-semibold">{s.value}</p>
-                    <p className="text-xs text-white/40">{s.sub}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="grid gap-4 p-6 pt-0 md:grid-cols-2">
-                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <p className="mb-3 text-xs uppercase tracking-wider text-white/40">Programação do dia</p>
-                  <ul className="space-y-2 text-sm">
-                    {["09:00 · Passeio grupo A", "11:00 · Banho — Thor", "14:00 · Brincadeira livre", "16:30 · Lanche da tarde"].map((t) => (
-                      <li key={t} className="flex items-center gap-2 text-white/80">
-                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> {t}
-                      </li>
-                    ))}
-                  </ul>
+            </div>
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-3xl border-4 border-white shadow-2xl transition-transform duration-500 hover:rotate-0 rotate-2">
+                <img
+                  src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=1000&q=80"
+                  alt="Cachorro feliz em creche canina"
+                  className="h-auto w-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-6">
+                  <p className="text-lg font-semibold text-white">
+                    Mais tempo para abraçar, menos tempo com planilhas ❤️
+                  </p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <p className="mb-3 text-xs uppercase tracking-wider text-white/40">Boletins recentes</p>
-                  <ul className="space-y-2 text-sm text-white/80">
-                    <li>Mel · comeu tudo, brincou muito</li>
-                    <li>Bento · descansou após o passeio</li>
-                    <li>Nina · interagiu com novos amigos</li>
-                  </ul>
-                </div>
               </div>
+              <div className="absolute -right-6 -top-6 hidden animate-bounce rounded-2xl bg-white p-4 shadow-xl sm:block">🐕</div>
+              <div className="absolute -bottom-4 -left-4 hidden rounded-2xl bg-[#FFD66B] p-4 shadow-xl sm:block">💖</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Módulos */}
-      <section id="modulos" className="relative border-t border-white/5 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">Módulos inclusos</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Tudo que o seu negócio pet precisa.
+      {/* Funcionalidades */}
+      <section id="funcionalidades" className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <span className="text-sm font-semibold uppercase tracking-wide text-[#FF7F50]">Tudo que você precisa</span>
+            <h2 className="mt-3 mb-4 text-3xl font-extrabold text-gray-800 sm:text-4xl">
+              Funcionalidades que fazem seu dia correr melhor
             </h2>
-            <p className="mt-4 text-white/60">
-              Nove módulos integrados. Sem cobrar a parte por funcionalidade básica.
-            </p>
+            <p className="text-lg text-gray-600">Desenvolvido para creches, hotéis e day cares caninos.</p>
           </div>
-          <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {MODULES.map(({ icon: Icon, title, desc }) => (
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div
                 key={title}
-                className="group rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-6 transition hover:border-indigo-500/40 hover:bg-white/[0.06]"
+                className="rounded-3xl border border-orange-100 bg-orange-50 p-8 transition-all hover:-translate-y-1 hover:shadow-xl"
               >
-                <span className="inline-grid h-10 w-10 place-items-center rounded-lg bg-indigo-500/15 text-indigo-300 transition group-hover:bg-indigo-500/25">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/60">{desc}</p>
+                <div
+                  className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg"
+                  style={{ background: "linear-gradient(135deg,#FF7F50,#FF9F43)" }}
+                >
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="mb-3 text-xl font-bold text-gray-800">{title}</h3>
+                <p className="text-gray-600">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefícios */}
-      <section id="beneficios" className="relative border-t border-white/5 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent py-24">
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-2 lg:items-center">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">Por que mudar</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Menos retrabalho. Mais tempo cuidando dos pets.
+      {/* Planos */}
+      <section id="planos" className="relative overflow-hidden bg-gradient-to-b from-orange-50 to-white py-20">
+        <span className="pointer-events-none absolute right-10 top-20 rotate-12 text-7xl opacity-10">🐾</span>
+        <span className="pointer-events-none absolute -left-2 bottom-20 -rotate-12 text-6xl opacity-10">🐾</span>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <span className="text-sm font-semibold uppercase tracking-wide text-[#FF7F50]">Planos e preços</span>
+            <h2 className="mt-3 mb-4 text-3xl font-extrabold text-gray-800 sm:text-4xl">
+              Escolha o período ideal para você
             </h2>
-            <p className="mt-4 text-white/60">
-              A Central Pet substitui agenda de papel, planilha, grupo de WhatsApp e arquivos soltos
-              por uma única tela limpa que toda a equipe entende.
+            <p className="text-lg text-gray-600">
+              Todos os planos incluem <strong>todas as funcionalidades</strong>.
             </p>
-            <a
-              href="#contato"
-              className="mt-8 inline-flex items-center gap-2 rounded-lg bg-[#4f46e5] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-500/30 transition hover:bg-[#4338ca]"
-            >
-              Quero conhecer <ArrowRight className="h-4 w-4" />
-            </a>
           </div>
-          <ul className="space-y-3">
-            {BENEFITS.map((b) => (
-              <li key={b} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-indigo-500/20 text-indigo-300">
-                  <Check className="h-3.5 w-3.5" />
-                </span>
-                <span className="text-sm text-white/85">{b}</span>
-              </li>
+          <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {PLANS.map((p) => (
+              <div
+                key={p.name}
+                className={
+                  "relative flex flex-col rounded-3xl border-2 bg-white p-8 transition-all hover:-translate-y-2 hover:shadow-2xl " +
+                  (p.popular ? "border-[#FF9F43]" : "border-orange-100")
+                }
+              >
+                {p.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-4 py-1.5 text-xs font-bold text-white shadow-lg">
+                    POPULAR
+                  </div>
+                )}
+                <h3 className="mb-2 text-xl font-bold text-gray-800">{p.name}</h3>
+                <p className="mb-6 text-sm text-gray-500">{p.desc}</p>
+                <div className="mb-6">
+                  <span className="text-4xl font-extrabold text-[#FF7F50]">{p.price}</span>
+                  <span className="text-gray-500">{p.per}</span>
+                </div>
+                <Link
+                  to="/auth"
+                  className="mt-auto w-full rounded-xl bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] py-3 text-center font-bold text-white shadow-lg transition-all hover:from-[#E86A3C]"
+                >
+                  Assinar plano
+                </Link>
+              </div>
             ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* Segurança */}
-      <section className="border-t border-white/5 py-20">
-        <div className="mx-auto grid max-w-6xl gap-6 px-6 md:grid-cols-3">
-          {[
-            { icon: ShieldCheck, t: "Adequado à LGPD", d: "Consentimento, separação por perfil e auditoria de acessos." },
-            { icon: HeartPulse, t: "Pensado por quem opera", d: "Construído junto com uma creche real, em uso diário." },
-            { icon: Sparkles, t: "Atualizações contínuas", d: "Novos recursos sem custo adicional para clientes ativos." },
-          ].map(({ icon: Icon, t, d }) => (
-            <div key={t} className="rounded-2xl border border-white/10 p-6">
-              <Icon className="h-5 w-5 text-indigo-400" />
-              <h3 className="mt-3 font-semibold">{t}</h3>
-              <p className="mt-1 text-sm text-white/60">{d}</p>
-            </div>
-          ))}
+          </div>
         </div>
       </section>
 
       {/* Depoimentos */}
-      <section id="depoimentos" className="border-t border-white/5 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">Quem usa</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Recomendado por quem cuida.
+      <section id="depoimentos" className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <span className="text-sm font-semibold uppercase tracking-wide text-[#FF7F50]">Depoimentos</span>
+            <h2 className="mt-3 mb-4 text-3xl font-extrabold text-gray-800 sm:text-4xl">
+              O que os nossos clientes dizem
             </h2>
           </div>
-          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                quote: "Tirei o caderno e o grupo de WhatsApp da operação. Hoje cada funcionário sabe exatamente o que fazer.",
-                name: "Gabriela",
-                role: "Quintal da Gabi · Pet creche",
-              },
-              {
-                quote: "Os tutores ficaram encantados em receber o boletim com fotos todo dia. Virou diferencial de venda.",
-                name: "Cliente piloto",
-                role: "Hospedagem canina",
-              },
-              {
-                quote: "Contrato assinado digital, sem papel. Cliente recebe e devolve em minutos.",
-                name: "Equipe de banho & tosa",
-                role: "Unidade parceira",
-              },
-            ].map((t) => (
-              <figure key={t.name} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                <blockquote className="text-sm leading-relaxed text-white/85">“{t.quote}”</blockquote>
-                <figcaption className="mt-4 text-xs">
-                  <span className="font-medium text-white">{t.name}</span>
-                  <span className="text-white/50"> · {t.role}</span>
-                </figcaption>
-              </figure>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex min-h-[200px] items-center justify-center rounded-3xl border border-dashed border-orange-100 bg-orange-50 p-8 text-center italic text-gray-500"
+              >
+                Depoimento em breve...
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="border-t border-white/5 py-24">
-        <div className="mx-auto max-w-3xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">Dúvidas frequentes</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Antes de falar com a gente.</h2>
-          </div>
-          <div className="mt-12 space-y-3">
-            {FAQ.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} />)}
-          </div>
+      {/* CTA */}
+      <section className="relative overflow-hidden py-20">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FF7F50] to-[#FF9F43]" />
+        <div className="relative z-10 mx-auto max-w-4xl px-4 text-center">
+          <span className="mb-6 block text-5xl">🐕🦴🐾</span>
+          <h2 className="mb-6 text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl">
+            Pronto para transformar sua creche canina?
+          </h2>
+          <p className="mb-10 text-lg text-white/90">
+            Junte-se à Central Pet e cuide do que importa.
+          </p>
+          <Link
+            to="/auth"
+            className="inline-block rounded-full bg-white px-10 py-4 text-lg font-bold text-[#FF7F50] shadow-2xl transition-transform hover:-translate-y-1"
+          >
+            Quero começar agora
+          </Link>
         </div>
       </section>
 
-      {/* Contato / CTA */}
-      <section id="contato" className="border-t border-white/5 py-24">
-        <div className="mx-auto max-w-4xl px-6">
-          <div className="relative overflow-hidden rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-600/20 via-violet-600/10 to-transparent p-10 text-center md:p-16">
-            <div className="pointer-events-none absolute inset-0 opacity-50">
-              <div className="absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-indigo-500/30 blur-3xl" />
-            </div>
-            <div className="relative">
-              <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                Pronto para profissionalizar sua operação?
-              </h2>
-              <p className="mx-auto mt-4 max-w-xl text-white/70">
-                Conte para a gente sobre o seu negócio. Mostramos a Central Pet por dentro e fazemos
-                uma proposta sob medida.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <a
-                  href="mailto:contato@centralpet.com.br"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#4f46e5] px-6 py-3 text-sm font-medium text-white shadow-xl shadow-indigo-500/30 transition hover:bg-[#4338ca]"
-                >
-                  Falar por e-mail <ArrowRight className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://wa.me/"
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-6 py-3 text-sm font-medium text-white hover:bg-white/10"
-                >
-                  WhatsApp
-                </a>
-              </div>
-              <p className="mt-6 text-xs text-white/40">
-                Contatos serão configurados antes do lançamento.
-              </p>
-            </div>
+      <footer className="bg-gray-900 py-14 text-white">
+        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-gray-400">
+          <div className="mb-4 flex items-center justify-center gap-2">
+            <Logo className="h-9 w-9 text-base" />
+            <span className="text-xl font-extrabold text-white">Central Pet</span>
           </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 text-sm text-white/50 md:flex-row">
-          <div className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-indigo-500/20">
-              <PawPrint className="h-3.5 w-3.5 text-indigo-300" />
-            </span>
-            <span>© {new Date().getFullYear()} Central Pet. Todos os direitos reservados.</span>
-          </div>
-          <div className="flex gap-6">
-            <Link to="/auth" className="hover:text-white">Acessar painel</Link>
-            <a href="#contato" className="hover:text-white">Contato</a>
-          </div>
+          <p>© {new Date().getFullYear()} Central Pet. Todos os direitos reservados.</p>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium hover:bg-white/[0.03]"
-      >
-        <span>{q}</span>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-white/50 transition ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open ? <div className="px-5 pb-4 text-sm leading-relaxed text-white/65">{a}</div> : null}
     </div>
   );
 }
