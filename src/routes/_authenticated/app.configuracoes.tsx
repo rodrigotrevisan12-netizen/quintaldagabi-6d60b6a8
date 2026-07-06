@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, Building2, Scissors, CalendarRange } from "lucide-react";
+import { Plus, Loader2, Building2, Scissors, CalendarRange, Palette } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,30 +12,221 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { CENTRALPET_BRAND, useInvalidateBrand } from "@/lib/branding";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
-  head: () => ({ meta: [{ title: "Configurações — Quintal da Gabi" }] }),
+  head: () => ({ meta: [{ title: "Configurações — Central Pet" }] }),
   component: ConfiguracoesPage,
 });
 
 function ConfiguracoesPage() {
+  const { data: me } = useCurrentUser();
+  const isAdmin = me?.roles.includes("admin") ?? false;
   return (
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-3xl font-semibold">Configurações</h1>
-        <p className="text-muted-foreground">Unidades, capacidade e serviços oferecidos.</p>
+        <p className="text-muted-foreground">Unidades, capacidade, serviços e identidade visual.</p>
       </header>
 
-      <Tabs defaultValue="unidades">
+      <Tabs defaultValue={isAdmin ? "identidade" : "unidades"}>
         <TabsList>
+          {isAdmin && (
+            <TabsTrigger value="identidade"><Palette className="mr-1 h-4 w-4" />Identidade visual</TabsTrigger>
+          )}
           <TabsTrigger value="unidades"><Building2 className="mr-1 h-4 w-4" />Unidades</TabsTrigger>
           <TabsTrigger value="servicos"><Scissors className="mr-1 h-4 w-4" />Serviços de banho & tosa</TabsTrigger>
           <TabsTrigger value="pacotes"><CalendarRange className="mr-1 h-4 w-4" />Pacotes de creche</TabsTrigger>
         </TabsList>
+        {isAdmin && (
+          <TabsContent value="identidade"><BrandingPanel /></TabsContent>
+        )}
         <TabsContent value="unidades"><UnitsPanel /></TabsContent>
         <TabsContent value="servicos"><ServicesPanel /></TabsContent>
         <TabsContent value="pacotes"><DaycarePackagesPanel /></TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function BrandingPanel() {
+  const qc = useQueryClient();
+  const invalidateBrand = useInvalidateBrand();
+
+  const q = useQuery({
+    queryKey: ["units-branding"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("units")
+        .select("id, name, brand_name, brand_logo_url, brand_primary, brand_secondary, brand_accent")
+        .order("created_at");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const save = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, string | null> }) => {
+      const { error } = await supabase.from("units").update(patch as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Identidade visual atualizada");
+      qc.invalidateQueries({ queryKey: ["units-branding"] });
+      invalidateBrand();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Identidade visual da empresa</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Personalize nome, logo e cores. As alterações são aplicadas automaticamente para
+          administradores, funcionários e tutores da sua empresa. Cada empresa mantém a sua
+          própria identidade — o padrão Central Pet é usado até você personalizar.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {(q.data ?? []).map((u: any) => (
+          <BrandingRow
+            key={u.id}
+            unit={u}
+            saving={save.isPending}
+            onSave={(patch) => save.mutate({ id: u.id, patch })}
+          />
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function BrandingRow({
+  unit,
+  onSave,
+  saving,
+}: {
+  unit: any;
+  onSave: (patch: Record<string, string | null>) => void;
+  saving: boolean;
+}) {
+  const [name, setName] = useState<string>(unit.brand_name ?? "");
+  const [logo, setLogo] = useState<string>(unit.brand_logo_url ?? "");
+  const [primary, setPrimary] = useState<string>(unit.brand_primary ?? CENTRALPET_BRAND.primary);
+  const [secondary, setSecondary] = useState<string>(unit.brand_secondary ?? CENTRALPET_BRAND.secondary);
+  const [accent, setAccent] = useState<string>(unit.brand_accent ?? CENTRALPET_BRAND.accent);
+
+  function handleSave() {
+    onSave({
+      brand_name: name.trim() || null,
+      brand_logo_url: logo.trim() || null,
+      brand_primary: primary || null,
+      brand_secondary: secondary || null,
+      brand_accent: accent || null,
+    });
+  }
+
+  function handleReset() {
+    setName("");
+    setLogo("");
+    setPrimary(CENTRALPET_BRAND.primary);
+    setSecondary(CENTRALPET_BRAND.secondary);
+    setAccent(CENTRALPET_BRAND.accent);
+    onSave({
+      brand_name: null,
+      brand_logo_url: null,
+      brand_primary: null,
+      brand_secondary: null,
+      brand_accent: null,
+    });
+  }
+
+  return (
+    <div className="space-y-4 rounded-lg border p-4">
+      <p className="text-sm font-medium text-muted-foreground">{unit.name}</p>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <Label className="text-xs">Nome da empresa</Label>
+          <Input
+            value={name}
+            placeholder={CENTRALPET_BRAND.name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Logo (URL)</Label>
+          <Input
+            value={logo}
+            placeholder="https://.../logo.png"
+            onChange={(e) => setLogo(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <ColorField label="Cor primária" value={primary} onChange={setPrimary} />
+        <ColorField label="Cor secundária" value={secondary} onChange={setSecondary} />
+        <ColorField label="Cor de destaque" value={accent} onChange={setAccent} />
+      </div>
+
+      <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
+        {logo ? (
+          <img src={logo} alt="Prévia do logo" className="h-10 w-10 rounded-full object-cover" />
+        ) : (
+          <span
+            className="grid h-10 w-10 place-items-center rounded-full text-white"
+            style={{ background: `linear-gradient(135deg, ${primary}, ${accent})` }}
+          >
+            🐾
+          </span>
+        )}
+        <span className="font-display text-lg font-semibold" style={{ color: primary }}>
+          {name || CENTRALPET_BRAND.name}
+        </span>
+        <span
+          className="ml-auto rounded-full px-3 py-1 text-xs font-medium text-white"
+          style={{ background: accent }}
+        >
+          Prévia
+        </span>
+      </div>
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" size="sm" onClick={handleReset} disabled={saving}>
+          Restaurar padrão Central Pet
+        </Button>
+        <Button size="sm" onClick={handleSave} disabled={saving}>
+          {saving && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}Salvar identidade visual
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label className="text-xs">{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-12 cursor-pointer rounded border border-input bg-background"
+        />
+        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="#FF7F50" />
+      </div>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { BrandingApplier } from "@/lib/branding";
 
 function NotFoundComponent() {
   return (
@@ -79,25 +80,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Quintal da Gabi — Pet creche, hospedagem e banho & tosa" },
+      { title: "Central Pet — Gestão completa para creches, hotéis e day cares caninos" },
       {
         name: "description",
         content:
-          "Plataforma de gestão do Quintal da Gabi: agenda, prontuário dos cães e portal do tutor em um só lugar.",
+          "Central Pet: sistema multiempresa para creches, hotéis e day cares caninos. Agenda, tutores, contratos, boletins e portal do tutor em um só lugar.",
       },
-      { property: "og:title", content: "Quintal da Gabi — Pet creche, hospedagem e banho & tosa" },
+      { property: "og:title", content: "Central Pet — Gestão completa para o seu negócio pet" },
       {
         property: "og:description",
-        content: "Cuidado, carinho e organização para a rotina do seu cão.",
+        content: "Mais tempo cuidando dos cães, menos tempo com planilha.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Quintal da Gabi — Pet creche, hospedagem e banho & tosa" },
-      { name: "description", content: "Pet Creche. Hospedagem. Banho e Tosa" },
-      { property: "og:description", content: "Pet Creche. Hospedagem. Banho e Tosa" },
-      { name: "twitter:description", content: "Pet Creche. Hospedagem. Banho e Tosa" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Hr3vTlopKzdlrAO2bFkLdrgHJ5W2/social-images/social-1781361990755-C_fundo_creme_QUINTAL_DA_GABI_.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Hr3vTlopKzdlrAO2bFkLdrgHJ5W2/social-images/social-1781361990755-C_fundo_creme_QUINTAL_DA_GABI_.webp" },
+      { name: "twitter:title", content: "Central Pet — Gestão completa para o seu negócio pet" },
+      { name: "twitter:description", content: "Mais tempo cuidando dos cães, menos tempo com planilha." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -151,6 +148,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BrandingApplier />
       <Outlet />
       <Toaster richColors position="top-right" />
     </QueryClientProvider>

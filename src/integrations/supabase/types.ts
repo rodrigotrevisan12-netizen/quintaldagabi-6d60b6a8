@@ -2568,6 +2568,11 @@ export type Database = {
       units: {
         Row: {
           address: string | null
+          brand_accent: string | null
+          brand_logo_url: string | null
+          brand_name: string | null
+          brand_primary: string | null
+          brand_secondary: string | null
           city: string | null
           created_at: string
           id: string
@@ -2578,6 +2583,11 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          brand_accent?: string | null
+          brand_logo_url?: string | null
+          brand_name?: string | null
+          brand_primary?: string | null
+          brand_secondary?: string | null
           city?: string | null
           created_at?: string
           id?: string
@@ -2588,6 +2598,11 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          brand_accent?: string | null
+          brand_logo_url?: string | null
+          brand_name?: string | null
+          brand_primary?: string | null
+          brand_secondary?: string | null
           city?: string | null
           created_at?: string
           id?: string

@@ -33,6 +33,7 @@ import { useMemo, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
+import { useBrand } from "@/lib/branding";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -222,12 +223,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="grid min-h-screen bg-background lg:grid-cols-[260px_1fr]">
       <aside className="hidden border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <div className="flex items-center gap-2 px-6 py-6">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
-            <PawPrint className="h-5 w-5" />
-          </span>
+          <BrandMark />
           <div>
             <p className="font-display text-base font-semibold leading-none text-sidebar-foreground">
-              Quintal da Gabi
+              <BrandName />
             </p>
             <p className="text-xs text-sidebar-foreground/70">
               {role === "admin"
@@ -331,10 +330,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
           <Link to="/app" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground">
-              <PawPrint className="h-4 w-4" />
-            </span>
-            <span className="font-display text-base font-semibold">Quintal da Gabi</span>
+            <BrandMark size="sm" />
+            <span className="font-display text-base font-semibold"><BrandName /></span>
           </Link>
           <Button size="sm" variant="ghost" onClick={handleSignOut}>
             <LogOut className="h-4 w-4" />
@@ -366,4 +363,32 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
     </div>
   );
+}
+
+function BrandMark({ size = "md" }: { size?: "sm" | "md" }) {
+  const brand = useBrand();
+  const dim = size === "sm" ? "h-8 w-8" : "h-9 w-9";
+  if (brand.logoUrl) {
+    return (
+      <img
+        src={brand.logoUrl}
+        alt={brand.name}
+        className={cn("rounded-full object-cover", dim)}
+      />
+    );
+  }
+  return (
+    <span
+      className={cn("grid place-items-center rounded-full text-white", dim)}
+      style={{ background: `linear-gradient(135deg, ${brand.primary}, ${brand.accent})` }}
+      aria-hidden
+    >
+      <PawPrint className={size === "sm" ? "h-4 w-4" : "h-5 w-5"} />
+    </span>
+  );
+}
+
+function BrandName() {
+  const brand = useBrand();
+  return <>{brand.name}</>;
 }

@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useBrand } from "@/lib/branding";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +41,7 @@ function TutorShellRoute() {
 
 function TutorShell({ children }: { children: ReactNode }) {
   const { data: me, isLoading } = useCurrentUser();
+  const brand = useBrand();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -55,11 +57,18 @@ function TutorShell({ children }: { children: ReactNode }) {
     <div className="grid min-h-screen bg-background lg:grid-cols-[240px_1fr]">
       <aside className="hidden border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <div className="flex items-center gap-2 px-6 py-6">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">
-            <PawPrint className="h-5 w-5" />
-          </span>
+          {brand.logoUrl ? (
+            <img src={brand.logoUrl} alt={brand.name} className="h-9 w-9 rounded-full object-cover" />
+          ) : (
+            <span
+              className="grid h-9 w-9 place-items-center rounded-full text-white"
+              style={{ background: `linear-gradient(135deg, ${brand.primary}, ${brand.accent})` }}
+            >
+              <PawPrint className="h-5 w-5" />
+            </span>
+          )}
           <div>
-            <p className="font-display text-base font-semibold text-sidebar-foreground">Quintal da Gabi</p>
+            <p className="font-display text-base font-semibold text-sidebar-foreground">{brand.name}</p>
             <p className="text-xs text-sidebar-foreground/70">Área do tutor</p>
           </div>
         </div>
