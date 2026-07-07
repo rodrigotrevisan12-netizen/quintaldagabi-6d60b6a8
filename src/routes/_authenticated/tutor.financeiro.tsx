@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/tutor/financeiro")({
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const isOpen = (s?: string | null) => s === "pendente" || s === "atrasado";
+const isOpen = (s?: string | null) => s === "pendente" || s === "vencido" || s === "atrasado";
 const isPaid = (s?: string | null) => s === "pago" || s === "recebido";
 
 function TutorFin() {
