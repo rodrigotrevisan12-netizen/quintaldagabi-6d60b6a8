@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/tutor/financeiro")({
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const isOpen = (s?: string | null) => s === "pendente" || s === "atrasado";
+const isOpen = (s?: string | null) => s === "pendente" || s === "vencido" || s === "atrasado";
 const isPaid = (s?: string | null) => s === "pago" || s === "recebido";
 
 function TutorFin() {
@@ -29,7 +29,7 @@ function TutorFin() {
         .from("tutors").select("id").eq("user_id", me!.userId).maybeSingle();
       if (!t) return [];
       const { data } = await supabase.from("financial_transactions")
-        .select("*").eq("tutor_id", t.id).order("transaction_date", { ascending: false });
+        .select("*").eq("tutor_id", t.id).order("created_at", { ascending: false });
       return data ?? [];
     },
   });
@@ -83,7 +83,7 @@ function TutorFin() {
                   <p className="font-medium">{t.description ?? t.category}</p>
                   <p className="text-xs text-muted-foreground">
                     {t.due_date ? `Vence em ${new Date(t.due_date).toLocaleDateString("pt-BR")}` :
-                      new Date(t.transaction_date).toLocaleDateString("pt-BR")}
+                      new Date(t.created_at).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
               </div>
@@ -107,8 +107,8 @@ function TutorFin() {
                   <div>
                     <p className="font-medium">{t.description ?? t.category}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(t.transaction_date).toLocaleDateString("pt-BR")}
-                      {r ? ` · Recibo nº ${r.receipt_number}` : ""}
+                      {new Date(t.paid_at ?? t.created_at).toLocaleDateString("pt-BR")}
+                      {r ? ` · Recibo nº ${r.number}` : ""}
                     </p>
                   </div>
                 </div>
@@ -117,12 +117,6 @@ function TutorFin() {
                     <p className="font-semibold">{fmt(Number(t.amount ?? 0))}</p>
                     <Badge>Pago</Badge>
                   </div>
-                  {r?.pdf_url && (
-                    <a href={r.pdf_url} target="_blank" rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary underline">
-                      <FileText className="h-3 w-3" /> recibo
-                    </a>
-                  )}
                 </div>
               </CardContent></Card>
             );

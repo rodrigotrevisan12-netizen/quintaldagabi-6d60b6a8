@@ -47,32 +47,29 @@ function DogDetail() {
     (s: any) => !s.check_out_at || new Date(s.check_out_at) >= today,
   );
 
-  const [vacName, setVacName] = useState("");
-  const [vacDate, setVacDate] = useState("");
   const [vacFile, setVacFile] = useState<File | null>(null);
+  const [vacNote, setVacNote] = useState("");
 
   const addVaccine = useMutation({
     mutationFn: async () => {
-      if (!vacName || !vacDate) throw new Error("Informe a vacina e a data");
-      let card_photo_url: string | null = null;
-      if (vacFile) {
-        const path = `${id}/vaccine-${Date.now()}-${vacFile.name}`;
-        const up = await supabase.storage.from("dogs").upload(path, vacFile);
-        if (up.error) throw up.error;
-        const { data } = supabase.storage.from("dogs").getPublicUrl(path);
-        card_photo_url = data.publicUrl;
-      }
+      if (!vacFile) throw new Error("Selecione a foto da carteira de vacinação");
+      const path = `${id}/vaccine-${Date.now()}-${vacFile.name}`;
+      const up = await supabase.storage.from("dogs").upload(path, vacFile);
+      if (up.error) throw up.error;
+      const { data } = supabase.storage.from("dogs").getPublicUrl(path);
       const { error } = await supabase.from("dog_vaccines").insert({
         dog_id: id,
-        vaccine_type: vacName,
-        applied_date: vacDate,
-        card_photo_url,
+        vaccine_type: vacNote.trim() || "Carteira de vacinação (foto)",
+        applied_date: new Date().toISOString().slice(0, 10),
+        card_photo_url: data.publicUrl,
+        notes: "Enviada pelo tutor",
       } as any);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Vacina adicionada");
-      setVacName(""); setVacDate(""); setVacFile(null);
+      toast.success("Foto enviada — a equipe já pode ver na aba de Saúde");
+      setVacFile(null);
+      setVacNote("");
       qc.invalidateQueries({ queryKey: ["tutor-vaccines", id] });
     },
     onError: (e: any) => toast.error(e.message),
@@ -108,14 +105,23 @@ function DogDetail() {
         <TabsContent value="vaccines" className="space-y-3">
           <Card>
             <CardContent className="space-y-3 p-4">
-              <p className="text-sm font-medium">Anexar carteira de vacinação</p>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <div><Label>Vacina</Label><Input value={vacName} onChange={(e) => setVacName(e.target.value)} placeholder="Ex: V8" /></div>
-                <div><Label>Data</Label><Input type="date" value={vacDate} onChange={(e) => setVacDate(e.target.value)} /></div>
-                <div><Label>Foto da carteira</Label><Input type="file" accept="image/*" onChange={(e) => setVacFile(e.target.files?.[0] ?? null)} /></div>
+              <p className="text-sm font-medium">Anexar foto da carteira de vacinação</p>
+              <p className="text-xs text-muted-foreground">
+                A equipe do Quintal da Gabi cuida do registro das vacinas com base na foto que você enviar.
+                Você só precisa mandar a foto — o preenchimento fica com a gente.
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div>
+                  <Label>Foto da carteira</Label>
+                  <Input type="file" accept="image/*" onChange={(e) => setVacFile(e.target.files?.[0] ?? null)} />
+                </div>
+                <div>
+                  <Label>Observação (opcional)</Label>
+                  <Input value={vacNote} onChange={(e) => setVacNote(e.target.value)} placeholder="Ex.: reforço V10 desta semana" />
+                </div>
               </div>
-              <Button size="sm" onClick={() => addVaccine.mutate()} disabled={addVaccine.isPending}>
-                <Upload className="mr-1 h-4 w-4" /> Enviar
+              <Button size="sm" onClick={() => addVaccine.mutate()} disabled={addVaccine.isPending || !vacFile}>
+                <Upload className="mr-1 h-4 w-4" /> Enviar foto
               </Button>
             </CardContent>
           </Card>

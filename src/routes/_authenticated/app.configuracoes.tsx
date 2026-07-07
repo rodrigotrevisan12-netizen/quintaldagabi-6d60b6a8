@@ -264,7 +264,11 @@ function UnitsPanel() {
       const { error } = await supabase.from("unit_settings").upsert({ unit_id, daycare_capacity: daycare, boarding_capacity: boarding }, { onConflict: "unit_id" });
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Capacidade salva"); qc.invalidateQueries({ queryKey: ["units-config"] }); },
+    onSuccess: () => {
+      toast.success("Capacidade salva");
+      qc.invalidateQueries({ queryKey: ["units-config"] });
+      qc.invalidateQueries({ queryKey: ["inteligencia-financeira-unit-settings"] });
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
