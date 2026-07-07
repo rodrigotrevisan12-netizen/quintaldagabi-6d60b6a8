@@ -117,12 +117,6 @@ function TutorFin() {
                     <p className="font-semibold">{fmt(Number(t.amount ?? 0))}</p>
                     <Badge>Pago</Badge>
                   </div>
-                  {r?.pdf_url && (
-                    <a href={r.pdf_url} target="_blank" rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary underline">
-                      <FileText className="h-3 w-3" /> recibo
-                    </a>
-                  )}
                 </div>
               </CardContent></Card>
             );
