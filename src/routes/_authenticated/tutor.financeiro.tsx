@@ -29,7 +29,7 @@ function TutorFin() {
         .from("tutors").select("id").eq("user_id", me!.userId).maybeSingle();
       if (!t) return [];
       const { data } = await supabase.from("financial_transactions")
-        .select("*").eq("tutor_id", t.id).order("transaction_date", { ascending: false });
+        .select("*").eq("tutor_id", t.id).order("created_at", { ascending: false });
       return data ?? [];
     },
   });
@@ -83,7 +83,7 @@ function TutorFin() {
                   <p className="font-medium">{t.description ?? t.category}</p>
                   <p className="text-xs text-muted-foreground">
                     {t.due_date ? `Vence em ${new Date(t.due_date).toLocaleDateString("pt-BR")}` :
-                      new Date(t.transaction_date).toLocaleDateString("pt-BR")}
+                      new Date(t.created_at).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
               </div>
@@ -107,8 +107,8 @@ function TutorFin() {
                   <div>
                     <p className="font-medium">{t.description ?? t.category}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(t.transaction_date).toLocaleDateString("pt-BR")}
-                      {r ? ` · Recibo nº ${r.receipt_number}` : ""}
+                      {new Date(t.paid_at ?? t.created_at).toLocaleDateString("pt-BR")}
+                      {r ? ` · Recibo nº ${r.number}` : ""}
                     </p>
                   </div>
                 </div>
