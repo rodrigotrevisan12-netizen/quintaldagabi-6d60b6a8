@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, AlertCircle, Loader2, CheckCircle2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/app/ocorrencias")({
   head: () => ({ meta: [{ title: "Ocorrências — Quintal da Gabi" }] }),
@@ -33,6 +44,9 @@ const sevColor: Record<string, string> = { baixa: "secondary", media: "default",
 function OcorrenciasPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [toDelete, setToDelete] = useState<any | null>(null);
+  const { data: me } = useCurrentUser();
+  const isAdmin = me?.primaryRole === "admin";
   const [filter, setFilter] = useState<"abertas" | "resolvidas" | "todas">("abertas");
   const [form, setForm] = useState({ dog_id: "", category: "observacao", severity: "baixa", description: "", occurred_at: format(new Date(), "yyyy-MM-dd'T'HH:mm") });
 
@@ -81,6 +95,19 @@ function OcorrenciasPage() {
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Resolvida"); qc.invalidateQueries({ queryKey: ["occurrences"] }); },
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from("occurrences").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Ocorrência excluída");
+      setToDelete(null);
+      qc.invalidateQueries({ queryKey: ["occurrences"] });
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   return (
@@ -152,6 +179,11 @@ function OcorrenciasPage() {
                   <div className="flex gap-2">
                     <Badge variant={sevColor[r.severity] as any}>{SEVERITIES.find((s) => s.v === r.severity)?.l}</Badge>
                     {r.resolved ? <Badge variant="outline"><CheckCircle2 className="mr-1 h-3 w-3" />Resolvida</Badge> : <Badge variant="destructive">Aberta</Badge>}
+                    {isAdmin && (
+                      <Button size="icon" variant="ghost" onClick={() => setToDelete(r)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{format(new Date(r.occurred_at), "dd/MM/yyyy HH:mm")}</p>
@@ -167,6 +199,24 @@ function OcorrenciasPage() {
           ))}
         </div>
       )}
+
+      <AlertDialog open={toDelete !== null} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir esta ocorrência?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete?.description ? `"${toDelete.description}". ` : ""}
+              Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => toDelete && remove.mutate(toDelete.id)}>
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
