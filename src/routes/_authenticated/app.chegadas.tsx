@@ -2,12 +2,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/app/chegadas")({
   head: () => ({ meta: [{ title: "Chegadas — Quintal da Gabi" }] }),
@@ -22,6 +33,9 @@ function remaining(createdAt: string, eta: number) {
 function Chegadas() {
   const qc = useQueryClient();
   const [, setTick] = useState(0);
+  const [toDelete, setToDelete] = useState<any | null>(null);
+  const { data: me } = useCurrentUser();
+  const isAdmin = me?.primaryRole === "admin";
 
   // Tick a cada 30s para contagem regressiva
   useEffect(() => {
@@ -58,6 +72,19 @@ function Chegadas() {
     onSuccess: () => { toast.success("Marcada como chegou"); qc.invalidateQueries({ queryKey: ["arrivals-admin"] }); },
   });
 
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("arrival_notifications").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Registro excluído");
+      setToDelete(null);
+      qc.invalidateQueries({ queryKey: ["arrivals-admin"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const active = data?.filter((a) => a.status === "on_the_way") ?? [];
   const history = data?.filter((a) => a.status !== "on_the_way") ?? [];
 
@@ -84,6 +111,11 @@ function Chegadas() {
                 <div className="flex items-center gap-2">
                   <Badge variant={tone as any}>{label}</Badge>
                   <Button size="sm" onClick={() => close.mutate(a.id)}><Check className="mr-1 h-3 w-3" />Chegou</Button>
+                  {isAdmin && (
+                    <Button size="icon" variant="ghost" onClick={() => setToDelete(a)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </CardContent></Card>
             );
@@ -98,10 +130,35 @@ function Chegadas() {
               <span className="font-medium">{a.tutors?.full_name}</span>
               <span className="ml-2 text-muted-foreground">{new Date(a.created_at).toLocaleString("pt-BR")}</span>
             </div>
-            <Badge variant="outline">{a.status === "arrived" ? "Chegou" : "Cancelado"}</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{a.status === "arrived" ? "Chegou" : "Cancelado"}</Badge>
+              {isAdmin && (
+                <Button size="icon" variant="ghost" onClick={() => setToDelete(a)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </CardContent></Card>
         ))}
       </section>
+
+      <AlertDialog open={toDelete !== null} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir este registro de chegada?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete?.tutors?.full_name ? `Tutor: ${toDelete.tutors.full_name}. ` : ""}
+              Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => toDelete && remove.mutate(toDelete.id)}>
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
