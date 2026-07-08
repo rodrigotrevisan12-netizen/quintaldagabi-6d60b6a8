@@ -2707,6 +2707,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_tutor_of_dog: {
+        Args: { _dog_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_tutor_of_dog_folder: {
+        Args: { _folder: string; _user_id: string }
+        Returns: boolean
+      }
       tutor_of_dog: { Args: { _dog_id: string }; Returns: string }
       upsert_service_charge: {
         Args: {

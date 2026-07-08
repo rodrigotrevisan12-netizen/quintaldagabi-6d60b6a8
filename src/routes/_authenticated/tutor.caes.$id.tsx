@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export const Route = createFileRoute("/_authenticated/tutor/caes")({
+export const Route = createFileRoute("/_authenticated/tutor/caes/$id")({
   head: () => ({ meta: [{ title: "Cão — Quintal da Gabi" }] }),
   component: DogDetail,
 });

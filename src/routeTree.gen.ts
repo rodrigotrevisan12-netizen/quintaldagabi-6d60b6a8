@@ -21,7 +21,6 @@ import { Route as AuthenticatedTutorStoriesRouteImport } from './routes/_authent
 import { Route as AuthenticatedTutorFinanceiroRouteImport } from './routes/_authenticated/tutor.financeiro'
 import { Route as AuthenticatedTutorDocumentosRouteImport } from './routes/_authenticated/tutor.documentos'
 import { Route as AuthenticatedTutorChegadaRouteImport } from './routes/_authenticated/tutor.chegada'
-import { Route as AuthenticatedTutorCaesRouteImport } from './routes/_authenticated/tutor.caes'
 import { Route as AuthenticatedTutorBoletinsRouteImport } from './routes/_authenticated/tutor.boletins'
 import { Route as AuthenticatedTutorBanhoTosaRouteImport } from './routes/_authenticated/tutor.banho-tosa'
 import { Route as AuthenticatedAppTutoresRouteImport } from './routes/_authenticated/app.tutores'
@@ -45,6 +44,7 @@ import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAppBoletinsRouteImport } from './routes/_authenticated/app.boletins'
 import { Route as AuthenticatedAppBanhoTosaRouteImport } from './routes/_authenticated/app.banho-tosa'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
+import { Route as AuthenticatedTutorCaesIdRouteImport } from './routes/_authenticated/tutor.caes.$id'
 import { Route as AuthenticatedAppHospedagemIdRelatorioRouteImport } from './routes/_authenticated/app.hospedagem.$id.relatorio'
 import { Route as AuthenticatedAppCaesIdTimelineRouteImport } from './routes/_authenticated/app.caes.$id.timeline'
 
@@ -111,11 +111,6 @@ const AuthenticatedTutorChegadaRoute =
     path: '/chegada',
     getParentRoute: () => AuthenticatedTutorRoute,
   } as any)
-const AuthenticatedTutorCaesRoute = AuthenticatedTutorCaesRouteImport.update({
-  id: '/caes',
-  path: '/caes',
-  getParentRoute: () => AuthenticatedTutorRoute,
-} as any)
 const AuthenticatedTutorBoletinsRoute =
   AuthenticatedTutorBoletinsRouteImport.update({
     id: '/boletins',
@@ -248,6 +243,12 @@ const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedTutorCaesIdRoute =
+  AuthenticatedTutorCaesIdRouteImport.update({
+    id: '/caes/$id',
+    path: '/caes/$id',
+    getParentRoute: () => AuthenticatedTutorRoute,
+  } as any)
 const AuthenticatedAppHospedagemIdRelatorioRoute =
   AuthenticatedAppHospedagemIdRelatorioRouteImport.update({
     id: '/$id/relatorio',
@@ -290,13 +291,13 @@ export interface FileRoutesByFullPath {
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/tutor/banho-tosa': typeof AuthenticatedTutorBanhoTosaRoute
   '/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
-  '/tutor/caes': typeof AuthenticatedTutorCaesRoute
   '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
   '/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
   '/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
   '/tutor/stories': typeof AuthenticatedTutorStoriesRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/tutor/': typeof AuthenticatedTutorIndexRoute
+  '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
   '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
@@ -327,13 +328,13 @@ export interface FileRoutesByTo {
   '/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/tutor/banho-tosa': typeof AuthenticatedTutorBanhoTosaRoute
   '/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
-  '/tutor/caes': typeof AuthenticatedTutorCaesRoute
   '/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
   '/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
   '/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
   '/tutor/stories': typeof AuthenticatedTutorStoriesRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/tutor': typeof AuthenticatedTutorIndexRoute
+  '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
   '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
@@ -368,13 +369,13 @@ export interface FileRoutesById {
   '/_authenticated/app/tutores': typeof AuthenticatedAppTutoresRoute
   '/_authenticated/tutor/banho-tosa': typeof AuthenticatedTutorBanhoTosaRoute
   '/_authenticated/tutor/boletins': typeof AuthenticatedTutorBoletinsRoute
-  '/_authenticated/tutor/caes': typeof AuthenticatedTutorCaesRoute
   '/_authenticated/tutor/chegada': typeof AuthenticatedTutorChegadaRoute
   '/_authenticated/tutor/documentos': typeof AuthenticatedTutorDocumentosRoute
   '/_authenticated/tutor/financeiro': typeof AuthenticatedTutorFinanceiroRoute
   '/_authenticated/tutor/stories': typeof AuthenticatedTutorStoriesRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/tutor/': typeof AuthenticatedTutorIndexRoute
+  '/_authenticated/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
   '/_authenticated/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/_authenticated/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
 }
@@ -409,13 +410,13 @@ export interface FileRouteTypes {
     | '/app/tutores'
     | '/tutor/banho-tosa'
     | '/tutor/boletins'
-    | '/tutor/caes'
     | '/tutor/chegada'
     | '/tutor/documentos'
     | '/tutor/financeiro'
     | '/tutor/stories'
     | '/app/'
     | '/tutor/'
+    | '/tutor/caes/$id'
     | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
   fileRoutesByTo: FileRoutesByTo
@@ -446,13 +447,13 @@ export interface FileRouteTypes {
     | '/app/tutores'
     | '/tutor/banho-tosa'
     | '/tutor/boletins'
-    | '/tutor/caes'
     | '/tutor/chegada'
     | '/tutor/documentos'
     | '/tutor/financeiro'
     | '/tutor/stories'
     | '/app'
     | '/tutor'
+    | '/tutor/caes/$id'
     | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
   id:
@@ -486,13 +487,13 @@ export interface FileRouteTypes {
     | '/_authenticated/app/tutores'
     | '/_authenticated/tutor/banho-tosa'
     | '/_authenticated/tutor/boletins'
-    | '/_authenticated/tutor/caes'
     | '/_authenticated/tutor/chegada'
     | '/_authenticated/tutor/documentos'
     | '/_authenticated/tutor/financeiro'
     | '/_authenticated/tutor/stories'
     | '/_authenticated/app/'
     | '/_authenticated/tutor/'
+    | '/_authenticated/tutor/caes/$id'
     | '/_authenticated/app/caes/$id/timeline'
     | '/_authenticated/app/hospedagem/$id/relatorio'
   fileRoutesById: FileRoutesById
@@ -588,13 +589,6 @@ declare module '@tanstack/react-router' {
       path: '/chegada'
       fullPath: '/tutor/chegada'
       preLoaderRoute: typeof AuthenticatedTutorChegadaRouteImport
-      parentRoute: typeof AuthenticatedTutorRoute
-    }
-    '/_authenticated/tutor/caes': {
-      id: '/_authenticated/tutor/caes'
-      path: '/caes'
-      fullPath: '/tutor/caes'
-      preLoaderRoute: typeof AuthenticatedTutorCaesRouteImport
       parentRoute: typeof AuthenticatedTutorRoute
     }
     '/_authenticated/tutor/boletins': {
@@ -758,6 +752,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/tutor/caes/$id': {
+      id: '/_authenticated/tutor/caes/$id'
+      path: '/caes/$id'
+      fullPath: '/tutor/caes/$id'
+      preLoaderRoute: typeof AuthenticatedTutorCaesIdRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
     '/_authenticated/app/hospedagem/$id/relatorio': {
       id: '/_authenticated/app/hospedagem/$id/relatorio'
       path: '/$id/relatorio'
@@ -858,23 +859,23 @@ const AuthenticatedAppRouteWithChildren =
 interface AuthenticatedTutorRouteChildren {
   AuthenticatedTutorBanhoTosaRoute: typeof AuthenticatedTutorBanhoTosaRoute
   AuthenticatedTutorBoletinsRoute: typeof AuthenticatedTutorBoletinsRoute
-  AuthenticatedTutorCaesRoute: typeof AuthenticatedTutorCaesRoute
   AuthenticatedTutorChegadaRoute: typeof AuthenticatedTutorChegadaRoute
   AuthenticatedTutorDocumentosRoute: typeof AuthenticatedTutorDocumentosRoute
   AuthenticatedTutorFinanceiroRoute: typeof AuthenticatedTutorFinanceiroRoute
   AuthenticatedTutorStoriesRoute: typeof AuthenticatedTutorStoriesRoute
   AuthenticatedTutorIndexRoute: typeof AuthenticatedTutorIndexRoute
+  AuthenticatedTutorCaesIdRoute: typeof AuthenticatedTutorCaesIdRoute
 }
 
 const AuthenticatedTutorRouteChildren: AuthenticatedTutorRouteChildren = {
   AuthenticatedTutorBanhoTosaRoute: AuthenticatedTutorBanhoTosaRoute,
   AuthenticatedTutorBoletinsRoute: AuthenticatedTutorBoletinsRoute,
-  AuthenticatedTutorCaesRoute: AuthenticatedTutorCaesRoute,
   AuthenticatedTutorChegadaRoute: AuthenticatedTutorChegadaRoute,
   AuthenticatedTutorDocumentosRoute: AuthenticatedTutorDocumentosRoute,
   AuthenticatedTutorFinanceiroRoute: AuthenticatedTutorFinanceiroRoute,
   AuthenticatedTutorStoriesRoute: AuthenticatedTutorStoriesRoute,
   AuthenticatedTutorIndexRoute: AuthenticatedTutorIndexRoute,
+  AuthenticatedTutorCaesIdRoute: AuthenticatedTutorCaesIdRoute,
 }
 
 const AuthenticatedTutorRouteWithChildren =
