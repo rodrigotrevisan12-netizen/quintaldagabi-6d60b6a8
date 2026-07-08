@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Syringe, BedDouble, Upload, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Syringe, BedDouble, Upload, Image as ImageIcon, Bug, Pill, AlertTriangle, Ban, Plus } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +16,93 @@ export const Route = createFileRoute("/_authenticated/tutor/caes/$id")({
   head: () => ({ meta: [{ title: "Cão — Quintal da Gabi" }] }),
   component: DogDetail,
 });
+
+// Seção simples de "cadastrar e listar" reaproveitada pelas 4 abas de saúde
+// que o tutor pode preencher sozinho (antipulgas, medicamentos, alergias,
+// restrições). O tutor só consegue ADICIONAR — editar/excluir é com a equipe.
+function SimpleHealthSection({
+  dogId,
+  table,
+  emptyLabel,
+  fields,
+  renderItem,
+}: {
+  dogId: string;
+  table: string;
+  emptyLabel: string;
+  fields: { key: string; label: string; type?: "text" | "date"; placeholder?: string; required?: boolean }[];
+  renderItem: (row: any) => { title: string; subtitle?: string };
+}) {
+  const qc = useQueryClient();
+  const [values, setValues] = useState<Record<string, string>>({});
+
+  const { data: items } = useQuery({
+    queryKey: ["tutor-health", table, dogId],
+    queryFn: async () =>
+      ((await (supabase as any).from(table).select("*").eq("dog_id", dogId).order("created_at", { ascending: false }))
+        .data ?? []) as any[],
+  });
+
+  const add = useMutation({
+    mutationFn: async () => {
+      const missing = fields.find((f) => f.required && !values[f.key]?.trim());
+      if (missing) throw new Error(`Preencha "${missing.label}"`);
+      const payload: Record<string, unknown> = { dog_id: dogId };
+      for (const f of fields) {
+        if (values[f.key]?.trim()) payload[f.key] = values[f.key].trim();
+      }
+      const { error } = await (supabase as any).from(table).insert(payload);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Registrado — já aparece para a equipe também");
+      setValues({});
+      qc.invalidateQueries({ queryKey: ["tutor-health", table, dogId] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            {fields.map((f) => (
+              <div key={f.key}>
+                <Label>{f.label}</Label>
+                <Input
+                  type={f.type ?? "text"}
+                  value={values[f.key] ?? ""}
+                  placeholder={f.placeholder}
+                  onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+          <Button size="sm" onClick={() => add.mutate()} disabled={add.isPending}>
+            <Plus className="mr-1 h-4 w-4" /> Adicionar
+          </Button>
+        </CardContent>
+      </Card>
+
+      {items?.length ? (
+        items.map((row) => {
+          const { title, subtitle } = renderItem(row);
+          return (
+            <Card key={row.id}>
+              <CardContent className="p-4">
+                <p className="font-medium">{title}</p>
+                {subtitle ? <p className="text-xs text-muted-foreground">{subtitle}</p> : null}
+              </CardContent>
+            </Card>
+          );
+        })
+      ) : (
+        <p className="text-sm text-muted-foreground">{emptyLabel}</p>
+      )}
+    </div>
+  );
+}
 
 function DogDetail() {
   const { id } = Route.useParams();
@@ -97,8 +184,12 @@ function DogDetail() {
       </Card>
 
       <Tabs defaultValue="vaccines">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="vaccines"><Syringe className="mr-2 h-4 w-4" />Vacinas</TabsTrigger>
+          <TabsTrigger value="flea"><Bug className="mr-2 h-4 w-4" />Antipulgas</TabsTrigger>
+          <TabsTrigger value="meds"><Pill className="mr-2 h-4 w-4" />Medicamentos</TabsTrigger>
+          <TabsTrigger value="allergies"><AlertTriangle className="mr-2 h-4 w-4" />Alergias</TabsTrigger>
+          <TabsTrigger value="diet"><Ban className="mr-2 h-4 w-4" />Restrições</TabsTrigger>
           <TabsTrigger value="stays"><BedDouble className="mr-2 h-4 w-4" />Hospedagens</TabsTrigger>
         </TabsList>
 
@@ -144,6 +235,67 @@ function DogDetail() {
               </CardContent>
             </Card>
           )) : <p className="text-sm text-muted-foreground">Nenhuma vacina registrada.</p>}
+        </TabsContent>
+
+        <TabsContent value="flea">
+          <SimpleHealthSection
+            dogId={id}
+            table="dog_flea_treatments"
+            emptyLabel="Nenhum antipulgas registrado."
+            fields={[
+              { key: "product", label: "Produto", placeholder: "Ex.: Bravecto", required: true },
+              { key: "applied_date", label: "Data de aplicação", type: "date", required: true },
+              { key: "next_due_date", label: "Próxima dose", type: "date" },
+              { key: "notes", label: "Observação" },
+            ]}
+            renderItem={(r) => ({
+              title: r.product ?? "Antipulgas",
+              subtitle: `Aplicado: ${r.applied_date ? new Date(r.applied_date).toLocaleDateString("pt-BR") : "—"}${r.next_due_date ? ` · Próxima: ${new Date(r.next_due_date).toLocaleDateString("pt-BR")}` : ""}`,
+            })}
+          />
+        </TabsContent>
+
+        <TabsContent value="meds">
+          <SimpleHealthSection
+            dogId={id}
+            table="dog_medications"
+            emptyLabel="Nenhum medicamento registrado."
+            fields={[
+              { key: "name", label: "Medicamento", placeholder: "Ex.: Apoquel", required: true },
+              { key: "dose", label: "Dose", placeholder: "Ex.: 16mg" },
+              { key: "frequency", label: "Frequência", placeholder: "Ex.: 1x ao dia" },
+              { key: "notes", label: "Observação" },
+            ]}
+            renderItem={(r) => ({
+              title: r.name,
+              subtitle: [r.dose, r.frequency].filter(Boolean).join(" · ") || undefined,
+            })}
+          />
+        </TabsContent>
+
+        <TabsContent value="allergies">
+          <SimpleHealthSection
+            dogId={id}
+            table="dog_allergies"
+            emptyLabel="Nenhuma alergia registrada."
+            fields={[
+              { key: "description", label: "Alergia", placeholder: "Ex.: Alergia a frango", required: true },
+              { key: "severity", label: "Gravidade", placeholder: "Ex.: leve, moderada, grave" },
+            ]}
+            renderItem={(r) => ({ title: r.description, subtitle: r.severity })}
+          />
+        </TabsContent>
+
+        <TabsContent value="diet">
+          <SimpleHealthSection
+            dogId={id}
+            table="dog_diet_restrictions"
+            emptyLabel="Nenhuma restrição registrada."
+            fields={[
+              { key: "description", label: "Restrição alimentar", placeholder: "Ex.: Não pode comer ração X", required: true },
+            ]}
+            renderItem={(r) => ({ title: r.description })}
+          />
         </TabsContent>
 
         <TabsContent value="stays" className="space-y-2">
