@@ -220,23 +220,56 @@ function ColorField({
   label,
   value,
   onChange,
+  allowEmpty = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  allowEmpty?: boolean;
 }) {
+  const [text, setText] = useState(value);
+  useEffect(() => setText(value), [value]);
+
+  const resolved = text.trim() ? resolveColor(text) : null;
+  const swatch = resolved ?? (value && /^#/.test(value) ? value : "#e5e7eb");
+  const isUnknown = text.trim().length > 0 && resolved === null && !/^#([0-9a-f]{6})$/i.test(text.trim());
+
+  function commit(v: string) {
+    const trimmed = v.trim();
+    if (!trimmed) {
+      if (allowEmpty) onChange("");
+      return;
+    }
+    const hex = resolveColor(trimmed);
+    if (hex) onChange(hex);
+    else if (/^#([0-9a-f]{6})$/i.test(trimmed)) onChange(trimmed.toUpperCase());
+    // se não reconhecer, mantém o valor salvo anterior; UI mostra o aviso
+  }
+
   return (
     <div>
       <Label className="text-xs">{label}</Label>
       <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-12 cursor-pointer rounded border border-input bg-background"
+        <span
+          aria-hidden
+          className="h-9 w-9 shrink-0 rounded border border-input"
+          style={{ background: swatch }}
         />
-        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="#FF7F50" />
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          }}
+          placeholder="ex.: azul marinho, verde água, #FF7F50"
+        />
       </div>
+      {isUnknown && (
+        <p className="mt-1 text-[11px] text-destructive">
+          Cor "{text}" não reconhecida. Tente um nome em português (ex.: <em>azul marinho</em>) ou um código hex (<code>#123ABC</code>).
+        </p>
+      )}
     </div>
   );
 }
