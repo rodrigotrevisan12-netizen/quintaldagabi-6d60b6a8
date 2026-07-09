@@ -142,7 +142,7 @@ const RAW: Record<string, string> = {
   "yellow": "#FACC15",
   "orange": "#F97316",
   "purple": "#8B5CF6",
-  "pink": "#EC4899",
+  
   "brown": "#7A4E2D",
   "navy": "#0B1E3F",
   "teal": "#14B8A6",
