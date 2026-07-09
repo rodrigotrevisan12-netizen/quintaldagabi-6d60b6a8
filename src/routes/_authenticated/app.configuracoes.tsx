@@ -171,11 +171,16 @@ function BrandingRow({
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         <ColorField label="Cor primária" value={primary} onChange={setPrimary} />
         <ColorField label="Cor secundária" value={secondary} onChange={setSecondary} />
         <ColorField label="Cor de destaque" value={accent} onChange={setAccent} />
+        <ColorField label="Cor de fundo" value={background} onChange={setBackground} allowEmpty />
       </div>
+      <p className="-mt-2 text-xs text-muted-foreground">
+        Você pode digitar o nome da cor em português (ex.: <em>azul marinho</em>, <em>verde água</em>,
+        <em>rosa antigo</em>, <em>bege</em>) ou o código hex (<code>#3B82F6</code>).
+      </p>
 
       <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
         {logo ? (
