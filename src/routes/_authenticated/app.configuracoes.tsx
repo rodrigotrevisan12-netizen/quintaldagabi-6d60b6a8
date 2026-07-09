@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { CENTRALPET_BRAND, useInvalidateBrand } from "@/lib/branding";
+import { resolveColor } from "@/lib/color-names";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — Central Pet" }] }),
