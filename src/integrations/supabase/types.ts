@@ -2569,6 +2569,7 @@ export type Database = {
         Row: {
           address: string | null
           brand_accent: string | null
+          brand_background: string | null
           brand_logo_url: string | null
           brand_name: string | null
           brand_primary: string | null
@@ -2584,6 +2585,7 @@ export type Database = {
         Insert: {
           address?: string | null
           brand_accent?: string | null
+          brand_background?: string | null
           brand_logo_url?: string | null
           brand_name?: string | null
           brand_primary?: string | null
@@ -2599,6 +2601,7 @@ export type Database = {
         Update: {
           address?: string | null
           brand_accent?: string | null
+          brand_background?: string | null
           brand_logo_url?: string | null
           brand_name?: string | null
           brand_primary?: string | null

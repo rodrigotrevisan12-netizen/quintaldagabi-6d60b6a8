@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { CENTRALPET_BRAND, useInvalidateBrand } from "@/lib/branding";
+import { resolveColor } from "@/lib/color-names";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — Central Pet" }] }),
@@ -117,6 +118,7 @@ function BrandingRow({
   const [primary, setPrimary] = useState<string>(unit.brand_primary ?? CENTRALPET_BRAND.primary);
   const [secondary, setSecondary] = useState<string>(unit.brand_secondary ?? CENTRALPET_BRAND.secondary);
   const [accent, setAccent] = useState<string>(unit.brand_accent ?? CENTRALPET_BRAND.accent);
+  const [background, setBackground] = useState<string>(unit.brand_background ?? "");
 
   function handleSave() {
     onSave({
@@ -125,6 +127,7 @@ function BrandingRow({
       brand_primary: primary || null,
       brand_secondary: secondary || null,
       brand_accent: accent || null,
+      brand_background: background.trim() ? (resolveColor(background) ?? background) : null,
     });
   }
 
@@ -134,12 +137,14 @@ function BrandingRow({
     setPrimary(CENTRALPET_BRAND.primary);
     setSecondary(CENTRALPET_BRAND.secondary);
     setAccent(CENTRALPET_BRAND.accent);
+    setBackground("");
     onSave({
       brand_name: null,
       brand_logo_url: null,
       brand_primary: null,
       brand_secondary: null,
       brand_accent: null,
+      brand_background: null,
     });
   }
 
@@ -166,11 +171,16 @@ function BrandingRow({
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         <ColorField label="Cor primária" value={primary} onChange={setPrimary} />
         <ColorField label="Cor secundária" value={secondary} onChange={setSecondary} />
         <ColorField label="Cor de destaque" value={accent} onChange={setAccent} />
+        <ColorField label="Cor de fundo" value={background} onChange={setBackground} allowEmpty />
       </div>
+      <p className="-mt-2 text-xs text-muted-foreground">
+        Você pode digitar o nome da cor em português (ex.: <em>azul marinho</em>, <em>verde água</em>,
+        <em>rosa antigo</em>, <em>bege</em>) ou o código hex (<code>#3B82F6</code>).
+      </p>
 
       <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
         {logo ? (
@@ -210,23 +220,56 @@ function ColorField({
   label,
   value,
   onChange,
+  allowEmpty = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  allowEmpty?: boolean;
 }) {
+  const [text, setText] = useState(value);
+  useEffect(() => setText(value), [value]);
+
+  const resolved = text.trim() ? resolveColor(text) : null;
+  const swatch = resolved ?? (value && /^#/.test(value) ? value : "#e5e7eb");
+  const isUnknown = text.trim().length > 0 && resolved === null && !/^#([0-9a-f]{6})$/i.test(text.trim());
+
+  function commit(v: string) {
+    const trimmed = v.trim();
+    if (!trimmed) {
+      if (allowEmpty) onChange("");
+      return;
+    }
+    const hex = resolveColor(trimmed);
+    if (hex) onChange(hex);
+    else if (/^#([0-9a-f]{6})$/i.test(trimmed)) onChange(trimmed.toUpperCase());
+    // se não reconhecer, mantém o valor salvo anterior; UI mostra o aviso
+  }
+
   return (
     <div>
       <Label className="text-xs">{label}</Label>
       <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-12 cursor-pointer rounded border border-input bg-background"
+        <span
+          aria-hidden
+          className="h-9 w-9 shrink-0 rounded border border-input"
+          style={{ background: swatch }}
         />
-        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="#FF7F50" />
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          }}
+          placeholder="ex.: azul marinho, verde água, #FF7F50"
+        />
       </div>
+      {isUnknown && (
+        <p className="mt-1 text-[11px] text-destructive">
+          Cor "{text}" não reconhecida. Tente um nome em português (ex.: <em>azul marinho</em>) ou um código hex (<code>#123ABC</code>).
+        </p>
+      )}
     </div>
   );
 }
