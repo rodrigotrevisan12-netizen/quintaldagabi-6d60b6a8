@@ -118,6 +118,7 @@ function BrandingRow({
   const [primary, setPrimary] = useState<string>(unit.brand_primary ?? CENTRALPET_BRAND.primary);
   const [secondary, setSecondary] = useState<string>(unit.brand_secondary ?? CENTRALPET_BRAND.secondary);
   const [accent, setAccent] = useState<string>(unit.brand_accent ?? CENTRALPET_BRAND.accent);
+  const [background, setBackground] = useState<string>(unit.brand_background ?? "");
 
   function handleSave() {
     onSave({
@@ -126,6 +127,7 @@ function BrandingRow({
       brand_primary: primary || null,
       brand_secondary: secondary || null,
       brand_accent: accent || null,
+      brand_background: background.trim() ? (resolveColor(background) ?? background) : null,
     });
   }
 
@@ -135,12 +137,14 @@ function BrandingRow({
     setPrimary(CENTRALPET_BRAND.primary);
     setSecondary(CENTRALPET_BRAND.secondary);
     setAccent(CENTRALPET_BRAND.accent);
+    setBackground("");
     onSave({
       brand_name: null,
       brand_logo_url: null,
       brand_primary: null,
       brand_secondary: null,
       brand_accent: null,
+      brand_background: null,
     });
   }
 
