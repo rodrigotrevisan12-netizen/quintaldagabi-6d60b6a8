@@ -348,6 +348,48 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          plan: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string
+          trial_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          plan?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string
+          trial_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          plan?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string
+          trial_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_report_entries: {
         Row: {
           created_at: string
@@ -2080,6 +2122,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string
           created_at: string
           default_unit_id: string | null
           full_name: string | null
@@ -2090,6 +2133,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          company_id: string
           created_at?: string
           default_unit_id?: string | null
           full_name?: string | null
@@ -2100,6 +2144,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string
           created_at?: string
           default_unit_id?: string | null
           full_name?: string | null
@@ -2109,6 +2154,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_default_unit_id_fkey"
             columns: ["default_unit_id"]
@@ -2618,6 +2670,7 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          company_id: string
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
@@ -2625,6 +2678,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id: string
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
@@ -2632,6 +2686,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
@@ -2639,6 +2694,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_roles_unit_id_fkey"
             columns: ["unit_id"]
@@ -2702,6 +2764,7 @@ export type Database = {
       }
     }
     Functions: {
+      current_company_id: { Args: never; Returns: string }
       default_unit_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -2710,6 +2773,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_company_admin: { Args: never; Returns: boolean }
       is_tutor_of_dog: {
         Args: { _dog_id: string; _user_id: string }
         Returns: boolean
