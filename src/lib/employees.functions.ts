@@ -50,17 +50,26 @@ export const inviteEmployee = createServerFn({ method: "POST" })
     }
     if (!authUserId) throw new Error("Falha ao obter id do usuário.");
 
+    // Empresa do admin que está criando o funcionário
+    const { data: adminProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userId)
+      .single();
+    const companyId = adminProfile?.company_id;
+    if (!companyId) throw new Error("Empresa do administrador não encontrada.");
+
     // Remove papel "tutor" se houver — esse usuário agora é funcionário
     await supabaseAdmin.from("user_roles").delete().eq("user_id", authUserId).eq("role", "tutor");
 
     // Garante papel "funcionario"
     await supabaseAdmin
       .from("user_roles")
-      .upsert({ user_id: authUserId, role: "funcionario" }, { onConflict: "user_id,role,unit_id", ignoreDuplicates: true });
+      .upsert({ user_id: authUserId, role: "funcionario", company_id: companyId }, { onConflict: "user_id,role,unit_id", ignoreDuplicates: true });
 
     // Marca obrigação de definir senha no 1º acesso
     await supabaseAdmin.from("profiles").upsert(
-      { id: authUserId, must_set_password: true },
+      { id: authUserId, must_set_password: true, company_id: companyId },
       { onConflict: "id" },
     );
 
