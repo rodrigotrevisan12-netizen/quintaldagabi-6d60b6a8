@@ -56,17 +56,26 @@ export const inviteTutor = createServerFn({ method: "POST" })
     }
     if (!authUserId) throw new Error("Falha ao obter o id do usuário.");
 
+    // Empresa do admin que está convidando o tutor
+    const { data: adminProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("company_id")
+      .eq("id", userId)
+      .single();
+    const companyId = adminProfile?.company_id;
+    if (!companyId) throw new Error("Empresa do administrador não encontrada.");
+
     // Garante papel "tutor" (não remove outros — admin/funcionario podem ser também tutor da própria casa)
     await supabaseAdmin
       .from("user_roles")
       .upsert(
-        { user_id: authUserId, role: "tutor" },
+        { user_id: authUserId, role: "tutor", company_id: companyId },
         { onConflict: "user_id,role,unit_id", ignoreDuplicates: true },
       );
 
     // Marca obrigação de definir senha no 1º acesso
     await supabaseAdmin.from("profiles").upsert(
-      { id: authUserId, must_set_password: true },
+      { id: authUserId, must_set_password: true, company_id: companyId },
       { onConflict: "id" },
     );
 
