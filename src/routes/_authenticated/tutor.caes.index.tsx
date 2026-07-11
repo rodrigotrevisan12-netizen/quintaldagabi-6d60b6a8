@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const Route = createFileRoute("/_authenticated/tutor/caes")({
+export const Route = createFileRoute("/_authenticated/tutor/caes/")({
   head: () => ({ meta: [{ title: "Meus cães — Área do tutor" }] }),
   component: MyDogs,
 });
