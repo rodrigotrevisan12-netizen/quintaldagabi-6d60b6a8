@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           arrived_at: string | null
           cancelled_at: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           dog_id: string | null
@@ -33,6 +34,7 @@ export type Database = {
         Insert: {
           arrived_at?: string | null
           cancelled_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           dog_id?: string | null
@@ -48,6 +50,7 @@ export type Database = {
         Update: {
           arrived_at?: string | null
           cancelled_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           dog_id?: string | null
@@ -61,6 +64,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "arrival_notifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "arrival_notifications_dog_id_fkey"
             columns: ["dog_id"]
@@ -93,6 +103,7 @@ export type Database = {
       }
       boarding_belongings: {
         Row: {
+          company_id: string
           created_at: string
           id: string
           item: string
@@ -102,6 +113,7 @@ export type Database = {
           stay_id: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           id?: string
           item: string
@@ -111,6 +123,7 @@ export type Database = {
           stay_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           id?: string
           item?: string
@@ -120,6 +133,13 @@ export type Database = {
           stay_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "boarding_belongings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "boarding_belongings_stay_id_fkey"
             columns: ["stay_id"]
@@ -131,6 +151,7 @@ export type Database = {
       }
       boarding_daily_logs: {
         Row: {
+          company_id: string
           created_at: string
           fed_ok: boolean
           id: string
@@ -142,6 +163,7 @@ export type Database = {
           stay_id: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           fed_ok?: boolean
           id?: string
@@ -153,6 +175,7 @@ export type Database = {
           stay_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           fed_ok?: boolean
           id?: string
@@ -164,6 +187,13 @@ export type Database = {
           stay_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "boarding_daily_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "boarding_daily_logs_stay_id_fkey"
             columns: ["stay_id"]
@@ -176,6 +206,7 @@ export type Database = {
       boarding_food: {
         Row: {
           brand: string | null
+          company_id: string
           created_at: string
           id: string
           meals_per_day: number | null
@@ -187,6 +218,7 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           meals_per_day?: number | null
@@ -198,6 +230,7 @@ export type Database = {
         }
         Update: {
           brand?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           meals_per_day?: number | null
@@ -209,6 +242,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "boarding_food_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "boarding_food_stay_id_fkey"
             columns: ["stay_id"]
             isOneToOne: false
@@ -219,6 +259,7 @@ export type Database = {
       }
       boarding_medications: {
         Row: {
+          company_id: string
           created_at: string
           dose: string | null
           frequency: string | null
@@ -229,6 +270,7 @@ export type Database = {
           stay_id: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           dose?: string | null
           frequency?: string | null
@@ -239,6 +281,7 @@ export type Database = {
           stay_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           dose?: string | null
           frequency?: string | null
@@ -249,6 +292,13 @@ export type Database = {
           stay_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "boarding_medications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "boarding_medications_stay_id_fkey"
             columns: ["stay_id"]
@@ -264,6 +314,7 @@ export type Database = {
           check_in_by: string | null
           check_out_at: string | null
           check_out_by: string | null
+          company_id: string
           created_at: string
           daily_rate: number
           dog_id: string
@@ -279,6 +330,7 @@ export type Database = {
           check_in_by?: string | null
           check_out_at?: string | null
           check_out_by?: string | null
+          company_id?: string
           created_at?: string
           daily_rate?: number
           dog_id: string
@@ -294,6 +346,7 @@ export type Database = {
           check_in_by?: string | null
           check_out_at?: string | null
           check_out_by?: string | null
+          company_id?: string
           created_at?: string
           daily_rate?: number
           dog_id?: string
@@ -305,6 +358,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "boarding_stays_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "boarding_stays_dog_id_fkey"
             columns: ["dog_id"]
@@ -327,6 +387,7 @@ export type Database = {
           attachment_url: string | null
           author_id: string
           body: string
+          company_id: string
           created_at: string
           id: string
         }
@@ -335,6 +396,7 @@ export type Database = {
           attachment_url?: string | null
           author_id: string
           body: string
+          company_id?: string
           created_at?: string
           id?: string
         }
@@ -343,10 +405,19 @@ export type Database = {
           attachment_url?: string | null
           author_id?: string
           body?: string
+          company_id?: string
           created_at?: string
           id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       companies: {
         Row: {
@@ -392,6 +463,7 @@ export type Database = {
       }
       daily_report_entries: {
         Row: {
+          company_id: string
           created_at: string
           description: string
           entry_type: Database["public"]["Enums"]["report_entry_type"]
@@ -401,6 +473,7 @@ export type Database = {
           report_id: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           description: string
           entry_type: Database["public"]["Enums"]["report_entry_type"]
@@ -410,6 +483,7 @@ export type Database = {
           report_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           description?: string
           entry_type?: Database["public"]["Enums"]["report_entry_type"]
@@ -419,6 +493,13 @@ export type Database = {
           report_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_report_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daily_report_entries_report_id_fkey"
             columns: ["report_id"]
@@ -431,6 +512,7 @@ export type Database = {
       daily_report_media: {
         Row: {
           caption: string | null
+          company_id: string
           created_at: string
           id: string
           media_type: Database["public"]["Enums"]["report_media_type"]
@@ -439,6 +521,7 @@ export type Database = {
         }
         Insert: {
           caption?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           media_type?: Database["public"]["Enums"]["report_media_type"]
@@ -447,6 +530,7 @@ export type Database = {
         }
         Update: {
           caption?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           media_type?: Database["public"]["Enums"]["report_media_type"]
@@ -454,6 +538,13 @@ export type Database = {
           report_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_report_media_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daily_report_media_report_id_fkey"
             columns: ["report_id"]
@@ -466,6 +557,7 @@ export type Database = {
       daily_reports: {
         Row: {
           author_id: string | null
+          company_id: string
           created_at: string
           date: string
           dog_id: string
@@ -479,6 +571,7 @@ export type Database = {
         }
         Insert: {
           author_id?: string | null
+          company_id?: string
           created_at?: string
           date: string
           dog_id: string
@@ -492,6 +585,7 @@ export type Database = {
         }
         Update: {
           author_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           dog_id?: string
@@ -505,6 +599,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "daily_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "daily_reports_dog_id_fkey"
             columns: ["dog_id"]
             isOneToOne: false
@@ -517,6 +618,7 @@ export type Database = {
         Row: {
           changed_at: string
           changed_by: string | null
+          company_id: string
           id: string
           item_id: string
           new_status: Database["public"]["Enums"]["schedule_status"]
@@ -526,6 +628,7 @@ export type Database = {
         Insert: {
           changed_at?: string
           changed_by?: string | null
+          company_id?: string
           id?: string
           item_id: string
           new_status: Database["public"]["Enums"]["schedule_status"]
@@ -537,6 +640,7 @@ export type Database = {
         Update: {
           changed_at?: string
           changed_by?: string | null
+          company_id?: string
           id?: string
           item_id?: string
           new_status?: Database["public"]["Enums"]["schedule_status"]
@@ -546,6 +650,13 @@ export type Database = {
             | null
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_schedule_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daily_schedule_history_item_id_fkey"
             columns: ["item_id"]
@@ -558,6 +669,7 @@ export type Database = {
       daily_schedule_items: {
         Row: {
           activity: string
+          company_id: string
           completed_at: string | null
           completed_by: string | null
           created_at: string
@@ -578,6 +690,7 @@ export type Database = {
         }
         Insert: {
           activity: string
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -598,6 +711,7 @@ export type Database = {
         }
         Update: {
           activity?: string
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -618,6 +732,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "daily_schedule_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "daily_schedule_items_responsible_id_fkey"
             columns: ["responsible_id"]
             isOneToOne: false
@@ -628,24 +749,34 @@ export type Database = {
       }
       daily_schedule_participants: {
         Row: {
+          company_id: string
           created_at: string
           dog_id: string
           id: string
           item_id: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           dog_id: string
           id?: string
           item_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           dog_id?: string
           id?: string
           item_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_schedule_participants_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daily_schedule_participants_dog_id_fkey"
             columns: ["dog_id"]
@@ -664,6 +795,7 @@ export type Database = {
       }
       daily_schedule_photos: {
         Row: {
+          company_id: string
           created_at: string
           id: string
           item_id: string
@@ -671,6 +803,7 @@ export type Database = {
           uploaded_by: string | null
         }
         Insert: {
+          company_id?: string
           created_at?: string
           id?: string
           item_id: string
@@ -678,6 +811,7 @@ export type Database = {
           uploaded_by?: string | null
         }
         Update: {
+          company_id?: string
           created_at?: string
           id?: string
           item_id?: string
@@ -685,6 +819,13 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_schedule_photos_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daily_schedule_photos_item_id_fkey"
             columns: ["item_id"]
@@ -697,6 +838,7 @@ export type Database = {
       daycare_activities: {
         Row: {
           activity_type: Database["public"]["Enums"]["daycare_activity_type"]
+          company_id: string
           created_at: string
           duration_min: number | null
           id: string
@@ -707,6 +849,7 @@ export type Database = {
         }
         Insert: {
           activity_type: Database["public"]["Enums"]["daycare_activity_type"]
+          company_id?: string
           created_at?: string
           duration_min?: number | null
           id?: string
@@ -717,6 +860,7 @@ export type Database = {
         }
         Update: {
           activity_type?: Database["public"]["Enums"]["daycare_activity_type"]
+          company_id?: string
           created_at?: string
           duration_min?: number | null
           id?: string
@@ -726,6 +870,13 @@ export type Database = {
           stay_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daycare_activities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daycare_activities_stay_id_fkey"
             columns: ["stay_id"]
@@ -738,6 +889,7 @@ export type Database = {
       daycare_feedings: {
         Row: {
           amount: string | null
+          company_id: string
           created_at: string
           fed_at: string
           feeding_type: Database["public"]["Enums"]["daycare_feeding_type"]
@@ -748,6 +900,7 @@ export type Database = {
         }
         Insert: {
           amount?: string | null
+          company_id?: string
           created_at?: string
           fed_at?: string
           feeding_type: Database["public"]["Enums"]["daycare_feeding_type"]
@@ -758,6 +911,7 @@ export type Database = {
         }
         Update: {
           amount?: string | null
+          company_id?: string
           created_at?: string
           fed_at?: string
           feeding_type?: Database["public"]["Enums"]["daycare_feeding_type"]
@@ -767,6 +921,13 @@ export type Database = {
           stay_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daycare_feedings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daycare_feedings_stay_id_fkey"
             columns: ["stay_id"]
@@ -778,6 +939,7 @@ export type Database = {
       }
       daycare_medications: {
         Row: {
+          company_id: string
           created_at: string
           dose: string | null
           given_at: string
@@ -788,6 +950,7 @@ export type Database = {
           stay_id: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           dose?: string | null
           given_at?: string
@@ -798,6 +961,7 @@ export type Database = {
           stay_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           dose?: string | null
           given_at?: string
@@ -809,6 +973,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "daycare_medications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "daycare_medications_stay_id_fkey"
             columns: ["stay_id"]
             isOneToOne: false
@@ -819,6 +990,7 @@ export type Database = {
       }
       daycare_packages: {
         Row: {
+          company_id: string
           created_at: string
           days_per_week: number
           extra_day_price: number
@@ -829,6 +1001,7 @@ export type Database = {
           unit_id: string | null
         }
         Insert: {
+          company_id?: string
           created_at?: string
           days_per_week: number
           extra_day_price?: number
@@ -839,6 +1012,7 @@ export type Database = {
           unit_id?: string | null
         }
         Update: {
+          company_id?: string
           created_at?: string
           days_per_week?: number
           extra_day_price?: number
@@ -849,6 +1023,13 @@ export type Database = {
           unit_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "daycare_packages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daycare_packages_unit_id_fkey"
             columns: ["unit_id"]
@@ -864,6 +1045,7 @@ export type Database = {
           check_in_by: string | null
           check_out_at: string | null
           check_out_by: string | null
+          company_id: string
           created_at: string
           dog_id: string
           drop_off_person: string | null
@@ -878,6 +1060,7 @@ export type Database = {
           check_in_by?: string | null
           check_out_at?: string | null
           check_out_by?: string | null
+          company_id?: string
           created_at?: string
           dog_id: string
           drop_off_person?: string | null
@@ -892,6 +1075,7 @@ export type Database = {
           check_in_by?: string | null
           check_out_at?: string | null
           check_out_by?: string | null
+          company_id?: string
           created_at?: string
           dog_id?: string
           drop_off_person?: string | null
@@ -902,6 +1086,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "daycare_stays_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "daycare_stays_dog_id_fkey"
             columns: ["dog_id"]
@@ -920,6 +1111,7 @@ export type Database = {
       }
       document_signatures: {
         Row: {
+          company_id: string
           document_id: string
           id: string
           ip_address: string | null
@@ -933,6 +1125,7 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          company_id?: string
           document_id: string
           id?: string
           ip_address?: string | null
@@ -946,6 +1139,7 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          company_id?: string
           document_id?: string
           id?: string
           ip_address?: string | null
@@ -960,6 +1154,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "document_signatures_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "document_signatures_document_id_fkey"
             columns: ["document_id"]
             isOneToOne: false
@@ -971,6 +1172,7 @@ export type Database = {
       document_templates: {
         Row: {
           body: string
+          company_id: string
           created_at: string
           id: string
           is_active: boolean
@@ -981,6 +1183,7 @@ export type Database = {
         }
         Insert: {
           body: string
+          company_id?: string
           created_at?: string
           id?: string
           is_active?: boolean
@@ -991,6 +1194,7 @@ export type Database = {
         }
         Update: {
           body?: string
+          company_id?: string
           created_at?: string
           id?: string
           is_active?: boolean
@@ -999,12 +1203,21 @@ export type Database = {
           updated_at?: string
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
           body: string
           cancelled_at: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           dog_id: string | null
@@ -1025,6 +1238,7 @@ export type Database = {
         Insert: {
           body: string
           cancelled_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           dog_id?: string | null
@@ -1045,6 +1259,7 @@ export type Database = {
         Update: {
           body?: string
           cancelled_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           dog_id?: string | null
@@ -1063,6 +1278,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_dog_id_fkey"
             columns: ["dog_id"]
@@ -1095,6 +1317,7 @@ export type Database = {
       }
       dog_allergies: {
         Row: {
+          company_id: string
           created_at: string
           description: string
           dog_id: string
@@ -1103,6 +1326,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           description: string
           dog_id: string
@@ -1111,6 +1335,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           description?: string
           dog_id?: string
@@ -1119,6 +1344,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_allergies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_allergies_dog_id_fkey"
             columns: ["dog_id"]
@@ -1130,6 +1362,7 @@ export type Database = {
       }
       dog_behavior: {
         Row: {
+          company_id: string
           compat_females: boolean
           compat_large: boolean
           compat_males: boolean
@@ -1143,6 +1376,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          company_id?: string
           compat_females?: boolean
           compat_large?: boolean
           compat_males?: boolean
@@ -1156,6 +1390,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          company_id?: string
           compat_females?: boolean
           compat_large?: boolean
           compat_males?: boolean
@@ -1170,6 +1405,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "dog_behavior_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "dog_behavior_dog_id_fkey"
             columns: ["dog_id"]
             isOneToOne: true
@@ -1180,6 +1422,7 @@ export type Database = {
       }
       dog_behavior_history: {
         Row: {
+          company_id: string
           compat_females: boolean | null
           compat_large: boolean | null
           compat_males: boolean | null
@@ -1194,6 +1437,7 @@ export type Database = {
           traits: Database["public"]["Enums"]["behavior_trait"][]
         }
         Insert: {
+          company_id?: string
           compat_females?: boolean | null
           compat_large?: boolean | null
           compat_males?: boolean | null
@@ -1208,6 +1452,7 @@ export type Database = {
           traits?: Database["public"]["Enums"]["behavior_trait"][]
         }
         Update: {
+          company_id?: string
           compat_females?: boolean | null
           compat_large?: boolean | null
           compat_males?: boolean | null
@@ -1222,6 +1467,13 @@ export type Database = {
           traits?: Database["public"]["Enums"]["behavior_trait"][]
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_behavior_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_behavior_history_dog_id_fkey"
             columns: ["dog_id"]
@@ -1234,6 +1486,7 @@ export type Database = {
       dog_dewormings: {
         Row: {
           applied_date: string
+          company_id: string
           created_at: string
           dog_id: string
           id: string
@@ -1244,6 +1497,7 @@ export type Database = {
         }
         Insert: {
           applied_date: string
+          company_id?: string
           created_at?: string
           dog_id: string
           id?: string
@@ -1254,6 +1508,7 @@ export type Database = {
         }
         Update: {
           applied_date?: string
+          company_id?: string
           created_at?: string
           dog_id?: string
           id?: string
@@ -1263,6 +1518,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_dewormings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_dewormings_dog_id_fkey"
             columns: ["dog_id"]
@@ -1274,6 +1536,7 @@ export type Database = {
       }
       dog_diet_restrictions: {
         Row: {
+          company_id: string
           created_at: string
           description: string
           dog_id: string
@@ -1281,6 +1544,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           description: string
           dog_id: string
@@ -1288,6 +1552,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           description?: string
           dog_id?: string
@@ -1295,6 +1560,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_diet_restrictions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_diet_restrictions_dog_id_fkey"
             columns: ["dog_id"]
@@ -1307,6 +1579,7 @@ export type Database = {
       dog_flea_treatments: {
         Row: {
           applied_date: string
+          company_id: string
           created_at: string
           dog_id: string
           id: string
@@ -1317,6 +1590,7 @@ export type Database = {
         }
         Insert: {
           applied_date: string
+          company_id?: string
           created_at?: string
           dog_id: string
           id?: string
@@ -1327,6 +1601,7 @@ export type Database = {
         }
         Update: {
           applied_date?: string
+          company_id?: string
           created_at?: string
           dog_id?: string
           id?: string
@@ -1336,6 +1611,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_flea_treatments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_flea_treatments_dog_id_fkey"
             columns: ["dog_id"]
@@ -1347,6 +1629,7 @@ export type Database = {
       }
       dog_medical_history: {
         Row: {
+          company_id: string
           created_at: string
           description: string
           dog_id: string
@@ -1356,6 +1639,7 @@ export type Database = {
           vet_name: string | null
         }
         Insert: {
+          company_id?: string
           created_at?: string
           description: string
           dog_id: string
@@ -1365,6 +1649,7 @@ export type Database = {
           vet_name?: string | null
         }
         Update: {
+          company_id?: string
           created_at?: string
           description?: string
           dog_id?: string
@@ -1374,6 +1659,13 @@ export type Database = {
           vet_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_medical_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_medical_history_dog_id_fkey"
             columns: ["dog_id"]
@@ -1386,6 +1678,7 @@ export type Database = {
       dog_medications: {
         Row: {
           active: boolean
+          company_id: string
           created_at: string
           dog_id: string
           dose: string | null
@@ -1397,6 +1690,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          company_id?: string
           created_at?: string
           dog_id: string
           dose?: string | null
@@ -1408,6 +1702,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          company_id?: string
           created_at?: string
           dog_id?: string
           dose?: string | null
@@ -1418,6 +1713,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_medications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_medications_dog_id_fkey"
             columns: ["dog_id"]
@@ -1430,6 +1732,7 @@ export type Database = {
       dog_stories: {
         Row: {
           caption: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           dog_id: string
@@ -1440,6 +1743,7 @@ export type Database = {
         }
         Insert: {
           caption?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           dog_id: string
@@ -1450,6 +1754,7 @@ export type Database = {
         }
         Update: {
           caption?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           dog_id?: string
@@ -1459,6 +1764,13 @@ export type Database = {
           media_url?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_stories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_stories_dog_id_fkey"
             columns: ["dog_id"]
@@ -1473,6 +1785,7 @@ export type Database = {
           applied_date: string
           batch: string | null
           card_photo_url: string | null
+          company_id: string
           created_at: string
           dog_id: string
           id: string
@@ -1486,6 +1799,7 @@ export type Database = {
           applied_date: string
           batch?: string | null
           card_photo_url?: string | null
+          company_id?: string
           created_at?: string
           dog_id: string
           id?: string
@@ -1499,6 +1813,7 @@ export type Database = {
           applied_date?: string
           batch?: string | null
           card_photo_url?: string | null
+          company_id?: string
           created_at?: string
           dog_id?: string
           id?: string
@@ -1509,6 +1824,13 @@ export type Database = {
           vet_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "dog_vaccines_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dog_vaccines_dog_id_fkey"
             columns: ["dog_id"]
@@ -1522,6 +1844,7 @@ export type Database = {
         Row: {
           birth_date: string | null
           breed: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           daycare_package_id: string | null
@@ -1544,6 +1867,7 @@ export type Database = {
         Insert: {
           birth_date?: string | null
           breed?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           daycare_package_id?: string | null
@@ -1566,6 +1890,7 @@ export type Database = {
         Update: {
           birth_date?: string | null
           breed?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           daycare_package_id?: string | null
@@ -1586,6 +1911,13 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "dogs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dogs_daycare_package_id_fkey"
             columns: ["daycare_package_id"]
@@ -1619,6 +1951,7 @@ export type Database = {
       employees: {
         Row: {
           active: boolean
+          company_id: string
           created_at: string
           email: string | null
           full_name: string
@@ -1636,6 +1969,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          company_id?: string
           created_at?: string
           email?: string | null
           full_name: string
@@ -1653,6 +1987,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          company_id?: string
           created_at?: string
           email?: string | null
           full_name?: string
@@ -1670,6 +2005,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "employees_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "employees_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -1681,6 +2023,7 @@ export type Database = {
       financial_transactions: {
         Row: {
           amount: number
+          company_id: string
           created_at: string
           created_by: string | null
           description: string
@@ -1706,6 +2049,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description: string
@@ -1731,6 +2075,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string
@@ -1755,6 +2100,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "financial_transactions_tutor_id_fkey"
             columns: ["tutor_id"]
@@ -1781,6 +2133,7 @@ export type Database = {
       grooming_appointment_services: {
         Row: {
           appointment_id: string
+          company_id: string
           created_at: string
           id: string
           price: number
@@ -1788,6 +2141,7 @@ export type Database = {
         }
         Insert: {
           appointment_id: string
+          company_id?: string
           created_at?: string
           id?: string
           price?: number
@@ -1795,6 +2149,7 @@ export type Database = {
         }
         Update: {
           appointment_id?: string
+          company_id?: string
           created_at?: string
           id?: string
           price?: number
@@ -1809,6 +2164,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "grooming_appointment_services_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "grooming_appointment_services_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1819,6 +2181,7 @@ export type Database = {
       }
       grooming_appointments: {
         Row: {
+          company_id: string
           created_at: string
           dog_id: string
           duration_min: number
@@ -1833,6 +2196,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           dog_id: string
           duration_min?: number
@@ -1847,6 +2211,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           dog_id?: string
           duration_min?: number
@@ -1861,6 +2226,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "grooming_appointments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "grooming_appointments_dog_id_fkey"
             columns: ["dog_id"]
@@ -1880,6 +2252,7 @@ export type Database = {
       grooming_photos: {
         Row: {
           appointment_id: string
+          company_id: string
           created_at: string
           id: string
           moment: Database["public"]["Enums"]["grooming_photo_moment"]
@@ -1888,6 +2261,7 @@ export type Database = {
         }
         Insert: {
           appointment_id: string
+          company_id?: string
           created_at?: string
           id?: string
           moment: Database["public"]["Enums"]["grooming_photo_moment"]
@@ -1896,6 +2270,7 @@ export type Database = {
         }
         Update: {
           appointment_id?: string
+          company_id?: string
           created_at?: string
           id?: string
           moment?: Database["public"]["Enums"]["grooming_photo_moment"]
@@ -1910,11 +2285,19 @@ export type Database = {
             referencedRelation: "grooming_appointments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "grooming_photos_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       grooming_services: {
         Row: {
           base_price: number
+          company_id: string
           created_at: string
           duration_min: number
           id: string
@@ -1924,6 +2307,7 @@ export type Database = {
         }
         Insert: {
           base_price?: number
+          company_id?: string
           created_at?: string
           duration_min?: number
           id?: string
@@ -1933,6 +2317,7 @@ export type Database = {
         }
         Update: {
           base_price?: number
+          company_id?: string
           created_at?: string
           duration_min?: number
           id?: string
@@ -1940,11 +2325,20 @@ export type Database = {
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "grooming_services_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       internal_communication_attachments: {
         Row: {
           comm_id: string
+          company_id: string
           created_at: string
           file_name: string | null
           file_url: string
@@ -1953,6 +2347,7 @@ export type Database = {
         }
         Insert: {
           comm_id: string
+          company_id?: string
           created_at?: string
           file_name?: string | null
           file_url: string
@@ -1961,6 +2356,7 @@ export type Database = {
         }
         Update: {
           comm_id?: string
+          company_id?: string
           created_at?: string
           file_name?: string | null
           file_url?: string
@@ -1975,23 +2371,33 @@ export type Database = {
             referencedRelation: "internal_communications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "internal_communication_attachments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       internal_communication_reads: {
         Row: {
           comm_id: string
+          company_id: string
           id: string
           read_at: string
           user_id: string
         }
         Insert: {
           comm_id: string
+          company_id?: string
           id?: string
           read_at?: string
           user_id: string
         }
         Update: {
           comm_id?: string
+          company_id?: string
           id?: string
           read_at?: string
           user_id?: string
@@ -2004,6 +2410,13 @@ export type Database = {
             referencedRelation: "internal_communications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "internal_communication_reads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
       internal_communications: {
@@ -2011,6 +2424,7 @@ export type Database = {
           author_id: string
           body: string
           comm_type: Database["public"]["Enums"]["comm_type"]
+          company_id: string
           created_at: string
           id: string
           is_broadcast: boolean
@@ -2025,6 +2439,7 @@ export type Database = {
           author_id: string
           body: string
           comm_type: Database["public"]["Enums"]["comm_type"]
+          company_id?: string
           created_at?: string
           id?: string
           is_broadcast?: boolean
@@ -2039,6 +2454,7 @@ export type Database = {
           author_id?: string
           body?: string
           comm_type?: Database["public"]["Enums"]["comm_type"]
+          company_id?: string
           created_at?: string
           id?: string
           is_broadcast?: boolean
@@ -2051,6 +2467,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "internal_communications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "internal_communications_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -2062,6 +2485,7 @@ export type Database = {
       occurrences: {
         Row: {
           category: string
+          company_id: string
           created_at: string
           created_by: string | null
           description: string
@@ -2076,6 +2500,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description: string
@@ -2090,6 +2515,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string
@@ -2103,6 +2529,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "occurrences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "occurrences_dog_id_fkey"
             columns: ["dog_id"]
@@ -2173,6 +2606,7 @@ export type Database = {
       receipts: {
         Row: {
           amount: number
+          company_id: string
           created_at: string
           description: string
           id: string
@@ -2185,6 +2619,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          company_id?: string
           created_at?: string
           description: string
           id?: string
@@ -2197,6 +2632,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          company_id?: string
           created_at?: string
           description?: string
           id?: string
@@ -2209,6 +2645,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "receipts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "receipts_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
@@ -2220,6 +2663,7 @@ export type Database = {
       tasks: {
         Row: {
           assigned_to: string | null
+          company_id: string
           completed_at: string | null
           created_at: string
           created_by: string | null
@@ -2234,6 +2678,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          company_id?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -2248,6 +2693,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          company_id?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -2262,6 +2708,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -2274,6 +2727,7 @@ export type Database = {
         Row: {
           active: boolean
           category: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -2287,6 +2741,7 @@ export type Database = {
         Insert: {
           active?: boolean
           category?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2300,6 +2755,7 @@ export type Database = {
         Update: {
           active?: boolean
           category?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2310,10 +2766,19 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "training_courses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_materials: {
         Row: {
+          company_id: string
           content: string | null
           course_id: string
           created_at: string
@@ -2325,6 +2790,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           content?: string | null
           course_id: string
           created_at?: string
@@ -2336,6 +2802,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           content?: string | null
           course_id?: string
           created_at?: string
@@ -2347,6 +2814,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "training_materials_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "training_materials_course_id_fkey"
             columns: ["course_id"]
@@ -2360,6 +2834,7 @@ export type Database = {
         Row: {
           certificate_code: string | null
           certificate_issued: boolean
+          company_id: string
           completed: boolean
           completed_at: string | null
           course_id: string
@@ -2374,6 +2849,7 @@ export type Database = {
         Insert: {
           certificate_code?: string | null
           certificate_issued?: boolean
+          company_id?: string
           completed?: boolean
           completed_at?: string | null
           course_id: string
@@ -2388,6 +2864,7 @@ export type Database = {
         Update: {
           certificate_code?: string | null
           certificate_issued?: boolean
+          company_id?: string
           completed?: boolean
           completed_at?: string | null
           course_id?: string
@@ -2401,6 +2878,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "training_progress_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "training_progress_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
@@ -2411,6 +2895,7 @@ export type Database = {
       }
       tutor_authorized_pickups: {
         Row: {
+          company_id: string
           created_at: string
           document: string | null
           id: string
@@ -2421,6 +2906,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           document?: string | null
           id?: string
@@ -2431,6 +2917,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           document?: string | null
           id?: string
@@ -2441,6 +2928,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tutor_authorized_pickups_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tutor_authorized_pickups_tutor_id_fkey"
             columns: ["tutor_id"]
@@ -2459,6 +2953,7 @@ export type Database = {
       }
       tutor_emergency_contacts: {
         Row: {
+          company_id: string
           created_at: string
           id: string
           name: string
@@ -2468,6 +2963,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string
           created_at?: string
           id?: string
           name: string
@@ -2477,6 +2973,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string
           created_at?: string
           id?: string
           name?: string
@@ -2486,6 +2983,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tutor_emergency_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tutor_emergency_contacts_tutor_id_fkey"
             columns: ["tutor_id"]
@@ -2512,6 +3016,7 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           birth_date: string | null
+          company_id: string
           cpf: string | null
           created_at: string
           created_by: string | null
@@ -2535,6 +3040,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           birth_date?: string | null
+          company_id?: string
           cpf?: string | null
           created_at?: string
           created_by?: string | null
@@ -2558,6 +3064,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           birth_date?: string | null
+          company_id?: string
           cpf?: string | null
           created_at?: string
           created_by?: string | null
@@ -2574,6 +3081,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "tutors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tutors_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -2585,6 +3099,7 @@ export type Database = {
       unit_settings: {
         Row: {
           boarding_capacity: number
+          company_id: string
           created_at: string
           daycare_capacity: number
           daycare_daily_rate: number | null
@@ -2593,6 +3108,7 @@ export type Database = {
         }
         Insert: {
           boarding_capacity?: number
+          company_id?: string
           created_at?: string
           daycare_capacity?: number
           daycare_daily_rate?: number | null
@@ -2601,6 +3117,7 @@ export type Database = {
         }
         Update: {
           boarding_capacity?: number
+          company_id?: string
           created_at?: string
           daycare_capacity?: number
           daycare_daily_rate?: number | null
@@ -2608,6 +3125,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "unit_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "unit_settings_unit_id_fkey"
             columns: ["unit_id"]
@@ -2627,6 +3151,7 @@ export type Database = {
           brand_primary: string | null
           brand_secondary: string | null
           city: string | null
+          company_id: string
           created_at: string
           id: string
           is_active: boolean
@@ -2643,6 +3168,7 @@ export type Database = {
           brand_primary?: string | null
           brand_secondary?: string | null
           city?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           is_active?: boolean
@@ -2659,6 +3185,7 @@ export type Database = {
           brand_primary?: string | null
           brand_secondary?: string | null
           city?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           is_active?: boolean
@@ -2666,7 +3193,15 @@ export type Database = {
           phone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "units_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
