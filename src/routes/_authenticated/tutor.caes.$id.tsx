@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { VaccineCardLink } from "@/components/vaccine-card-image";
 
 export const Route = createFileRoute("/_authenticated/tutor/caes/$id")({
   head: () => ({ meta: [{ title: "Cão — Quintal da Gabi" }] }),
@@ -143,12 +144,11 @@ function DogDetail() {
       const path = `${id}/vaccine-${Date.now()}-${vacFile.name}`;
       const up = await supabase.storage.from("dogs").upload(path, vacFile);
       if (up.error) throw up.error;
-      const { data } = supabase.storage.from("dogs").getPublicUrl(path);
       const { error } = await supabase.from("dog_vaccines").insert({
         dog_id: id,
         vaccine_type: vacNote.trim() || "Carteira de vacinação (foto)",
         applied_date: new Date().toISOString().slice(0, 10),
-        card_photo_url: data.publicUrl,
+        card_photo_url: path,
         notes: "Enviada pelo tutor",
       } as any);
       if (error) throw error;
@@ -226,9 +226,9 @@ function DogDetail() {
                     Aplicada: {v.applied_date ? new Date(v.applied_date).toLocaleDateString("pt-BR") : "—"}
                   </p>
                   {v.card_photo_url && (
-                    <a href={v.card_photo_url} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-primary underline">
+                    <VaccineCardLink value={v.card_photo_url} className="mt-1 inline-flex items-center gap-1 text-xs text-primary underline">
                       <ImageIcon className="h-3 w-3" /> ver carteira
-                    </a>
+                    </VaccineCardLink>
                   )}
                 </div>
                 {v.next_due_date ? <Badge variant="outline">Próxima: {new Date(v.next_due_date).toLocaleDateString("pt-BR")}</Badge> : null}

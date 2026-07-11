@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { VaccineCardThumb, VaccineCardLink } from "@/components/vaccine-card-image";
 
 export const Route = createFileRoute("/_authenticated/app/saude")({
   head: () => ({ meta: [{ title: "Saúde — Quintal da Gabi" }] }),
@@ -147,19 +148,15 @@ function DateProductSection({ dogId, table, titleSingular, fields }: { dogId: st
             {(q.data ?? []).map((r: any) => (
               <li key={r.id} className="flex items-center justify-between gap-3 py-2">
                 <div className="flex flex-1 items-center gap-3">
-                  {r.card_photo_url && (
-                    <a href={r.card_photo_url} target="_blank" rel="noreferrer" className="shrink-0">
-                      <img src={r.card_photo_url} alt="carteira de vacinação" className="h-14 w-14 rounded-md border object-cover" />
-                    </a>
-                  )}
+                  {r.card_photo_url && <VaccineCardThumb value={r.card_photo_url} />}
                   <div>
                     <p className="font-medium">{fields.map(f => r[f.k]).filter(Boolean).join(" • ") || "—"}</p>
                     <p className="text-xs text-muted-foreground">Aplicado: {r.applied_date} {r.next_due_date && `• Próxima: ${r.next_due_date}`}</p>
                     {r.notes && <p className="text-xs">{r.notes}</p>}
                     {r.card_photo_url && (
-                      <a href={r.card_photo_url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">
+                      <VaccineCardLink value={r.card_photo_url} className="text-xs text-primary underline">
                         Ver carteira de vacinação (enviada pelo tutor)
-                      </a>
+                      </VaccineCardLink>
                     )}
                   </div>
                 </div>
