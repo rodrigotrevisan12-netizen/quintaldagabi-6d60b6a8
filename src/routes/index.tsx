@@ -83,18 +83,19 @@ function Landing() {
             <a href="#funcionalidades" className="hover:text-[#FF7F50]">Funcionalidades</a>
             <a href="#planos" className="hover:text-[#FF7F50]">Planos</a>
             <a href="#depoimentos" className="hover:text-[#FF7F50]">Depoimentos</a>
+            <Link to="/auth" className="hover:text-[#FF7F50]">Acessar</Link>
             <Link
-              to="/auth"
+              to="/comprar"
               className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-6 py-2.5 font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
             >
-              Acessar
+              Começar grátis
             </Link>
           </div>
           <Link
-            to="/auth"
+            to="/comprar"
             className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-4 py-2 text-sm font-semibold text-white shadow-lg md:hidden"
           >
-            Acessar
+            Começar
           </Link>
         </div>
       </nav>
