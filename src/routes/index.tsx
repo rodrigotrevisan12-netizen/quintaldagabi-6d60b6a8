@@ -83,18 +83,19 @@ function Landing() {
             <a href="#funcionalidades" className="hover:text-[#FF7F50]">Funcionalidades</a>
             <a href="#planos" className="hover:text-[#FF7F50]">Planos</a>
             <a href="#depoimentos" className="hover:text-[#FF7F50]">Depoimentos</a>
+            <Link to="/auth" className="hover:text-[#FF7F50]">Acessar</Link>
             <Link
-              to="/auth"
+              to="/comprar"
               className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-6 py-2.5 font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
             >
-              Acessar
+              Começar grátis
             </Link>
           </div>
           <Link
-            to="/auth"
+            to="/comprar"
             className="rounded-full bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] px-4 py-2 text-sm font-semibold text-white shadow-lg md:hidden"
           >
-            Acessar
+            Começar
           </Link>
         </div>
       </nav>
@@ -230,10 +231,10 @@ function Landing() {
                   <span className="text-gray-500">{p.per}</span>
                 </div>
                 <Link
-                  to="/auth"
+                  to="/comprar"
                   className="mt-auto w-full rounded-xl bg-gradient-to-r from-[#FF7F50] to-[#FF9F43] py-3 text-center font-bold text-white shadow-lg transition-all hover:from-[#E86A3C]"
                 >
-                  Assinar plano
+                  Começar grátis
                 </Link>
               </div>
             ))}
@@ -275,10 +276,10 @@ function Landing() {
             Junte-se à Central Pet e cuide do que importa.
           </p>
           <Link
-            to="/auth"
+            to="/comprar"
             className="inline-block rounded-full bg-white px-10 py-4 text-lg font-bold text-[#FF7F50] shadow-2xl transition-transform hover:-translate-y-1"
           >
-            Quero começar agora
+            Começar 14 dias grátis
           </Link>
         </div>
       </section>
