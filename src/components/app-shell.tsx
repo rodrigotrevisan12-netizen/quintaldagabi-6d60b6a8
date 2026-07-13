@@ -27,6 +27,7 @@ import {
   BrainCircuit,
   ChevronDown,
   Folder,
+  CreditCard,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
