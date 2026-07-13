@@ -177,7 +177,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "configuracoes",
-    items: [{ to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] }],
+    items: [
+      { to: "/app/assinatura", label: "Assinatura", icon: CreditCard, roles: ["admin"] },
+      { to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
+    ],
   },
 ];
 
