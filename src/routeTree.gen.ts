@@ -45,6 +45,7 @@ import { Route as AuthenticatedAppCalendarioRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppCaesRouteImport } from './routes/_authenticated/app.caes'
 import { Route as AuthenticatedAppBoletinsRouteImport } from './routes/_authenticated/app.boletins'
 import { Route as AuthenticatedAppBanhoTosaRouteImport } from './routes/_authenticated/app.banho-tosa'
+import { Route as AuthenticatedAppAssinaturaRouteImport } from './routes/_authenticated/app.assinatura'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
 import { Route as AuthenticatedTutorCaesIndexRouteImport } from './routes/_authenticated/tutor.caes.index'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -252,6 +253,12 @@ const AuthenticatedAppBanhoTosaRoute =
     path: '/banho-tosa',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAssinaturaRoute =
+  AuthenticatedAppAssinaturaRouteImport.update({
+    id: '/assinatura',
+    path: '/assinatura',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
@@ -296,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/tutor': typeof AuthenticatedTutorRouteWithChildren
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/assinatura': typeof AuthenticatedAppAssinaturaRoute
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
@@ -337,6 +345,7 @@ export interface FileRoutesByTo {
   '/comprar': typeof ComprarRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/assinatura': typeof AuthenticatedAppAssinaturaRoute
   '/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
@@ -381,6 +390,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/tutor': typeof AuthenticatedTutorRouteWithChildren
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/_authenticated/app/assinatura': typeof AuthenticatedAppAssinaturaRoute
   '/_authenticated/app/banho-tosa': typeof AuthenticatedAppBanhoTosaRoute
   '/_authenticated/app/boletins': typeof AuthenticatedAppBoletinsRoute
   '/_authenticated/app/caes': typeof AuthenticatedAppCaesRouteWithChildren
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/tutor'
     | '/app/agenda'
+    | '/app/assinatura'
     | '/app/banho-tosa'
     | '/app/boletins'
     | '/app/caes'
@@ -467,6 +478,7 @@ export interface FileRouteTypes {
     | '/comprar'
     | '/reset-password'
     | '/app/agenda'
+    | '/app/assinatura'
     | '/app/banho-tosa'
     | '/app/boletins'
     | '/app/caes'
@@ -510,6 +522,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/tutor'
     | '/_authenticated/app/agenda'
+    | '/_authenticated/app/assinatura'
     | '/_authenticated/app/banho-tosa'
     | '/_authenticated/app/boletins'
     | '/_authenticated/app/caes'
@@ -809,6 +822,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppBanhoTosaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/assinatura': {
+      id: '/_authenticated/app/assinatura'
+      path: '/assinatura'
+      fullPath: '/app/assinatura'
+      preLoaderRoute: typeof AuthenticatedAppAssinaturaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/agenda': {
       id: '/_authenticated/app/agenda'
       path: '/agenda'
@@ -882,6 +902,7 @@ const AuthenticatedAppHospedagemRouteWithChildren =
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
+  AuthenticatedAppAssinaturaRoute: typeof AuthenticatedAppAssinaturaRoute
   AuthenticatedAppBanhoTosaRoute: typeof AuthenticatedAppBanhoTosaRoute
   AuthenticatedAppBoletinsRoute: typeof AuthenticatedAppBoletinsRoute
   AuthenticatedAppCaesRoute: typeof AuthenticatedAppCaesRouteWithChildren
@@ -907,6 +928,7 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
+  AuthenticatedAppAssinaturaRoute: AuthenticatedAppAssinaturaRoute,
   AuthenticatedAppBanhoTosaRoute: AuthenticatedAppBanhoTosaRoute,
   AuthenticatedAppBoletinsRoute: AuthenticatedAppBoletinsRoute,
   AuthenticatedAppCaesRoute: AuthenticatedAppCaesRouteWithChildren,
