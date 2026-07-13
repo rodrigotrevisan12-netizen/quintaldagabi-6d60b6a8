@@ -47,6 +47,7 @@ import { Route as AuthenticatedAppBoletinsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppBanhoTosaRouteImport } from './routes/_authenticated/app.banho-tosa'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
 import { Route as AuthenticatedTutorCaesIndexRouteImport } from './routes/_authenticated/tutor.caes.index'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedTutorCaesIdRouteImport } from './routes/_authenticated/tutor.caes.$id'
 import { Route as AuthenticatedAppHospedagemIdRelatorioRouteImport } from './routes/_authenticated/app.hospedagem.$id.relatorio'
 import { Route as AuthenticatedAppCaesIdTimelineRouteImport } from './routes/_authenticated/app.caes.$id.timeline'
@@ -262,6 +263,12 @@ const AuthenticatedTutorCaesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedTutorCaesRoute,
   } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedTutorCaesIdRoute =
   AuthenticatedTutorCaesIdRouteImport.update({
     id: '/$id',
@@ -319,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/tutor/': typeof AuthenticatedTutorIndexRoute
   '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/tutor/caes/': typeof AuthenticatedTutorCaesIndexRoute
   '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
@@ -358,6 +366,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/tutor': typeof AuthenticatedTutorIndexRoute
   '/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/tutor/caes': typeof AuthenticatedTutorCaesIndexRoute
   '/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
@@ -402,6 +411,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/tutor/': typeof AuthenticatedTutorIndexRoute
   '/_authenticated/tutor/caes/$id': typeof AuthenticatedTutorCaesIdRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/tutor/caes/': typeof AuthenticatedTutorCaesIndexRoute
   '/_authenticated/app/caes/$id/timeline': typeof AuthenticatedAppCaesIdTimelineRoute
   '/_authenticated/app/hospedagem/$id/relatorio': typeof AuthenticatedAppHospedagemIdRelatorioRoute
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/tutor/'
     | '/tutor/caes/$id'
+    | '/api/public/payments/webhook'
     | '/tutor/caes/'
     | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
@@ -485,6 +496,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/tutor'
     | '/tutor/caes/$id'
+    | '/api/public/payments/webhook'
     | '/tutor/caes'
     | '/app/caes/$id/timeline'
     | '/app/hospedagem/$id/relatorio'
@@ -528,6 +540,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/_authenticated/tutor/'
     | '/_authenticated/tutor/caes/$id'
+    | '/api/public/payments/webhook'
     | '/_authenticated/tutor/caes/'
     | '/_authenticated/app/caes/$id/timeline'
     | '/_authenticated/app/hospedagem/$id/relatorio'
@@ -539,6 +552,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ComprarRoute: typeof ComprarRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -809,6 +823,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTutorCaesIndexRouteImport
       parentRoute: typeof AuthenticatedTutorCaesRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/tutor/caes/$id': {
       id: '/_authenticated/tutor/caes/$id'
       path: '/$id'
@@ -973,6 +994,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ComprarRoute: ComprarRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
