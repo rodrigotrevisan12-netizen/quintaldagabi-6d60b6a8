@@ -27,6 +27,7 @@ import {
   BrainCircuit,
   ChevronDown,
   Folder,
+  CreditCard,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -176,7 +177,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "configuracoes",
-    items: [{ to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] }],
+    items: [
+      { to: "/app/assinatura", label: "Assinatura", icon: CreditCard, roles: ["admin"] },
+      { to: "/app/configuracoes", label: "Configurações", icon: Settings, roles: ["admin"] },
+    ],
   },
 ];
 

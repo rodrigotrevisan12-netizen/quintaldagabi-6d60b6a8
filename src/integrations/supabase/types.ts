@@ -421,7 +421,14 @@ export type Database = {
       }
       companies: {
         Row: {
+          billing_customer_id: string | null
+          billing_environment: string | null
+          billing_price_id: string | null
+          billing_provider: string | null
+          billing_subscription_id: string | null
+          cancel_at_period_end: boolean
           created_at: string
+          current_period_end: string | null
           email: string | null
           id: string
           name: string
@@ -434,7 +441,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          billing_customer_id?: string | null
+          billing_environment?: string | null
+          billing_price_id?: string | null
+          billing_provider?: string | null
+          billing_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at?: string
+          current_period_end?: string | null
           email?: string | null
           id?: string
           name: string
@@ -447,7 +461,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          billing_customer_id?: string | null
+          billing_environment?: string | null
+          billing_price_id?: string | null
+          billing_provider?: string | null
+          billing_subscription_id?: string | null
+          cancel_at_period_end?: boolean
           created_at?: string
+          current_period_end?: string | null
           email?: string | null
           id?: string
           name?: string
@@ -3299,7 +3320,9 @@ export type Database = {
       }
     }
     Functions: {
+      company_has_access: { Args: { _company_id: string }; Returns: boolean }
       current_company_id: { Args: never; Returns: string }
+      current_user_has_access: { Args: never; Returns: boolean }
       default_unit_id: { Args: never; Returns: string }
       has_role: {
         Args: {
