@@ -102,10 +102,20 @@ function BrandingPanel() {
         </p>
       </CardHeader>
       <CardContent>
-        {q.data ? (
+        {q.isLoading ? (
+          <p className="text-muted-foreground">Carregando…</p>
+        ) : q.isError ? (
+          <p className="text-destructive">
+            Não foi possível carregar a identidade visual: {(q.error as any)?.message ?? "erro desconhecido"}.
+          </p>
+        ) : q.data ? (
           <BrandingRow company={q.data} saving={save.isPending} onSave={(patch) => save.mutate(patch)} />
         ) : (
-          <p className="text-muted-foreground">Carregando…</p>
+          <p className="text-destructive">
+            Sua conta ainda não está vinculada a nenhuma empresa, então não é possível
+            personalizar a identidade visual. Fale com o suporte para vincular sua conta a
+            uma empresa.
+          </p>
         )}
       </CardContent>
     </Card>
