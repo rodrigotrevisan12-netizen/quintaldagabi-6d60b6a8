@@ -30,15 +30,63 @@ CREATE TRIGGER trg_companies_updated_at
 BEFORE UPDATE ON public.companies
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+-- 1b) Garante as colunas de cobrança mesmo se `companies` já existia antes
+--     desta migração (o CREATE TABLE acima é pulado nesse caso, e o INSERT
+--     abaixo quebraria sem isso).
+ALTER TABLE public.companies
+  ADD COLUMN IF NOT EXISTS email text,
+  ADD COLUMN IF NOT EXISTS phone text,
+  ADD COLUMN IF NOT EXISTS subscription_status text NOT NULL DEFAULT 'trialing',
+  ADD COLUMN IF NOT EXISTS trial_expires_at timestamptz,
+  ADD COLUMN IF NOT EXISTS plan text,
+  ADD COLUMN IF NOT EXISTS stripe_customer_id text,
+  ADD COLUMN IF NOT EXISTS stripe_subscription_id text;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'companies_subscription_status_check'
+  ) THEN
+    ALTER TABLE public.companies
+      ADD CONSTRAINT companies_subscription_status_check
+      CHECK (subscription_status IN ('trialing','active','past_due','canceled'));
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'companies_plan_check'
+  ) THEN
+    ALTER TABLE public.companies
+      ADD CONSTRAINT companies_plan_check
+      CHECK (plan IN ('mensal','trimestral','semestral','anual'));
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'companies_stripe_customer_id_key'
+  ) THEN
+    ALTER TABLE public.companies ADD CONSTRAINT companies_stripe_customer_id_key UNIQUE (stripe_customer_id);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'companies_stripe_subscription_id_key'
+  ) THEN
+    ALTER TABLE public.companies ADD CONSTRAINT companies_stripe_subscription_id_key UNIQUE (stripe_subscription_id);
+  END IF;
+END $$;
+
 -- 2) Empresa inicial "Quintal da Gabi" (active, sem trial)
-INSERT INTO public.companies (id, name, subscription_status, plan)
+-- Observação: `slug` é incluído aqui porque, se `companies` já existia
+-- (criada por migração anterior) com `slug` obrigatório, o Postgres valida
+-- essa coluna na tentativa de INSERT antes mesmo de decidir se cai no
+-- ON CONFLICT — omitir `slug` quebraria mesmo quando a linha já existe e
+-- seria só atualizada.
+INSERT INTO public.companies (id, name, slug, subscription_status, plan)
 VALUES (
   '00000000-0000-0000-0000-000000000001'::uuid,
   'Quintal da Gabi',
+  'quintal-da-gabi',
   'active',
   'anual'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  subscription_status = EXCLUDED.subscription_status,
+  plan = EXCLUDED.plan;
 
 -- 3) company_id em profiles e user_roles
 ALTER TABLE public.profiles
