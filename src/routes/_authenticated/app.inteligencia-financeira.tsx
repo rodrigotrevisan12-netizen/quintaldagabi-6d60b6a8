@@ -18,6 +18,7 @@ import {
   Maximize2,
   Building,
   Plus,
+  Trash2,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,16 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import {
   FIXED_CATEGORIES,
   VARIABLE_CATEGORIES,
@@ -377,6 +388,9 @@ function CostEngine({
 }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [toDelete, setToDelete] = useState<any | null>(null);
+  const { data: me } = useCurrentUser();
+  const isAdmin = me?.primaryRole === "admin";
   const [form, setForm] = useState({
     description: "",
     amount: "",
@@ -450,6 +464,19 @@ function CostEngine({
       qc.invalidateQueries({ queryKey: ["inteligencia-financeira-transactions"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao registrar despesa"),
+  });
+
+  const deleteExpense = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("financial_transactions").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Despesa excluída");
+      setToDelete(null);
+      qc.invalidateQueries({ queryKey: ["inteligencia-financeira-transactions"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao excluir despesa"),
   });
 
   return (
@@ -654,6 +681,7 @@ function CostEngine({
                 <TableHead>Grupo</TableHead>
                 <TableHead>Vencimento</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
+                {isAdmin && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -671,12 +699,19 @@ function CostEngine({
                     </TableCell>
                     <TableCell>{fmtDate(tx.due_date || tx.created_at)}</TableCell>
                     <TableCell className="text-right text-red-600 font-medium">-{fmtBRL(tx.amount)}</TableCell>
+                    {isAdmin && (
+                      <TableCell>
+                        <Button size="icon" variant="ghost" onClick={() => setToDelete(tx)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
               {monthExpenses.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     Nenhuma despesa no mês corrente.
                   </TableCell>
                 </TableRow>
@@ -685,6 +720,24 @@ function CostEngine({
           </Table>
         </CardContent>
       </Card>
+
+      <AlertDialog open={toDelete !== null} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir esta despesa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {toDelete?.description ? `"${toDelete.description}" — ${fmtBRL(Number(toDelete?.amount || 0))}. ` : ""}
+              Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => toDelete && deleteExpense.mutate(toDelete.id)}>
+              Excluir
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
