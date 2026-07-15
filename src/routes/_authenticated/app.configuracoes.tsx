@@ -56,25 +56,35 @@ function BrandingPanel() {
   const invalidateBrand = useInvalidateBrand();
 
   const q = useQuery({
-    queryKey: ["units-branding"],
+    queryKey: ["company-branding-config"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("units")
-        .select("id, name, brand_name, brand_logo_url, brand_primary, brand_secondary, brand_accent")
-        .order("created_at");
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", userData.user?.id ?? "")
+        .maybeSingle();
+      const companyId = (profile as { company_id?: string | null } | null)?.company_id;
+      if (!companyId) return null;
+      const { data, error } = await (supabase as any)
+        .from("companies")
+        .select("id, name, logo_url, primary_color, secondary_color, accent_color, background_color")
+        .eq("id", companyId)
+        .maybeSingle();
       if (error) throw error;
-      return data ?? [];
+      return data;
     },
   });
 
   const save = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, string | null> }) => {
-      const { error } = await supabase.from("units").update(patch as any).eq("id", id);
+    mutationFn: async (patch: Record<string, string | null>) => {
+      if (!q.data?.id) throw new Error("Empresa não encontrada");
+      const { error } = await (supabase as any).from("companies").update(patch).eq("id", q.data.id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Identidade visual atualizada");
-      qc.invalidateQueries({ queryKey: ["units-branding"] });
+      qc.invalidateQueries({ queryKey: ["company-branding-config"] });
       invalidateBrand();
     },
     onError: (e: any) => toast.error(e.message),
@@ -86,48 +96,46 @@ function BrandingPanel() {
         <CardTitle>Identidade visual da empresa</CardTitle>
         <p className="text-sm text-muted-foreground">
           Personalize nome, logo e cores. As alterações são aplicadas automaticamente para
-          administradores, funcionários e tutores da sua empresa. Cada empresa mantém a sua
-          própria identidade — o padrão Central Pet é usado até você personalizar.
+          administradores, funcionários e tutores da sua empresa — em todas as unidades.
+          Cada empresa mantém a sua própria identidade; o padrão Central Pet é usado até
+          você personalizar.
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {(q.data ?? []).map((u: any) => (
-          <BrandingRow
-            key={u.id}
-            unit={u}
-            saving={save.isPending}
-            onSave={(patch) => save.mutate({ id: u.id, patch })}
-          />
-        ))}
+      <CardContent>
+        {q.data ? (
+          <BrandingRow company={q.data} saving={save.isPending} onSave={(patch) => save.mutate(patch)} />
+        ) : (
+          <p className="text-muted-foreground">Carregando…</p>
+        )}
       </CardContent>
     </Card>
   );
 }
 
 function BrandingRow({
-  unit,
+  company,
   onSave,
   saving,
 }: {
-  unit: any;
+  company: any;
   onSave: (patch: Record<string, string | null>) => void;
   saving: boolean;
 }) {
-  const [name, setName] = useState<string>(unit.brand_name ?? "");
-  const [logo, setLogo] = useState<string>(unit.brand_logo_url ?? "");
-  const [primary, setPrimary] = useState<string>(unit.brand_primary ?? CENTRALPET_BRAND.primary);
-  const [secondary, setSecondary] = useState<string>(unit.brand_secondary ?? CENTRALPET_BRAND.secondary);
-  const [accent, setAccent] = useState<string>(unit.brand_accent ?? CENTRALPET_BRAND.accent);
-  const [background, setBackground] = useState<string>(unit.brand_background ?? "");
+  const [name, setName] = useState<string>(company.name ?? "");
+  const [logo, setLogo] = useState<string>(company.logo_url ?? "");
+  const [primary, setPrimary] = useState<string>(company.primary_color ?? CENTRALPET_BRAND.primary);
+  const [secondary, setSecondary] = useState<string>(company.secondary_color ?? CENTRALPET_BRAND.secondary);
+  const [accent, setAccent] = useState<string>(company.accent_color ?? CENTRALPET_BRAND.accent);
+  const [background, setBackground] = useState<string>(company.background_color ?? "");
 
   function handleSave() {
     onSave({
-      brand_name: name.trim() || null,
-      brand_logo_url: logo.trim() || null,
-      brand_primary: primary || null,
-      brand_secondary: secondary || null,
-      brand_accent: accent || null,
-      brand_background: background.trim() ? (resolveColor(background) ?? background) : null,
+      name: name.trim() || CENTRALPET_BRAND.name,
+      logo_url: logo.trim() || null,
+      primary_color: primary || null,
+      secondary_color: secondary || null,
+      accent_color: accent || null,
+      background_color: background.trim() ? (resolveColor(background) ?? background) : null,
     });
   }
 
@@ -139,18 +147,17 @@ function BrandingRow({
     setAccent(CENTRALPET_BRAND.accent);
     setBackground("");
     onSave({
-      brand_name: null,
-      brand_logo_url: null,
-      brand_primary: null,
-      brand_secondary: null,
-      brand_accent: null,
-      brand_background: null,
+      name: CENTRALPET_BRAND.name,
+      logo_url: null,
+      primary_color: CENTRALPET_BRAND.primary,
+      secondary_color: CENTRALPET_BRAND.secondary,
+      accent_color: CENTRALPET_BRAND.accent,
+      background_color: null,
     });
   }
 
   return (
     <div className="space-y-4 rounded-lg border p-4">
-      <p className="text-sm font-medium text-muted-foreground">{unit.name}</p>
 
       <div className="grid gap-3 md:grid-cols-2">
         <div>
@@ -250,10 +257,15 @@ function ColorField({
     <div>
       <Label className="text-xs">{label}</Label>
       <div className="flex items-center gap-2">
-        <span
-          aria-hidden
-          className="h-9 w-9 shrink-0 rounded border border-input"
-          style={{ background: swatch }}
+        <input
+          type="color"
+          aria-label={`Selecionar ${label.toLowerCase()} visualmente`}
+          value={/^#([0-9a-f]{6})$/i.test(swatch) ? swatch : "#e5e7eb"}
+          onChange={(e) => {
+            setText(e.target.value.toUpperCase());
+            commit(e.target.value);
+          }}
+          className="h-9 w-9 shrink-0 cursor-pointer rounded border border-input bg-transparent p-0"
         />
         <Input
           value={text}
@@ -375,6 +387,10 @@ function UnitRow({ unit, daycareValue, boardingValue, onSaveUnit, onSaveCap, sav
           <Input defaultValue={unit.address ?? ""} onBlur={(e) => e.target.value !== (unit.address ?? "") && onSaveUnit({ address: e.target.value || null })} /></div>
         <div><Label className="text-xs">Telefone</Label>
           <Input defaultValue={unit.phone ?? ""} onBlur={(e) => e.target.value !== (unit.phone ?? "") && onSaveUnit({ phone: e.target.value || null })} /></div>
+        <div><Label className="text-xs">E-mail</Label>
+          <Input type="email" defaultValue={unit.email ?? ""} onBlur={(e) => e.target.value !== (unit.email ?? "") && onSaveUnit({ email: e.target.value || null })} /></div>
+        <div><Label className="text-xs">Horário de funcionamento</Label>
+          <Input placeholder="Ex.: Seg-Sex 07h-19h, Sáb 08h-12h" defaultValue={unit.opening_hours ?? ""} onBlur={(e) => e.target.value !== (unit.opening_hours ?? "") && onSaveUnit({ opening_hours: e.target.value || null })} /></div>
         <div>
           <Label className="text-xs">Capacidade creche</Label>
           <Input type="number" min={0} value={daycare} onChange={(e) => setDaycare(e.target.value)} />
@@ -406,10 +422,23 @@ function useEffectSync(value: number, setter: (v: string) => void) {
   }, [value, setter]);
 }
 
+const SIZES: { v: string; l: string }[] = [
+  { v: "pequeno", l: "Pequeno" },
+  { v: "medio", l: "Médio" },
+  { v: "grande", l: "Grande" },
+];
+
 function ServicesPanel() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", duration_min: "60", base_price: "0" });
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    description: "",
+    duration_min: "60",
+    base_price: "0",
+    sizes: ["pequeno", "medio", "grande"] as string[],
+  });
 
   const q = useQuery({
     queryKey: ["grooming-services"],
@@ -417,8 +446,24 @@ function ServicesPanel() {
   });
 
   const create = useMutation({
-    mutationFn: async () => { const { error } = await supabase.from("grooming_services").insert({ name: form.name, duration_min: Number(form.duration_min), base_price: Number(form.base_price), is_active: true }); if (error) throw error; },
-    onSuccess: () => { toast.success("Serviço criado"); setOpen(false); setForm({ name: "", duration_min: "60", base_price: "0" }); qc.invalidateQueries({ queryKey: ["grooming-services"] }); },
+    mutationFn: async () => {
+      const { error } = await supabase.from("grooming_services").insert({
+        name: form.name,
+        category: form.category.trim() || null,
+        description: form.description.trim() || null,
+        duration_min: Number(form.duration_min),
+        base_price: Number(form.base_price),
+        sizes: form.sizes.length ? form.sizes : ["pequeno", "medio", "grande"],
+        is_active: true,
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Serviço criado");
+      setOpen(false);
+      setForm({ name: "", category: "", description: "", duration_min: "60", base_price: "0", sizes: ["pequeno", "medio", "grande"] });
+      qc.invalidateQueries({ queryKey: ["grooming-services"] });
+    },
   });
   const update = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: any }) => { const { error } = await supabase.from("grooming_services").update(patch).eq("id", id); if (error) throw error; },
@@ -440,7 +485,31 @@ function ServicesPanel() {
             <div className="grid gap-3">
               <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
               <div className="grid grid-cols-2 gap-3">
+                <div><Label>Categoria</Label><Input placeholder="Ex.: Banho, Tosa, Spa" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} /></div>
                 <div><Label>Duração (min)</Label><Input type="number" value={form.duration_min} onChange={(e) => setForm({ ...form, duration_min: e.target.value })} /></div>
+              </div>
+              <div><Label>Descrição</Label><Input placeholder="Detalhes do serviço" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+              <div>
+                <Label>Porte permitido</Label>
+                <div className="mt-1 flex flex-wrap gap-3">
+                  {SIZES.map((s) => (
+                    <label key={s.v} className="flex items-center gap-1.5 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.sizes.includes(s.v)}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            sizes: e.target.checked ? [...f.sizes, s.v] : f.sizes.filter((x) => x !== s.v),
+                          }))
+                        }
+                      />
+                      {s.l}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div><Label>Preço base (R$)</Label><Input type="number" step="0.01" value={form.base_price} onChange={(e) => setForm({ ...form, base_price: e.target.value })} /></div>
               </div>
             </div>
@@ -454,8 +523,12 @@ function ServicesPanel() {
             {(q.data ?? []).map((s: any) => (
               <li key={s.id} className="flex items-center justify-between gap-3 py-2">
                 <div className="flex-1">
-                  <p className="font-medium">{s.name}</p>
-                  <p className="text-xs text-muted-foreground">{s.duration_min} min • R$ {Number(s.base_price).toFixed(2)}</p>
+                  <p className="font-medium">{s.name}{s.category ? <span className="ml-2 text-xs font-normal text-muted-foreground">({s.category})</span> : null}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {s.duration_min} min • R$ {Number(s.base_price).toFixed(2)}
+                    {s.sizes?.length ? ` • Porte: ${s.sizes.map((v: string) => SIZES.find((x) => x.v === v)?.l ?? v).join(", ")}` : ""}
+                  </p>
+                  {s.description ? <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p> : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch checked={s.is_active} onCheckedChange={(v) => update.mutate({ id: s.id, patch: { is_active: v } })} />
@@ -475,6 +548,12 @@ function DaycarePackagesPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", days_per_week: "3", monthly_price: "0", extra_day_price: "0" });
 
+  const [openAvulso, setOpenAvulso] = useState(false);
+  const [formAvulso, setFormAvulso] = useState({ name: "", total_days: "10", validity_days: "60", price: "0", description: "" });
+
+  const [sellDog, setSellDog] = useState("");
+  const [sellPkg, setSellPkg] = useState("");
+
   const pkgsQ = useQuery({
     queryKey: ["daycare-packages"],
     queryFn: async () => {
@@ -482,6 +561,8 @@ function DaycarePackagesPanel() {
       if (error) throw error; return data ?? [];
     },
   });
+  const semanalPkgs = (pkgsQ.data ?? []).filter((p: any) => p.package_type !== "avulso");
+  const avulsoPkgs = (pkgsQ.data ?? []).filter((p: any) => p.package_type === "avulso");
 
   const dogsQ = useQuery({
     queryKey: ["dogs-pkg-assign"],
@@ -491,15 +572,27 @@ function DaycarePackagesPanel() {
     },
   });
 
+  const purchasesQ = useQuery({
+    queryKey: ["daycare-package-purchases"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("daycare_package_purchases")
+        .select("*, dog:dogs(name), package:daycare_packages(name)")
+        .order("purchased_at", { ascending: false });
+      if (error) throw error; return data ?? [];
+    },
+  });
+
   const create = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("daycare_packages").insert({
         name: form.name,
+        package_type: "semanal",
         days_per_week: Number(form.days_per_week),
         monthly_price: Number(form.monthly_price),
         extra_day_price: Number(form.extra_day_price),
         is_active: true,
-      });
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Pacote criado"); setOpen(false); setForm({ name: "", days_per_week: "3", monthly_price: "0", extra_day_price: "0" }); qc.invalidateQueries({ queryKey: ["daycare-packages"] }); },
@@ -512,7 +605,31 @@ function DaycarePackagesPanel() {
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("daycare_packages").delete().eq("id", id); if (error) throw error; },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["daycare-packages"] }),
+    onError: (e: any) => toast.error(e.message),
   });
+
+  const createAvulso = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("daycare_packages").insert({
+        name: formAvulso.name,
+        package_type: "avulso",
+        total_days: Number(formAvulso.total_days),
+        validity_days: Number(formAvulso.validity_days),
+        monthly_price: Number(formAvulso.price),
+        description: formAvulso.description.trim() || null,
+        is_active: true,
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pacote avulso criado");
+      setOpenAvulso(false);
+      setFormAvulso({ name: "", total_days: "10", validity_days: "60", price: "0", description: "" });
+      qc.invalidateQueries({ queryKey: ["daycare-packages"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const assignDog = useMutation({
     mutationFn: async ({ dog_id, daycare_package_id }: { dog_id: string; daycare_package_id: string | null }) => {
       const { error } = await supabase.from("dogs").update({ daycare_package_id }).eq("id", dog_id);
@@ -522,15 +639,41 @@ function DaycarePackagesPanel() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const sellPackage = useMutation({
+    mutationFn: async () => {
+      const pkg = avulsoPkgs.find((p: any) => p.id === sellPkg) as any;
+      if (!pkg || !sellDog) throw new Error("Escolha o cão e o pacote");
+      const { error } = await (supabase as any).from("daycare_package_purchases").insert({
+        dog_id: sellDog,
+        package_id: pkg.id,
+        total_days: pkg.total_days,
+        expires_at: new Date(Date.now() + pkg.validity_days * 86400000).toISOString(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Pacote avulso vendido para o cão");
+      setSellDog(""); setSellPkg("");
+      qc.invalidateQueries({ queryKey: ["daycare-package-purchases"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const delPurchase = useMutation({
+    mutationFn: async (id: string) => { const { error } = await (supabase as any).from("daycare_package_purchases").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => { toast.success("Registro excluído"); qc.invalidateQueries({ queryKey: ["daycare-package-purchases"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Pacotes mensais de creche</CardTitle>
+          <CardTitle>Pacotes semanais (mensalidade recorrente)</CardTitle>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button size="sm"><Plus className="mr-1 h-4 w-4" />Novo pacote</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Novo pacote</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>Novo pacote semanal</DialogTitle></DialogHeader>
               <div className="grid gap-3">
                 <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: 3x na semana" /></div>
                 <div className="grid grid-cols-3 gap-3">
@@ -544,9 +687,9 @@ function DaycarePackagesPanel() {
           </Dialog>
         </CardHeader>
         <CardContent>
-          {(pkgsQ.data ?? []).length === 0 ? <p className="text-muted-foreground">Nenhum pacote cadastrado.</p> : (
+          {semanalPkgs.length === 0 ? <p className="text-muted-foreground">Nenhum pacote cadastrado.</p> : (
             <ul className="divide-y">
-              {(pkgsQ.data ?? []).map((p: any) => (
+              {semanalPkgs.map((p: any) => (
                 <li key={p.id} className="grid grid-cols-1 items-center gap-2 py-2 sm:grid-cols-[1fr_90px_120px_120px_auto]">
                   <Input defaultValue={p.name} onBlur={(e) => e.target.value !== p.name && update.mutate({ id: p.id, patch: { name: e.target.value } })} />
                   <Input type="number" min={1} max={7} defaultValue={p.days_per_week} onBlur={(e) => Number(e.target.value) !== p.days_per_week && update.mutate({ id: p.id, patch: { days_per_week: Number(e.target.value) } })} />
@@ -565,7 +708,106 @@ function DaycarePackagesPanel() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Pacote por cão</CardTitle></CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Pacotes avulsos (diárias com validade)</CardTitle>
+          <Dialog open={openAvulso} onOpenChange={setOpenAvulso}>
+            <DialogTrigger asChild><Button size="sm" variant="outline"><Plus className="mr-1 h-4 w-4" />Novo pacote avulso</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Novo pacote avulso</DialogTitle></DialogHeader>
+              <div className="grid gap-3">
+                <div><Label>Nome *</Label><Input value={formAvulso.name} onChange={(e) => setFormAvulso({ ...formAvulso, name: e.target.value })} placeholder="Ex: 10 diárias" /></div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div><Label>Quantidade de diárias</Label><Input type="number" min={1} value={formAvulso.total_days} onChange={(e) => setFormAvulso({ ...formAvulso, total_days: e.target.value })} /></div>
+                  <div><Label>Validade (dias)</Label><Input type="number" min={1} value={formAvulso.validity_days} onChange={(e) => setFormAvulso({ ...formAvulso, validity_days: e.target.value })} /></div>
+                  <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={formAvulso.price} onChange={(e) => setFormAvulso({ ...formAvulso, price: e.target.value })} /></div>
+                </div>
+                <div><Label>Descrição</Label><Input value={formAvulso.description} onChange={(e) => setFormAvulso({ ...formAvulso, description: e.target.value })} /></div>
+              </div>
+              <DialogFooter><Button onClick={() => createAvulso.mutate()} disabled={createAvulso.isPending || !formAvulso.name}>{createAvulso.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Criar</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {avulsoPkgs.length === 0 ? <p className="text-muted-foreground">Nenhum pacote avulso cadastrado.</p> : (
+            <ul className="divide-y">
+              {avulsoPkgs.map((p: any) => (
+                <li key={p.id} className="flex items-center justify-between gap-3 py-2">
+                  <div>
+                    <p className="font-medium">{p.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.total_days} diárias • válido {p.validity_days} dias • R$ {Number(p.monthly_price).toFixed(2)}
+                    </p>
+                    {p.description ? <p className="text-xs text-muted-foreground">{p.description}</p> : null}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={p.is_active} onCheckedChange={(v) => update.mutate({ id: p.id, patch: { is_active: v } })} />
+                    <Button variant="ghost" size="sm" onClick={() => { if (confirm("Remover pacote?")) del.mutate(p.id); }}>Remover</Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Vender pacote avulso para um cão</CardTitle></CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex-1">
+            <Label className="text-xs">Cão</Label>
+            <select className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={sellDog} onChange={(e) => setSellDog(e.target.value)}>
+              <option value="">Selecione o cão</option>
+              {(dogsQ.data ?? []).map((d: any) => (
+                <option key={d.id} value={d.id}>{d.name} — {d.tutor?.full_name ?? "—"}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <Label className="text-xs">Pacote avulso</Label>
+            <select className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm" value={sellPkg} onChange={(e) => setSellPkg(e.target.value)}>
+              <option value="">Selecione o pacote</option>
+              {avulsoPkgs.filter((p: any) => p.is_active).map((p: any) => (
+                <option key={p.id} value={p.id}>{p.name} — {p.total_days} diárias — R$ {Number(p.monthly_price).toFixed(2)}</option>
+              ))}
+            </select>
+          </div>
+          <Button onClick={() => sellPackage.mutate()} disabled={sellPackage.isPending || !sellDog || !sellPkg}>
+            {sellPackage.isPending && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Vender
+          </Button>
+        </CardContent>
+      </Card>
+
+      {(purchasesQ.data ?? []).length > 0 && (
+        <Card>
+          <CardHeader><CardTitle>Pacotes avulsos vendidos</CardTitle></CardHeader>
+          <CardContent>
+            <ul className="divide-y">
+              {(purchasesQ.data ?? []).map((pu: any) => {
+                const expired = new Date(pu.expires_at) < new Date();
+                const remaining = pu.total_days - pu.days_used;
+                return (
+                  <li key={pu.id} className="flex items-center justify-between gap-3 py-2">
+                    <div>
+                      <p className="font-medium">{pu.dog?.name} — {pu.package?.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {remaining} de {pu.total_days} diárias restantes • vence em {new Date(pu.expires_at).toLocaleDateString("pt-BR")}
+                        {expired ? " • vencido" : ""}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{expired ? "vencido" : pu.status}</span>
+                      <Button variant="ghost" size="sm" onClick={() => { if (confirm("Excluir esta venda de pacote?")) delPurchase.mutate(pu.id); }}>Remover</Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader><CardTitle>Pacote semanal por cão</CardTitle></CardHeader>
         <CardContent>
           {(dogsQ.data ?? []).length === 0 ? <p className="text-muted-foreground">Nenhum cão cadastrado.</p> : (
             <ul className="divide-y">
@@ -580,8 +822,8 @@ function DaycarePackagesPanel() {
                     value={d.daycare_package_id ?? ""}
                     onChange={(e) => assignDog.mutate({ dog_id: d.id, daycare_package_id: e.target.value || null })}
                   >
-                    <option value="">Sem pacote (diária avulsa)</option>
-                    {(pkgsQ.data ?? []).filter((p: any) => p.is_active).map((p: any) => (
+                    <option value="">Sem pacote (diária avulsa sem vínculo)</option>
+                    {semanalPkgs.filter((p: any) => p.is_active).map((p: any) => (
                       <option key={p.id} value={p.id}>{p.name} — R$ {Number(p.monthly_price).toFixed(2)}/mês</option>
                     ))}
                   </select>
