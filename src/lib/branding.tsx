@@ -20,13 +20,13 @@ export const CENTRALPET_BRAND: Brand = {
   background: null,
 };
 
-type UnitBrandRow = {
-  brand_name: string | null;
-  brand_logo_url: string | null;
-  brand_primary: string | null;
-  brand_secondary: string | null;
-  brand_accent: string | null;
-  brand_background: string | null;
+type CompanyBrandRow = {
+  name: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  accent_color: string | null;
+  background_color: string | null;
 };
 
 async function fetchBrand(): Promise<Brand> {
@@ -36,28 +36,28 @@ async function fetchBrand(): Promise<Brand> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("default_unit_id")
+    .select("company_id")
     .eq("id", user.id)
     .maybeSingle();
 
-  const unitId = profile?.default_unit_id;
-  if (!unitId) return CENTRALPET_BRAND;
+  const companyId = (profile as { company_id?: string | null } | null)?.company_id;
+  if (!companyId) return CENTRALPET_BRAND;
 
-  const { data: unit } = await (supabase as any)
-    .from("units")
-    .select("brand_name, brand_logo_url, brand_primary, brand_secondary, brand_accent, brand_background")
-    .eq("id", unitId)
+  const { data: company } = await (supabase as any)
+    .from("companies")
+    .select("name, logo_url, primary_color, secondary_color, accent_color, background_color")
+    .eq("id", companyId)
     .maybeSingle();
 
-  const u = unit as UnitBrandRow | null;
-  if (!u) return CENTRALPET_BRAND;
+  const c = company as CompanyBrandRow | null;
+  if (!c) return CENTRALPET_BRAND;
   return {
-    name: u.brand_name?.trim() || CENTRALPET_BRAND.name,
-    logoUrl: u.brand_logo_url?.trim() || null,
-    primary: u.brand_primary?.trim() || CENTRALPET_BRAND.primary,
-    secondary: u.brand_secondary?.trim() || CENTRALPET_BRAND.secondary,
-    accent: u.brand_accent?.trim() || CENTRALPET_BRAND.accent,
-    background: u.brand_background?.trim() || null,
+    name: c.name?.trim() || CENTRALPET_BRAND.name,
+    logoUrl: c.logo_url?.trim() || null,
+    primary: c.primary_color?.trim() || CENTRALPET_BRAND.primary,
+    secondary: c.secondary_color?.trim() || CENTRALPET_BRAND.secondary,
+    accent: c.accent_color?.trim() || CENTRALPET_BRAND.accent,
+    background: c.background_color?.trim() || null,
   };
 }
 
