@@ -20,7 +20,6 @@ import {
   UserCog,
   GraduationCap,
   MessageSquare,
-  Send,
   CalendarRange,
   ChevronDown,
   Folder,
@@ -76,7 +75,6 @@ const NAV_GROUPS: NavGroup[] = [
         icon: ListChecks,
         roles: ["admin", "funcionario"],
       },
-      { to: "/app/chegadas", label: "Chegadas", icon: Send, roles: ["admin", "funcionario"] },
     ],
   },
   {
