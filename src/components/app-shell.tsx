@@ -11,13 +11,11 @@ import {
   HeartPulse,
   BedDouble,
   Bath,
-  ListChecks,
   Wallet,
   FileText,
   ClipboardList,
   Newspaper,
   UserCog,
-  GraduationCap,
   MessageSquare,
   CalendarRange,
   ChevronDown,
@@ -68,12 +66,6 @@ const NAV_GROUPS: NavGroup[] = [
         roles: ["admin", "funcionario"],
       },
       { to: "/app/agenda", label: "Creche", icon: CalendarDays, roles: ["admin", "funcionario"] },
-      {
-        to: "/app/programacao",
-        label: "Programação do dia",
-        icon: ListChecks,
-        roles: ["admin", "funcionario"],
-      },
     ],
   },
   {
@@ -119,17 +111,8 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "equipe",
-    label: "Equipe",
-    icon: UserCog,
     items: [
-      { to: "/app/funcionarios", label: "Funcionários", icon: UserCog, roles: ["admin"] },
-      { to: "/app/tarefas", label: "Tarefas", icon: ListChecks, roles: ["admin", "funcionario"] },
-      {
-        to: "/app/treinamento",
-        label: "Treinamento",
-        icon: GraduationCap,
-        roles: ["admin", "funcionario"],
-      },
+      { to: "/app/funcionarios", label: "Equipe", icon: UserCog, roles: ["admin", "funcionario"] },
     ],
   },
   {
