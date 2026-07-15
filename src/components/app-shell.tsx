@@ -14,7 +14,6 @@ import {
   AlertCircle,
   ListChecks,
   Wallet,
-  BarChart3,
   FileText,
   ClipboardList,
   Newspaper,
@@ -24,7 +23,6 @@ import {
   Send,
   Camera,
   CalendarRange,
-  BrainCircuit,
   ChevronDown,
   Folder,
   CreditCard,
@@ -151,17 +149,8 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "financeiro",
-    label: "Financeiro",
-    icon: Wallet,
     items: [
-      { to: "/app/financeiro", label: "Visão geral & caixa", icon: Wallet, roles: ["admin"] },
-      { to: "/app/relatorios", label: "Relatórios", icon: BarChart3, roles: ["admin"] },
-      {
-        to: "/app/inteligencia-financeira",
-        label: "Inteligência & precificação",
-        icon: BrainCircuit,
-        roles: ["admin"],
-      },
+      { to: "/app/financeiro", label: "Financeiro", icon: Wallet, roles: ["admin"] },
     ],
   },
   {
