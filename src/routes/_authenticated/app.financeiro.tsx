@@ -2,7 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, Receipt as ReceiptIcon, Printer, Trash2, CheckCircle2 } from "lucide-react";
+import {
+  Plus, Loader2, Receipt as ReceiptIcon, Printer, Trash2, CheckCircle2,
+  LayoutDashboard, Wallet, Receipt, Tags, FlaskConical, TrendingUp, FileBarChart,
+} from "lucide-react";
 import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -26,6 +29,13 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { DashboardTab } from "@/components/dashboard-tab";
+import { PricingTab } from "@/components/pricing-tab";
+import { SimulationsTab } from "@/components/simulations-tab";
+import { IndicatorsTab } from "@/components/indicators-tab";
+import { ReportsTab } from "@/components/reports-tab";
+import { CostEngine } from "@/components/cost-engine-tab";
+import { ReportsCatalog } from "@/components/reports-catalog";
 
 export const Route = createFileRoute("/_authenticated/app/financeiro")({
   head: () => ({ meta: [{ title: "Financeiro — Quintal da Gabi" }] }),
@@ -80,6 +90,7 @@ function FinanceiroPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Tx | null>(null);
   const [receiptFor, setReceiptFor] = useState<Tx | null>(null);
+  const [outerTab, setOuterTab] = useState("visao-geral");
 
   const { data: txs = [], isLoading } = useQuery({
     queryKey: ["fin-tx"],
@@ -101,6 +112,88 @@ function FinanceiroPage() {
       return (data ?? []) as Array<{ id: string; full_name: string }>;
     },
   });
+
+  // ---- Dados adicionais usados pelas demais abas (Visão geral, Custos,
+  // Precificação, Simulações, Indicadores, Relatórios) ----
+  const { data: employees = [] } = useQuery({
+    queryKey: ["fin-employees"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("employees").select("*").order("full_name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: daycareStays = [] } = useQuery({
+    queryKey: ["fin-daycare-stays"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("daycare_stays").select("*, dog:dogs(name, tutor:tutors(full_name))")
+        .order("check_in_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: boardingStays = [] } = useQuery({
+    queryKey: ["fin-boarding-stays"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("boarding_stays").select("*, dog:dogs(name, tutor:tutors(full_name))")
+        .order("check_in_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: groomingAppointments = [] } = useQuery({
+    queryKey: ["fin-grooming"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("grooming_appointments").select("*, dog:dogs(name, tutor:tutors(full_name))")
+        .order("scheduled_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: daycarePackages = [] } = useQuery({
+    queryKey: ["fin-daycare-packages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("daycare_packages").select("*").order("days_per_week", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: groomingServices = [] } = useQuery({
+    queryKey: ["fin-grooming-services"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("grooming_services").select("*").order("name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: unitSettings = [] } = useQuery({
+    queryKey: ["fin-unit-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("unit_settings").select("*, unit:units(name)");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: dogsCount = 0 } = useQuery({
+    queryKey: ["fin-dogs-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase.from("dogs").select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const incomeTransactions = useMemo(
+    () => txs.filter((t) => (t.kind as string) === "receita" || (t.kind as string) === "revenue"),
+    [txs],
+  );
+  const expenseTransactions = useMemo(
+    () => txs.filter((t) => (t.kind as string) === "despesa" || (t.kind as string) === "expense"),
+    [txs],
+  );
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
@@ -179,39 +272,66 @@ function FinanceiroPage() {
         <div>
           <h1 className="font-display text-3xl">Financeiro</h1>
           <p className="text-sm text-muted-foreground">
-            Fluxo de caixa, contas a pagar e a receber, recibos e indicadores.
+            Fluxo de caixa, custos, precificação, indicadores e relatórios — tudo em um só lugar.
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" /> Novo lançamento
-        </Button>
       </header>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label="Faturamento (mês)" value={brl(metrics.receivedMonth)} />
-        <MetricCard label="Despesas (mês)" value={brl(metrics.paidMonth)} />
-        <MetricCard
-          label="Lucro (mês)"
-          value={brl(metrics.profit)}
-          tone={metrics.profit >= 0 ? "positive" : "negative"}
-        />
-        <MetricCard label="Ticket médio" value={brl(metrics.avgTicket)} />
-        <MetricCard label="A receber" value={brl(metrics.toReceive)} />
-        <MetricCard label="A pagar" value={brl(metrics.toPay)} />
-      </div>
+      <Tabs value={outerTab} onValueChange={setOuterTab} className="space-y-4">
+        <TabsList className="flex h-auto flex-wrap gap-1">
+          <TabsTrigger value="visao-geral"><LayoutDashboard className="mr-1.5 h-4 w-4" />Visão geral</TabsTrigger>
+          <TabsTrigger value="fluxo-caixa"><Wallet className="mr-1.5 h-4 w-4" />Fluxo de caixa</TabsTrigger>
+          <TabsTrigger value="custos"><Receipt className="mr-1.5 h-4 w-4" />Custos</TabsTrigger>
+          <TabsTrigger value="precificacao"><Tags className="mr-1.5 h-4 w-4" />Precificação</TabsTrigger>
+          <TabsTrigger value="simulacoes"><FlaskConical className="mr-1.5 h-4 w-4" />Simulações</TabsTrigger>
+          <TabsTrigger value="indicadores"><TrendingUp className="mr-1.5 h-4 w-4" />Indicadores</TabsTrigger>
+          <TabsTrigger value="relatorios"><FileBarChart className="mr-1.5 h-4 w-4" />Relatórios</TabsTrigger>
+        </TabsList>
 
-      <Tabs defaultValue="fluxo" className="space-y-4">
+        <TabsContent value="visao-geral" className="space-y-6">
+          <DashboardTab
+            income={incomeTransactions}
+            expenses={expenseTransactions}
+            employees={employees}
+            unitSettings={unitSettings}
+            daycareStays={daycareStays}
+            boardingStays={boardingStays}
+            groomingAppointments={groomingAppointments}
+            dogsCount={dogsCount}
+          />
+        </TabsContent>
+
+        <TabsContent value="fluxo-caixa" className="space-y-4">
+          <div className="flex justify-end">
+            <Button
+              onClick={() => {
+                setEditing(null);
+                setOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Novo lançamento
+            </Button>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard label="Faturamento (mês)" value={brl(metrics.receivedMonth)} />
+            <MetricCard label="Despesas (mês)" value={brl(metrics.paidMonth)} />
+            <MetricCard
+              label="Lucro (mês)"
+              value={brl(metrics.profit)}
+              tone={metrics.profit >= 0 ? "positive" : "negative"}
+            />
+            <MetricCard label="Ticket médio" value={brl(metrics.avgTicket)} />
+            <MetricCard label="A receber" value={brl(metrics.toReceive)} />
+            <MetricCard label="A pagar" value={brl(metrics.toPay)} />
+          </div>
+
+          <Tabs defaultValue="fluxo" className="space-y-4">
         <TabsList>
           <TabsTrigger value="fluxo">Fluxo de caixa</TabsTrigger>
           <TabsTrigger value="receber">A receber</TabsTrigger>
           <TabsTrigger value="pagar">A pagar</TabsTrigger>
           <TabsTrigger value="debitos">Débitos por tutor</TabsTrigger>
-          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
         </TabsList>
 
         <TabsContent value="fluxo">
@@ -243,12 +363,65 @@ function FinanceiroPage() {
             onPay={(t) => markPaid.mutate(t)}
             onReceipt={() => null}
           />
+            </TabsContent>
+            <TabsContent value="debitos">
+              <TutorBalances />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
-        <TabsContent value="debitos">
-          <TutorBalances />
+
+        <TabsContent value="custos" className="space-y-6">
+          <CostEngine employees={employees} expenses={expenseTransactions} unitSettings={unitSettings} />
         </TabsContent>
-        <TabsContent value="relatorios">
-          <Reports txs={txs} />
+
+        <TabsContent value="precificacao" className="space-y-6">
+          <PricingTab employees={employees} expenses={expenseTransactions} unitSettings={unitSettings} />
+        </TabsContent>
+
+        <TabsContent value="simulacoes" className="space-y-6">
+          <SimulationsTab
+            employees={employees}
+            expenses={expenseTransactions}
+            income={incomeTransactions}
+            unitSettings={unitSettings}
+          />
+        </TabsContent>
+
+        <TabsContent value="indicadores" className="space-y-6">
+          <IndicatorsTab
+            employees={employees}
+            expenses={expenseTransactions}
+            income={incomeTransactions}
+            unitSettings={unitSettings}
+            daycareStays={daycareStays}
+            boardingStays={boardingStays}
+            groomingAppointments={groomingAppointments}
+            daycarePackages={daycarePackages}
+            groomingServices={groomingServices}
+          />
+        </TabsContent>
+
+        <TabsContent value="relatorios" className="space-y-6">
+          <Tabs defaultValue="catalogo">
+            <TabsList>
+              <TabsTrigger value="catalogo">Catálogo detalhado</TabsTrigger>
+              <TabsTrigger value="comparativos">Comparativos</TabsTrigger>
+            </TabsList>
+            <TabsContent value="catalogo" className="mt-4">
+              <ReportsCatalog />
+            </TabsContent>
+            <TabsContent value="comparativos" className="mt-4">
+              <ReportsTab
+                income={incomeTransactions}
+                expenses={expenseTransactions}
+                employees={employees}
+                unitSettings={unitSettings}
+                daycareStays={daycareStays}
+                boardingStays={boardingStays}
+                groomingAppointments={groomingAppointments}
+              />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 
@@ -581,130 +754,6 @@ function TxSheet({
 function useMemoReset<T>(dep: T, fn: () => void) {
   // run fn when dep identity changes (open/edit toggle)
   useMemo(() => { fn(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [dep]);
-}
-
-function Reports({ txs }: { txs: Tx[] }) {
-  // Agrupa por mês (YYYY-MM)
-  const byMonth = useMemo(() => {
-    const map = new Map<string, { receita: number; despesa: number; count: number }>();
-    for (const t of txs) {
-      const ref = t.paid_at ?? t.due_date;
-      if (!ref) continue;
-      const key = ref.slice(0, 7);
-      const e = map.get(key) ?? { receita: 0, despesa: 0, count: 0 };
-      if (t.kind === "receita" && t.status === "recebido") {
-        e.receita += Number(t.amount); e.count += 1;
-      } else if (t.kind === "despesa" && t.status === "pago") {
-        e.despesa += Number(t.amount);
-      }
-      map.set(key, e);
-    }
-    return Array.from(map.entries()).sort(([a], [b]) => b.localeCompare(a));
-  }, [txs]);
-
-  const byRevCat = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const t of txs) {
-      if (t.kind !== "receita" || t.status !== "recebido") continue;
-      const k = t.revenue_category ?? "outros_servicos";
-      map.set(k, (map.get(k) ?? 0) + Number(t.amount));
-    }
-    return Array.from(map.entries());
-  }, [txs]);
-
-  const byExpCat = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const t of txs) {
-      if (t.kind !== "despesa" || t.status !== "pago") continue;
-      const k = t.expense_category ?? "outros";
-      map.set(k, (map.get(k) ?? 0) + Number(t.amount));
-    }
-    return Array.from(map.entries());
-  }, [txs]);
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader><CardTitle>Resumo mensal</CardTitle></CardHeader>
-        <CardContent>
-          {byMonth.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sem dados.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Mês</TableHead>
-                  <TableHead className="text-right">Faturamento</TableHead>
-                  <TableHead className="text-right">Despesas</TableHead>
-                  <TableHead className="text-right">Lucro</TableHead>
-                  <TableHead className="text-right">Ticket médio</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {byMonth.map(([key, v]) => {
-                  const [y, m] = key.split("-");
-                  const label = format(new Date(Number(y), Number(m) - 1, 1), "MMM/yyyy", { locale: ptBR });
-                  const profit = v.receita - v.despesa;
-                  const avg = v.count ? v.receita / v.count : 0;
-                  return (
-                    <TableRow key={key}>
-                      <TableCell className="capitalize">{label}</TableCell>
-                      <TableCell className="text-right text-emerald-600">{brl(v.receita)}</TableCell>
-                      <TableCell className="text-right text-rose-600">{brl(v.despesa)}</TableCell>
-                      <TableCell className={"text-right font-medium " + (profit >= 0 ? "text-emerald-600" : "text-rose-600")}>
-                        {brl(profit)}
-                      </TableCell>
-                      <TableCell className="text-right">{brl(avg)}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Receitas por categoria</CardTitle></CardHeader>
-        <CardContent>
-          <CategoryList rows={byRevCat} labels={REVENUE_CATS} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Despesas por categoria</CardTitle></CardHeader>
-        <CardContent>
-          <CategoryList rows={byExpCat} labels={EXPENSE_CATS} />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function CategoryList({
-  rows, labels,
-}: { rows: Array<[string, number]>; labels: readonly { value: string; label: string }[] }) {
-  if (!rows.length) return <p className="text-sm text-muted-foreground">Sem dados.</p>;
-  const total = rows.reduce((s, [, v]) => s + v, 0);
-  return (
-    <ul className="space-y-2">
-      {rows.sort(([, a], [, b]) => b - a).map(([k, v]) => {
-        const label = labels.find((l) => l.value === k)?.label ?? k;
-        const pct = total ? Math.round((v / total) * 100) : 0;
-        return (
-          <li key={k}>
-            <div className="flex justify-between text-sm">
-              <span>{label}</span>
-              <span className="font-medium">{brl(v)} <span className="text-muted-foreground">({pct}%)</span></span>
-            </div>
-            <div className="mt-1 h-2 rounded bg-muted">
-              <div className="h-2 rounded bg-primary" style={{ width: `${pct}%` }} />
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
 }
 
 function ReceiptDialog({
