@@ -11,7 +11,6 @@ import {
   HeartPulse,
   BedDouble,
   Bath,
-  AlertCircle,
   ListChecks,
   Wallet,
   FileText,
@@ -109,19 +108,11 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "comunicacao",
-    label: "Comunicação",
-    icon: MessageSquare,
     items: [
       {
         to: "/app/comunicacao",
-        label: "Chat & avisos",
+        label: "Comunicação",
         icon: MessageSquare,
-        roles: ["admin", "funcionario"],
-      },
-      {
-        to: "/app/ocorrencias",
-        label: "Ocorrências",
-        icon: AlertCircle,
         roles: ["admin", "funcionario"],
       },
     ],
