@@ -21,7 +21,6 @@ import {
   GraduationCap,
   MessageSquare,
   Send,
-  Camera,
   CalendarRange,
   ChevronDown,
   Folder,
@@ -106,11 +105,8 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "conteudo",
-    label: "Conteúdo para tutores",
-    icon: Camera,
     items: [
-      { to: "/app/boletins", label: "Boletins", icon: Newspaper, roles: ["admin", "funcionario"] },
-      { to: "/app/stories", label: "Stories", icon: Camera, roles: ["admin", "funcionario"] },
+      { to: "/app/boletins", label: "Conteúdo para tutores", icon: Newspaper, roles: ["admin", "funcionario"] },
     ],
   },
   {
