@@ -298,6 +298,9 @@ function Landing() {
             <Link to="/privacidade" className="hover:text-white hover:underline">
               Política de Privacidade
             </Link>
+            <Link to="/reembolso" className="hover:text-white hover:underline">
+              Política de Reembolso
+            </Link>
           </p>
         </div>
       </footer>
