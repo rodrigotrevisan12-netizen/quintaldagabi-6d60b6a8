@@ -291,6 +291,14 @@ function Landing() {
             <span className="text-xl font-extrabold text-white">Central Pet</span>
           </div>
           <p>© {new Date().getFullYear()} Central Pet. Todos os direitos reservados.</p>
+          <p className="mt-2 flex justify-center gap-4">
+            <Link to="/termos" className="hover:text-white hover:underline">
+              Termos de Serviço
+            </Link>
+            <Link to="/privacidade" className="hover:text-white hover:underline">
+              Política de Privacidade
+            </Link>
+          </p>
         </div>
       </footer>
     </div>
