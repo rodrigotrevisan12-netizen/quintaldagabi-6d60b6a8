@@ -100,7 +100,7 @@ function FuncionariosTab() {
   });
 
   function emptyForm() {
-    return { full_name: "", job_role: "outro", phone: "", email: "", hired_at: "", active: true, permissions: {}, notes: "", salary: "", work_schedule: "" };
+    return { full_name: "", job_role: "outro", phone: "", email: "", hired_at: "", active: true, permissions: {}, notes: "", salary: "", work_schedule: "", contract_type: "clt" };
   }
   const [form, setForm] = useState<any>(emptyForm());
 
@@ -112,7 +112,7 @@ function FuncionariosTab() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { ...form, hired_at: form.hired_at || null, salary: form.salary === "" || form.salary == null ? null : Number(form.salary), work_schedule: form.work_schedule || null };
+      const payload = { ...form, hired_at: form.hired_at || null, salary: form.salary === "" || form.salary == null ? null : Number(form.salary), work_schedule: form.work_schedule || null, contract_type: form.contract_type || "clt" };
       if (editing) {
         const { error } = await supabase.from("employees").update(payload).eq("id", editing.id);
         if (error) throw error;
@@ -193,7 +193,7 @@ function FuncionariosTab() {
                 {!e.active && <Badge variant="outline">inativo</Badge>}
                 {e.user_id && <Badge variant="secondary" className="ml-1 text-[10px]">acesso liberado</Badge>}
               </p>
-              <p className="text-xs text-muted-foreground truncate">{ROLES.find((r) => r.v === e.job_role)?.label} · {e.email ?? "—"} · {e.phone ?? "—"}</p>
+              <p className="text-xs text-muted-foreground truncate">{ROLES.find((r) => r.v === e.job_role)?.label} · {e.contract_type === "pj" ? "PJ" : "CLT"} · {e.email ?? "—"} · {e.phone ?? "—"}</p>
             </div>
             <div className="flex flex-wrap gap-1 shrink-0">
               {e.email && (
@@ -240,6 +240,16 @@ function FuncionariosTab() {
             <div><Label>Data de admissão</Label><Input type="date" value={form.hired_at ?? ""} onChange={(e) => setForm({ ...form, hired_at: e.target.value })} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Salário (R$)</Label><Input type="number" step="0.01" min="0" value={form.salary ?? ""} onChange={(e) => setForm({ ...form, salary: e.target.value })} /></div>
+              <div>
+                <Label>Tipo de contrato</Label>
+                <Select value={form.contract_type ?? "clt"} onValueChange={(v) => setForm({ ...form, contract_type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clt">CLT (com encargos)</SelectItem>
+                    <SelectItem value="pj">PJ / Autônomo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>Jornada de trabalho</Label><Input value={form.work_schedule ?? ""} onChange={(e) => setForm({ ...form, work_schedule: e.target.value })} placeholder="Ex: Seg-Sex 08h-17h" /></div>
             </div>
             <div className="space-y-2">
