@@ -375,7 +375,14 @@ function FinanceiroPage() {
         </TabsContent>
 
         <TabsContent value="precificacao" className="space-y-6">
-          <PricingTab employees={employees} expenses={expenseTransactions} unitSettings={unitSettings} />
+          <PricingTab
+            employees={employees}
+            expenses={expenseTransactions}
+            unitSettings={unitSettings}
+            daycareStays={daycareStays}
+            boardingStays={boardingStays}
+            groomingAppointments={groomingAppointments}
+          />
         </TabsContent>
 
         <TabsContent value="simulacoes" className="space-y-6">
