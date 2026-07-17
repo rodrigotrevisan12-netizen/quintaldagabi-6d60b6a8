@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { strongPasswordSchema, PASSWORD_REQUIREMENTS_TEXT } from "@/lib/password-schema";
+import { recordPasswordChangeEvent } from "@/lib/audit-events.functions";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
@@ -19,6 +21,7 @@ const passwordSchema = strongPasswordSchema;
 
 function ResetPassword() {
   const navigate = useNavigate();
+  const recordPasswordChange = useServerFn(recordPasswordChangeEvent);
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -50,6 +53,9 @@ function ResetPassword() {
     }
     // O trigger no banco já desmarca must_set_password; encaminhamos por papel.
     const uid = userData.user?.id;
+    if (uid) {
+      recordPasswordChange({ data: { userId: uid, email: userData.user?.email } }).catch(() => {});
+    }
     let to: "/app" | "/tutor" = "/tutor";
     if (uid) {
       const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid);
