@@ -22,6 +22,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { validateFile, IMAGE_TYPES } from "@/lib/file-validation";
 
 export const Route = createFileRoute("/_authenticated/app/banho-tosa")({
   head: () => ({ meta: [{ title: "Banho & tosa — Quintal da Gabi" }] }),
@@ -522,6 +523,8 @@ function PhotosSection({ appointmentId }: { appointmentId: string }) {
   });
 
   async function upload(file: File, moment: "before" | "after") {
+    const invalid = validateFile(file, { maxSizeMB: 5, allowedTypes: IMAGE_TYPES });
+    if (invalid) return toast.error(invalid);
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `${appointmentId}/${moment}_${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("grooming").upload(path, file);
