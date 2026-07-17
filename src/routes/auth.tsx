@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { checkLoginLock, recordFailedLogin, recordSuccessfulLogin } from "@/lib/login-security.functions";
+import { recordLoginEvent } from "@/lib/audit-events.functions";
 import { needsMfaStepUp, listTotpFactors, verifyLoginMfaCode } from "@/lib/mfa";
 import { verifyTurnstileToken } from "@/lib/turnstile.functions";
 import { isTurnstileConfigured, renderTurnstile, resetTurnstile } from "@/lib/turnstile";
@@ -45,6 +46,7 @@ function AuthPage() {
   const checkLock = useServerFn(checkLoginLock);
   const recordFailed = useServerFn(recordFailedLogin);
   const recordSuccess = useServerFn(recordSuccessfulLogin);
+  const recordLogin = useServerFn(recordLoginEvent);
   const verifyCaptcha = useServerFn(verifyTurnstileToken);
 
   useEffect(() => {
@@ -163,6 +165,7 @@ function AuthPage() {
     }
 
     recordSuccess({ data: { email: emailParsed.data } }).catch(() => {});
+    recordLogin({ data: { userId: data.user.id, email: data.user.email } }).catch(() => {});
     toast.success("Bem-vinda!");
     await redirectByRole(data.user.id);
   }
@@ -177,6 +180,7 @@ function AuthPage() {
     setMfaLoading(true);
     try {
       await verifyLoginMfaCode(mfaFactorId, mfaCode.trim());
+      recordLogin({ data: { userId: pendingUserId, email } }).catch(() => {});
       toast.success("Bem-vinda!");
       await redirectByRole(pendingUserId);
     } catch (err: any) {
