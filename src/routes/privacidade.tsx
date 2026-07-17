@@ -106,7 +106,17 @@ function PrivacidadePage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-gray-800">10. Contato</h2>
+          <h2 className="text-lg font-bold text-gray-800">10. Encarregado de dados (DPO)</h2>
+          <p>
+            Nos termos do art. 41 da LGPD, a empresa responsável por esta Plataforma mantém um encarregado pelo
+            tratamento de dados pessoais, responsável por receber comunicações da Autoridade Nacional de Proteção
+            de Dados (ANPD), do titular dos dados, e prestar esclarecimentos. Se você é tutor ou funcionário
+            cadastrado, pode exercer seus direitos diretamente pela Plataforma, na tela "Meus dados".
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-lg font-bold text-gray-800">11. Contato</h2>
           <p>
             Para dúvidas, solicitações ou exercício de direitos relacionados a esta Política, entre em contato
             através dos canais de suporte da Plataforma. Veja também nossos{" "}
