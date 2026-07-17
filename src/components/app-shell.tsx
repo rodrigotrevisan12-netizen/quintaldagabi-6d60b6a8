@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   PawPrint,
@@ -29,6 +30,7 @@ import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { useBrand } from "@/lib/branding";
+import { recordLogoutEvent } from "@/lib/audit-events.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -152,8 +154,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const recordLogout = useServerFn(recordLogoutEvent);
 
   async function handleSignOut() {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      recordLogout({ data: { userId: userData.user.id, email: userData.user.email } }).catch(() => {});
+    }
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
