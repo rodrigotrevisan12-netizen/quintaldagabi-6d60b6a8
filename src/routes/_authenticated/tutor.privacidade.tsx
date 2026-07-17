@@ -3,6 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Download, ShieldCheck, AlertTriangle, Loader2 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -51,30 +55,27 @@ function MeusDadosPage() {
       const user = userData.user;
       if (!user) throw new Error("Sessão expirada.");
 
-      const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       const { data: tutor } = await supabase.from("tutors").select("*").eq("user_id", user.id).maybeSingle();
 
       let dogs: any[] = [];
-      let stories: any[] = [];
-      let dailyReports: any[] = [];
       let boardingStays: any[] = [];
       let daycareStays: any[] = [];
       let groomingAppointments: any[] = [];
       let financial: any[] = [];
+      const dogNameById = new Map<string, string>();
 
       if (tutor?.id) {
         const { data } = await supabase.from("dogs").select("*").eq("tutor_id", tutor.id);
         dogs = data ?? [];
+        dogs.forEach((d) => dogNameById.set(d.id, d.name));
         const dogIds = dogs.map((d) => d.id);
 
         if (dogIds.length) {
-          const [storiesRes, boardingRes, daycareRes, groomingRes] = await Promise.all([
-            supabase.from("dog_stories").select("*").in("dog_id", dogIds),
+          const [boardingRes, daycareRes, groomingRes] = await Promise.all([
             supabase.from("boarding_stays").select("*").in("dog_id", dogIds),
             supabase.from("daycare_stays").select("*").in("dog_id", dogIds),
             supabase.from("grooming_appointments").select("*").in("dog_id", dogIds),
           ]);
-          stories = storiesRes.data ?? [];
           boardingStays = boardingRes.data ?? [];
           daycareStays = daycareRes.data ?? [];
           groomingAppointments = groomingRes.data ?? [];
@@ -85,35 +86,117 @@ function MeusDadosPage() {
           .select("*")
           .eq("tutor_id", tutor.id);
         financial = fin ?? [];
-
-        const { data: reports } = await (supabase as any)
-          .from("daily_reports")
-          .select("*")
-          .in("dog_id", dogIds.length ? dogIds : ["00000000-0000-0000-0000-000000000000"]);
-        dailyReports = reports ?? [];
       }
 
-      const exportPayload = {
-        exported_at: new Date().toISOString(),
-        conta: { email: user.email, criado_em: user.created_at },
-        perfil: profile,
-        tutor,
-        caes: dogs,
-        stories,
-        boletins: dailyReports,
-        hospedagens: boardingStays,
-        creche: daycareStays,
-        banho_tosa: groomingAppointments,
-        financeiro: financial,
-      };
+      // ---- Monta um PDF legível, em português, sem IDs internos/técnicos ----
+      const doc = new jsPDF();
+      const fmtDate = (d: string | null) => (d ? format(new Date(d), "dd/MM/yyyy", { locale: ptBR }) : "—");
+      const fmtDateTime = (d: string | null) => (d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "—");
+      const fmtBRL = (v: number | null) => (v != null ? Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—");
+      let y = 16;
 
-      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `meus-dados-central-pet-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      doc.setFontSize(16);
+      doc.text("Meus dados — Central Pet", 14, y);
+      y += 6;
+      doc.setFontSize(9);
+      doc.setTextColor(120);
+      doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`, 14, y);
+      doc.setTextColor(0);
+      y += 10;
+
+      doc.setFontSize(12);
+      doc.text("Meus dados de cadastro", 14, y);
+      y += 6;
+      autoTable(doc, {
+        startY: y,
+        theme: "plain",
+        styles: { fontSize: 9 },
+        body: [
+          ["Nome", tutor?.full_name ?? "—"],
+          ["E-mail", user.email ?? "—"],
+          ["Telefone / WhatsApp", tutor?.whatsapp ?? tutor?.phone ?? "—"],
+          [
+            "Endereço",
+            tutor
+              ? [tutor.address_street, tutor.address_number, tutor.address_neighborhood, tutor.address_city, tutor.address_state]
+                  .filter(Boolean).join(", ") || "—"
+              : "—",
+          ],
+          ["Cliente desde", fmtDate(user.created_at)],
+        ],
+      });
+      y = (doc as any).lastAutoTable.finalY + 10;
+
+      if (dogs.length) {
+        doc.setFontSize(12);
+        doc.text("Meus cães", 14, y);
+        y += 2;
+        autoTable(doc, {
+          startY: y + 4,
+          head: [["Nome", "Raça", "Porte", "Peso (kg)", "Sexo", "Plano"]],
+          body: dogs.map((d) => [d.name, d.breed ?? "—", d.size ?? "—", d.weight_kg ?? "—", d.sex ?? "—", d.plan ?? "—"]),
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [255, 127, 80] },
+        });
+        y = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (daycareStays.length) {
+        if (y > 250) { doc.addPage(); y = 16; }
+        doc.setFontSize(12);
+        doc.text("Histórico na creche", 14, y);
+        autoTable(doc, {
+          startY: y + 4,
+          head: [["Cão", "Chegada", "Saída"]],
+          body: daycareStays.map((s) => [dogNameById.get(s.dog_id) ?? "—", fmtDateTime(s.check_in_at), fmtDateTime(s.check_out_at)]),
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [255, 127, 80] },
+        });
+        y = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (boardingStays.length) {
+        if (y > 250) { doc.addPage(); y = 16; }
+        doc.setFontSize(12);
+        doc.text("Histórico de hospedagens", 14, y);
+        autoTable(doc, {
+          startY: y + 4,
+          head: [["Cão", "Entrada", "Saída"]],
+          body: boardingStays.map((s) => [dogNameById.get(s.dog_id) ?? "—", fmtDateTime(s.check_in_at), fmtDateTime(s.check_out_at)]),
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [255, 127, 80] },
+        });
+        y = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (groomingAppointments.length) {
+        if (y > 250) { doc.addPage(); y = 16; }
+        doc.setFontSize(12);
+        doc.text("Histórico de banho & tosa", 14, y);
+        autoTable(doc, {
+          startY: y + 4,
+          head: [["Cão", "Data"]],
+          body: groomingAppointments.map((g) => [dogNameById.get(g.dog_id) ?? "—", fmtDateTime(g.scheduled_at)]),
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [255, 127, 80] },
+        });
+        y = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (financial.length) {
+        if (y > 240) { doc.addPage(); y = 16; }
+        doc.setFontSize(12);
+        doc.text("Meu histórico financeiro", 14, y);
+        autoTable(doc, {
+          startY: y + 4,
+          head: [["Descrição", "Valor", "Situação", "Vencimento"]],
+          body: financial.map((f) => [f.description ?? "—", fmtBRL(f.amount), f.status ?? "—", fmtDate(f.due_date)]),
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [255, 127, 80] },
+        });
+      }
+
+      doc.save(`meus-dados-central-pet-${format(new Date(), "yyyyMMdd")}.pdf`);
       toast.success("Seus dados foram baixados.");
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao exportar seus dados.");
