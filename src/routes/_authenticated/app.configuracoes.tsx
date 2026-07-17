@@ -14,6 +14,10 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { CENTRALPET_BRAND, useInvalidateBrand } from "@/lib/branding";
 import { resolveColor } from "@/lib/color-names";
@@ -1048,8 +1052,12 @@ const AUDIT_ACTION_VARIANT: Record<string, "default" | "secondary" | "destructiv
 };
 
 function AuditLogPanel() {
+  const qc = useQueryClient();
   const [tableFilter, setTableFilter] = useState<string>("todas");
   const [actionFilter, setActionFilter] = useState<string>("todas");
+  const [restoreTarget, setRestoreTarget] = useState<any | null>(null);
+  const [restorePreview, setRestorePreview] = useState<any | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const q = useQuery({
     queryKey: ["audit-log", tableFilter, actionFilter],
@@ -1063,6 +1071,38 @@ function AuditLogPanel() {
     },
   });
 
+  async function startRestore(row: any) {
+    setRestoreTarget(row);
+    setPreviewLoading(true);
+    try {
+      const { data, error } = await (supabase as any).rpc("preview_restore", { p_audit_log_id: row.id });
+      if (error) throw error;
+      setRestorePreview(data);
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao verificar a restauração.");
+      setRestoreTarget(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  const restoreMutation = useMutation({
+    mutationFn: async (acknowledgeLgpd: boolean) => {
+      const { error } = await (supabase as any).rpc("restore_deleted_record", {
+        p_audit_log_id: restoreTarget.id,
+        p_acknowledge_lgpd: acknowledgeLgpd,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Restaurado com sucesso.");
+      setRestoreTarget(null);
+      setRestorePreview(null);
+      qc.invalidateQueries({ queryKey: ["audit-log"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Não foi possível restaurar."),
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -1074,7 +1114,7 @@ function AuditLogPanel() {
           Registro automático de quem fez o quê e quando: criação, edição e exclusão nas áreas mais
           sensíveis (financeiro, ocorrências, chegadas, cães, tutores, funcionários, pacotes, documentos,
           identidade visual, permissões), além de login, logout e troca de senha de qualquer usuário. Só
-          admin consegue ver este histórico.
+          admin consegue ver este histórico. Exclusões podem ser restauradas.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -1116,14 +1156,67 @@ function AuditLogPanel() {
                     {r.actor_email ?? "—"} em {new Date(r.created_at).toLocaleString("pt-BR")}
                   </p>
                 </div>
-                <Badge variant={AUDIT_ACTION_VARIANT[r.action] ?? "outline"}>
-                  {AUDIT_ACTION_LABEL[r.action] ?? r.action}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={AUDIT_ACTION_VARIANT[r.action] ?? "outline"}>
+                    {AUDIT_ACTION_LABEL[r.action] ?? r.action}
+                  </Badge>
+                  {r.action === "delete" && (
+                    <Button size="sm" variant="outline" onClick={() => startRestore(r)}>
+                      Restaurar
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
       </CardContent>
+
+      <AlertDialog open={restoreTarget !== null} onOpenChange={(o) => { if (!o) { setRestoreTarget(null); setRestorePreview(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restaurar este registro?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                {previewLoading ? (
+                  <p>Verificando…</p>
+                ) : restorePreview?.tutorMissing ? (
+                  <p className="text-destructive">
+                    O tutor deste cão também foi excluído, e não encontramos o registro dele no histórico
+                    para restaurar automaticamente. Não é possível restaurar agora — recrie o tutor
+                    manualmente primeiro.
+                  </p>
+                ) : restorePreview?.tutorLgpdDeleted ? (
+                  <p className="text-destructive">
+                    ⚠️ O tutor "{restorePreview.tutorName}" pediu e teve aprovada a exclusão dos dados dele
+                    pela LGPD. Restaurar vai trazer os dados dele de volta, contrariando esse pedido. Tem
+                    certeza que quer continuar?
+                  </p>
+                ) : restorePreview?.needsTutorRestore ? (
+                  <p>
+                    O tutor "{restorePreview.tutorName}" também foi excluído e será restaurado junto,
+                    automaticamente, para o cão poder voltar. Confirma?
+                  </p>
+                ) : (
+                  <p>Esse registro será recriado com os dados de antes da exclusão.</p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            {!restorePreview?.tutorMissing && (
+              <AlertDialogAction
+                disabled={previewLoading || restoreMutation.isPending}
+                onClick={() => restoreMutation.mutate(Boolean(restorePreview?.tutorLgpdDeleted))}
+              >
+                {restoreMutation.isPending ? "Restaurando…" : "Restaurar"}
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
+
