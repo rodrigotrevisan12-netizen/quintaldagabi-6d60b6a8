@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { validateFile, IMAGE_TYPES } from "@/lib/file-validation";
 
 export const Route = createFileRoute("/_authenticated/app/caes")({
   head: () => ({ meta: [{ title: "Cães — Quintal da Gabi" }] }),
@@ -400,8 +401,9 @@ function DogForm({ dog, onSaved }: { dog: Dog | null; onSaved: () => void }) {
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Foto até 5MB.");
+    const invalid = validateFile(file, { maxSizeMB: 5, allowedTypes: IMAGE_TYPES });
+    if (invalid) {
+      toast.error(invalid);
       return;
     }
     setUploading(true);
