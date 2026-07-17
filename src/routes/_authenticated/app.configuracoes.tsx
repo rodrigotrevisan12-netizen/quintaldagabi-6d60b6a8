@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { CENTRALPET_BRAND, useInvalidateBrand } from "@/lib/branding";
 import { resolveColor } from "@/lib/color-names";
+import { validateFile, IMAGE_TYPES } from "@/lib/file-validation";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — Central Pet" }] }),
@@ -141,6 +142,7 @@ function BrandingRow({
 }) {
   const [name, setName] = useState<string>(company.name ?? "");
   const [logo, setLogo] = useState<string>(company.logo_url ?? "");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [primary, setPrimary] = useState<string>(company.primary_color ?? CENTRALPET_BRAND.primary);
   const [secondary, setSecondary] = useState<string>(company.secondary_color ?? CENTRALPET_BRAND.secondary);
   const [accent, setAccent] = useState<string>(company.accent_color ?? CENTRALPET_BRAND.accent);
@@ -155,6 +157,34 @@ function BrandingRow({
       accent_color: accent || null,
       background_color: background.trim() ? (resolveColor(background) ?? background) : null,
     });
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const invalid = validateFile(file, { maxSizeMB: 3, allowedTypes: [...IMAGE_TYPES, "image/svg+xml"] });
+    if (invalid) {
+      toast.error(invalid);
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "png";
+      const path = `${company.id}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("branding").upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("branding").getPublicUrl(path);
+      setLogo(data.publicUrl);
+      toast.success("Logo enviado — clique em Salvar para confirmar.");
+    } catch (err: any) {
+      toast.error(err.message ?? "Erro ao enviar o logo.");
+    } finally {
+      setUploadingLogo(false);
+    }
   }
 
   function handleReset() {
@@ -187,12 +217,29 @@ function BrandingRow({
           />
         </div>
         <div>
-          <Label className="text-xs">Logo (URL)</Label>
-          <Input
-            value={logo}
-            placeholder="https://.../logo.png"
-            onChange={(e) => setLogo(e.target.value)}
-          />
+          <Label className="text-xs">Logo</Label>
+          <div className="flex items-center gap-3">
+            {logo ? (
+              <img src={logo} alt="Logo" className="h-12 w-12 rounded-lg border object-contain p-1" />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg border text-[10px] text-muted-foreground">
+                Sem logo
+              </div>
+            )}
+            <label>
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploadingLogo} />
+              <span className="inline-flex cursor-pointer items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-accent">
+                {uploadingLogo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                {logo ? "Trocar logo" : "Enviar logo"}
+              </span>
+            </label>
+            {logo && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setLogo("")}>
+                Remover
+              </Button>
+            )}
+          </div>
+          <p className="mt-1 text-[11px] text-muted-foreground">PNG, JPG, WEBP ou SVG, até 3MB.</p>
         </div>
       </div>
 
