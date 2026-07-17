@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { VaccineCardLink } from "@/components/vaccine-card-image";
+import { validateFile, IMAGE_TYPES } from "@/lib/file-validation";
 
 export const Route = createFileRoute("/_authenticated/tutor/caes/$id")({
   head: () => ({ meta: [{ title: "Cão — Quintal da Gabi" }] }),
@@ -141,6 +142,8 @@ function DogDetail() {
   const addVaccine = useMutation({
     mutationFn: async () => {
       if (!vacFile) throw new Error("Selecione a foto da carteira de vacinação");
+      const invalid = validateFile(vacFile, { maxSizeMB: 5, allowedTypes: IMAGE_TYPES });
+      if (invalid) throw new Error(invalid);
       const path = `${id}/vaccine-${Date.now()}-${vacFile.name}`;
       const up = await supabase.storage.from("dogs").upload(path, vacFile);
       if (up.error) throw up.error;
