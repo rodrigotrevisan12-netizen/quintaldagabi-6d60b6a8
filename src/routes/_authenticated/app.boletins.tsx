@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { validateFile, IMAGE_VIDEO_TYPES } from "@/lib/file-validation";
 
 export const Route = createFileRoute("/_authenticated/app/boletins")({
   head: () => ({ meta: [{ title: "Conteúdo para tutores — Quintal da Gabi" }] }),
@@ -283,6 +284,8 @@ function ReportDetail({ report, onClose, onChanged }: { report: Report | null; o
 
   async function uploadFile(file: File) {
     if (!report) return;
+    const invalid = validateFile(file, { maxSizeMB: 50, allowedTypes: IMAGE_VIDEO_TYPES });
+    if (invalid) { toast.error(invalid); return; }
     const ext = file.name.split(".").pop();
     const path = `${report.id}/${crypto.randomUUID()}.${ext}`;
     const { error: upErr } = await supabase.storage.from("reports").upload(path, file);
@@ -502,6 +505,8 @@ function NewStoryDialog({ open, onClose }: { open: boolean; onClose: () => void 
 
   async function handleSave() {
     if (!dogId || !file) return toast.error("Selecione cão e arquivo");
+    const invalid = validateFile(file, { maxSizeMB: 50, allowedTypes: IMAGE_VIDEO_TYPES });
+    if (invalid) return toast.error(invalid);
     setSaving(true);
     try {
       const ext = file.name.split(".").pop() || "bin";
