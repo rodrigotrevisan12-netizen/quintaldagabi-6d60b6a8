@@ -1025,16 +1025,38 @@ const AUDIT_TABLE_LABEL: Record<string, string> = {
   daycare_packages: "Pacotes de creche",
   daycare_package_purchases: "Venda de pacote avulso",
   documents: "Documentos",
+  companies: "Identidade visual / assinatura",
+  user_roles: "Permissões",
+};
+
+const AUDIT_ACTION_LABEL: Record<string, string> = {
+  create: "Criado",
+  update: "Editado",
+  delete: "Excluído",
+  login: "Login",
+  logout: "Logout",
+  password_change: "Trocou a senha",
+};
+
+const AUDIT_ACTION_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  create: "default",
+  update: "secondary",
+  delete: "destructive",
+  login: "outline",
+  logout: "outline",
+  password_change: "secondary",
 };
 
 function AuditLogPanel() {
   const [tableFilter, setTableFilter] = useState<string>("todas");
+  const [actionFilter, setActionFilter] = useState<string>("todas");
 
   const q = useQuery({
-    queryKey: ["audit-log", tableFilter],
+    queryKey: ["audit-log", tableFilter, actionFilter],
     queryFn: async () => {
       let qb = (supabase as any).from("audit_log").select("*").order("created_at", { ascending: false }).limit(200);
       if (tableFilter !== "todas") qb = qb.eq("table_name", tableFilter);
+      if (actionFilter !== "todas") qb = qb.eq("action", actionFilter);
       const { data, error } = await qb;
       if (error) throw error;
       return data ?? [];
@@ -1046,18 +1068,29 @@ function AuditLogPanel() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <History className="h-5 w-5" />
-          Log de auditoria — exclusões
+          Log de auditoria
         </CardTitle>
         <CardDescription>
-          Registro automático de quem excluiu o quê e quando, nas áreas mais sensíveis do sistema
-          (financeiro, ocorrências, chegadas, cães, tutores, funcionários, pacotes, documentos). Só admin
-          consegue ver este histórico.
+          Registro automático de quem fez o quê e quando: criação, edição e exclusão nas áreas mais
+          sensíveis (financeiro, ocorrências, chegadas, cães, tutores, funcionários, pacotes, documentos,
+          identidade visual, permissões), além de login, logout e troca de senha de qualquer usuário. Só
+          admin consegue ver este histórico.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-2 flex flex-wrap gap-2">
+          <Button size="sm" variant={actionFilter === "todas" ? "default" : "outline"} onClick={() => setActionFilter("todas")}>
+            Todas as ações
+          </Button>
+          {Object.entries(AUDIT_ACTION_LABEL).map(([key, label]) => (
+            <Button key={key} size="sm" variant={actionFilter === key ? "default" : "outline"} onClick={() => setActionFilter(key)}>
+              {label}
+            </Button>
+          ))}
+        </div>
+        <div className="mb-4 flex flex-wrap gap-2 border-t pt-2">
           <Button size="sm" variant={tableFilter === "todas" ? "default" : "outline"} onClick={() => setTableFilter("todas")}>
-            Todas
+            Todas as áreas
           </Button>
           {Object.entries(AUDIT_TABLE_LABEL).map(([key, label]) => (
             <Button key={key} size="sm" variant={tableFilter === key ? "default" : "outline"} onClick={() => setTableFilter(key)}>
@@ -1069,21 +1102,23 @@ function AuditLogPanel() {
         {q.isLoading ? (
           <p className="text-muted-foreground">Carregando…</p>
         ) : (q.data ?? []).length === 0 ? (
-          <p className="text-muted-foreground">Nenhuma exclusão registrada ainda.</p>
+          <p className="text-muted-foreground">Nenhum evento registrado ainda.</p>
         ) : (
           <div className="space-y-2">
             {(q.data ?? []).map((r: any) => (
               <div key={r.id} className="flex items-start justify-between gap-3 rounded-lg border p-3 text-sm">
                 <div>
                   <p className="font-medium">
-                    {AUDIT_TABLE_LABEL[r.table_name] ?? r.table_name}
+                    {r.table_name ? (AUDIT_TABLE_LABEL[r.table_name] ?? r.table_name) : "Conta"}
                     {r.record_summary ? ` — "${r.record_summary}"` : ""}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Excluído por {r.actor_email ?? "—"} em {new Date(r.created_at).toLocaleString("pt-BR")}
+                    {r.actor_email ?? "—"} em {new Date(r.created_at).toLocaleString("pt-BR")}
                   </p>
                 </div>
-                <Badge variant="destructive">Excluído</Badge>
+                <Badge variant={AUDIT_ACTION_VARIANT[r.action] ?? "outline"}>
+                  {AUDIT_ACTION_LABEL[r.action] ?? r.action}
+                </Badge>
               </div>
             ))}
           </div>
