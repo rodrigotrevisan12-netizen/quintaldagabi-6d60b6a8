@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { checkLoginLock, recordFailedLogin, recordSuccessfulLogin } from "@/lib/login-security.functions";
+import { verifyTurnstileToken } from "@/lib/turnstile.functions";
+import { isTurnstileConfigured, renderTurnstile, resetTurnstile } from "@/lib/turnstile";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -30,10 +32,29 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [lockMessage, setLockMessage] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HTMLDivElement>(null);
+  const captchaWidgetId = useRef<string | undefined>(undefined);
 
   const checkLock = useServerFn(checkLoginLock);
   const recordFailed = useServerFn(recordFailedLogin);
   const recordSuccess = useServerFn(recordSuccessfulLogin);
+  const verifyCaptcha = useServerFn(verifyTurnstileToken);
+
+  useEffect(() => {
+    if (mode !== "login" || !captchaRef.current || !isTurnstileConfigured()) return;
+    let cancelled = false;
+    renderTurnstile(
+      captchaRef.current,
+      (token) => !cancelled && setCaptchaToken(token),
+      () => !cancelled && setCaptchaToken(null),
+    ).then((id) => {
+      if (!cancelled) captchaWidgetId.current = id;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
 
   async function redirectByRole(userId: string) {
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
@@ -59,6 +80,30 @@ function AuthPage() {
     setLoading(true);
     setLockMessage(null);
 
+    // CAPTCHA: só bloqueia o login se estiver configurado (chave presente)
+    // — assim, enquanto o Cloudflare não estiver com a chave secreta
+    // configurada no servidor, o login continua funcionando normalmente.
+    if (isTurnstileConfigured()) {
+      if (!captchaToken) {
+        setLoading(false);
+        toast.error("Confirme que você não é um robô antes de entrar.");
+        return;
+      }
+      try {
+        const captchaResult = await verifyCaptcha({ data: { token: captchaToken } });
+        if (captchaResult.configured && !captchaResult.success) {
+          setLoading(false);
+          toast.error("Não conseguimos confirmar o CAPTCHA. Tente novamente.");
+          resetTurnstile(captchaWidgetId.current);
+          setCaptchaToken(null);
+          return;
+        }
+      } catch {
+        // Falha ao verificar não trava o login — só significa que essa
+        // camada específica de proteção não pôde ser confirmada agora.
+      }
+    }
+
     // Verifica se esse e-mail está temporariamente bloqueado antes de
     // sequer tentar autenticar — protege contra tentativa de força bruta.
     try {
@@ -81,6 +126,8 @@ function AuthPage() {
       password: pwParsed.data,
     });
     setLoading(false);
+    resetTurnstile(captchaWidgetId.current);
+    setCaptchaToken(null);
     if (error || !data.user) {
       try {
         const result = await recordFailed({ data: { email: emailParsed.data } });
@@ -197,6 +244,7 @@ function AuthPage() {
                     required
                   />
                 </div>
+                <div ref={captchaRef} className="flex justify-center" />
                 <Button type="submit" className="w-full" disabled={loading || Boolean(lockMessage)}>
                   {loading ? "Entrando…" : "Entrar"}
                 </Button>
