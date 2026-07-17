@@ -35,6 +35,7 @@ function SignupPage() {
   const navigate = useNavigate();
   const signup = useServerFn(signupCompany);
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({
     companyName: "",
     fullName: "",
@@ -49,6 +50,10 @@ function SignupPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!acceptedTerms) {
+      toast.error("Você precisa aceitar os Termos de Serviço e a Política de Privacidade.");
+      return;
+    }
     const pwParsed = strongPasswordSchema.safeParse(form.password);
     if (!pwParsed.success) {
       toast.error(pwParsed.error.issues[0].message);
@@ -185,7 +190,28 @@ function SignupPage() {
               <p className="text-xs text-muted-foreground">{PASSWORD_REQUIREMENTS_TEXT}</p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                required
+              />
+              <span>
+                Li e concordo com os{" "}
+                <Link to="/termos" target="_blank" className="text-primary hover:underline">
+                  Termos de Serviço
+                </Link>{" "}
+                e a{" "}
+                <Link to="/privacidade" target="_blank" className="text-primary hover:underline">
+                  Política de Privacidade
+                </Link>
+                .
+              </span>
+            </label>
+
+            <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>
               {loading ? "Criando conta…" : "Começar grátis"}
             </Button>
 
