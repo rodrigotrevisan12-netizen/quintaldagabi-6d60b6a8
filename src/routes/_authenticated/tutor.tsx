@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send, Scissors, Camera, ShieldCheck } from "lucide-react";
+import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send, Scissors, Camera, ShieldCheck, KeyRound } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -98,6 +98,13 @@ function TutorShell({ children }: { children: ReactNode }) {
           <p className="mb-3 truncate text-sm text-sidebar-foreground">
             {isLoading ? "…" : (me?.fullName ?? me?.email)}
           </p>
+          <Link
+            to="/conta"
+            className="mb-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent"
+          >
+            <KeyRound className="h-4 w-4" />
+            Verificação em 2 etapas
+          </Link>
           <Button variant="ghost" className="w-full justify-start" onClick={signOut}>
             <LogOut className="mr-2 h-4 w-4" /> Sair
           </Button>
