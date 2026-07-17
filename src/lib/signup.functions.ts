@@ -1,12 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { strongPasswordSchema } from "@/lib/password-schema";
 
 const schema = z.object({
   companyName: z.string().trim().min(2, "Nome da empresa muito curto").max(120),
   fullName: z.string().trim().min(2, "Nome muito curto").max(120),
   email: z.string().trim().email("E-mail inválido").max(255),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
-  password: z.string().min(8, "Mínimo 8 caracteres").max(72),
+  password: strongPasswordSchema,
 });
 
 /**
