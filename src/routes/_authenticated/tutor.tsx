@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send, Scissors, Camera } from "lucide-react";
+import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send, Scissors, Camera, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,7 @@ const ITEMS = [
   { to: "/tutor/documentos", label: "Contratos", icon: FileText },
   { to: "/tutor/financeiro", label: "Recibos", icon: Receipt },
   { to: "/tutor/chegada", label: "Estou chegando", icon: Send },
+  { to: "/tutor/privacidade", label: "Meus dados", icon: ShieldCheck },
 ];
 
 function TutorShellRoute() {
