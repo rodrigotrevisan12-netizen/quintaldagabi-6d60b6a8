@@ -10,6 +10,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { strongPasswordSchema, PASSWORD_REQUIREMENTS_TEXT } from "@/lib/password-schema";
 import { Label } from "@/components/ui/label";
 import { signupCompany } from "@/lib/signup.functions";
+import { recordConsent } from "@/lib/consent.functions";
 
 export const Route = createFileRoute("/comprar")({
   head: () => ({
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/comprar")({
 function SignupPage() {
   const navigate = useNavigate();
   const signup = useServerFn(signupCompany);
+  const recordConsentFn = useServerFn(recordConsent);
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [form, setForm] = useState({
@@ -71,6 +73,14 @@ function SignupPage() {
         toast.success("Conta criada! Faça login para começar.");
         navigate({ to: "/auth" });
         return;
+      }
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        recordConsentFn({
+          data: { userId: userData.user.id, email: userData.user.email, userAgent: navigator.userAgent },
+        }).catch(() => {
+          // não impede o cadastro caso o registro de consentimento falhe
+        });
       }
       toast.success("Bem-vindo(a) à Central Pet! Você tem 14 dias grátis.");
       navigate({ to: "/app" });
