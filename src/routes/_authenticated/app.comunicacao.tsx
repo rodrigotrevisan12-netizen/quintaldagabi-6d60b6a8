@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { validateFile, ATTACHMENT_TYPES } from "@/lib/file-validation";
 
 export const Route = createFileRoute("/_authenticated/app/comunicacao")({
   head: () => ({ meta: [{ title: "Comunicação — Quintal da Gabi" }] }),
@@ -117,6 +118,8 @@ function TeamChat() {
       let attachment_url: string | null = null;
       let attachment_name: string | null = null;
       if (file) {
+        const invalid = validateFile(file, { maxSizeMB: 15, allowedTypes: ATTACHMENT_TYPES });
+        if (invalid) throw new Error(invalid);
         const path = `chat/${Date.now()}-${file.name}`;
         const up = await supabase.storage.from("comms").upload(path, file);
         if (up.error) throw up.error;
@@ -207,6 +210,8 @@ function Announcements() {
       const { data, error } = await supabase.from("internal_communications").insert(payload).select().single();
       if (error) throw error;
       if (file && data) {
+        const invalid = validateFile(file, { maxSizeMB: 15, allowedTypes: ATTACHMENT_TYPES });
+        if (invalid) throw new Error(invalid);
         const path = `${data.id}/${Date.now()}-${file.name}`;
         const { error: upErr } = await supabase.storage.from("comms").upload(path, file);
         if (!upErr) {
