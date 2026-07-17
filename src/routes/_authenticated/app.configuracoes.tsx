@@ -2,15 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, Building2, Scissors, CalendarRange, Palette } from "lucide-react";
+import { Plus, Loader2, Building2, Scissors, CalendarRange, Palette, ShieldCheck } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { CENTRALPET_BRAND, useInvalidateBrand } from "@/lib/branding";
@@ -39,6 +41,9 @@ function ConfiguracoesPage() {
           <TabsTrigger value="unidades"><Building2 className="mr-1 h-4 w-4" />Unidades</TabsTrigger>
           <TabsTrigger value="servicos"><Scissors className="mr-1 h-4 w-4" />Serviços de banho & tosa</TabsTrigger>
           <TabsTrigger value="pacotes"><CalendarRange className="mr-1 h-4 w-4" />Pacotes de creche</TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="lgpd"><ShieldCheck className="mr-1 h-4 w-4" />LGPD</TabsTrigger>
+          )}
         </TabsList>
         {isAdmin && (
           <TabsContent value="identidade"><BrandingPanel /></TabsContent>
@@ -46,6 +51,9 @@ function ConfiguracoesPage() {
         <TabsContent value="unidades"><UnitsPanel /></TabsContent>
         <TabsContent value="servicos"><ServicesPanel /></TabsContent>
         <TabsContent value="pacotes"><DaycarePackagesPanel /></TabsContent>
+        {isAdmin && (
+          <TabsContent value="lgpd"><LgpdPanel /></TabsContent>
+        )}
       </Tabs>
     </div>
   );
@@ -843,6 +851,113 @@ function DaycarePackagesPanel() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+const REQUEST_TYPE_LABEL: Record<string, string> = { export: "Exportação de dados", delete: "Exclusão de conta" };
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Aguardando", in_review: "Em análise", completed: "Concluída", rejected: "Recusada",
+};
+
+function LgpdPanel() {
+  const qc = useQueryClient();
+
+  const q = useQuery({
+    queryKey: ["lgpd-requests"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("data_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await (supabase as any)
+        .from("data_requests")
+        .update({ status, resolved_at: status === "completed" || status === "rejected" ? new Date().toISOString() : null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Atualizado"); qc.invalidateQueries({ queryKey: ["lgpd-requests"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const pending = (q.data ?? []).filter((r: any) => r.status === "pending" || r.status === "in_review");
+  const resolved = (q.data ?? []).filter((r: any) => r.status === "completed" || r.status === "rejected");
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5" />
+            Solicitações de dados (LGPD)
+          </CardTitle>
+          <CardDescription>
+            Pedidos de exportação ou exclusão de dados feitos pelos próprios tutores/funcionários. A lei dá até
+            15 dias para responder. Exclusões não são automáticas — revise se há obrigação legal de manter
+            algum registro (ex.: financeiro) antes de excluir de verdade a conta no Supabase.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {pending.length === 0 ? (
+            <p className="text-muted-foreground">Nenhuma solicitação pendente.</p>
+          ) : (
+            <div className="space-y-3">
+              {pending.map((r: any) => (
+                <div key={r.id} className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{REQUEST_TYPE_LABEL[r.request_type] ?? r.request_type}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {r.requester_name ?? "—"} · {r.requester_email}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Pedido em {new Date(r.created_at).toLocaleDateString("pt-BR")}
+                      </p>
+                      {r.notes && <p className="mt-1 text-sm">"{r.notes}"</p>}
+                    </div>
+                    <Badge variant="secondary">{STATUS_LABEL[r.status]}</Badge>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Button size="sm" onClick={() => updateStatus.mutate({ id: r.id, status: "completed" })}>
+                      Marcar como concluída
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => updateStatus.mutate({ id: r.id, status: "in_review" })}>
+                      Em análise
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => updateStatus.mutate({ id: r.id, status: "rejected" })}>
+                      Recusar
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {resolved.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle>Histórico</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {resolved.map((r: any) => (
+              <div key={r.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
+                <div>
+                  <p className="font-medium">{REQUEST_TYPE_LABEL[r.request_type] ?? r.request_type}</p>
+                  <p className="text-xs text-muted-foreground">{r.requester_email}</p>
+                </div>
+                <Badge variant={r.status === "completed" ? "default" : "destructive"}>{STATUS_LABEL[r.status]}</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
