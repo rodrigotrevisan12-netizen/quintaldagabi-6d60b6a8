@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -7,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { checkLoginLock, recordFailedLogin, recordSuccessfulLogin } from "@/lib/login-security.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -27,6 +29,11 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lockMessage, setLockMessage] = useState<string | null>(null);
+
+  const checkLock = useServerFn(checkLoginLock);
+  const recordFailed = useServerFn(recordFailedLogin);
+  const recordSuccess = useServerFn(recordSuccessfulLogin);
 
   async function redirectByRole(userId: string) {
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
@@ -50,15 +57,46 @@ function AuthPage() {
     if (!pwParsed.success) return toast.error(pwParsed.error.issues[0].message);
 
     setLoading(true);
+    setLockMessage(null);
+
+    // Verifica se esse e-mail está temporariamente bloqueado antes de
+    // sequer tentar autenticar — protege contra tentativa de força bruta.
+    try {
+      const lockStatus = await checkLock({ data: { email: emailParsed.data } });
+      if (lockStatus.locked) {
+        const minutes = Math.ceil(lockStatus.retryAfterSeconds / 60);
+        setLoading(false);
+        setLockMessage(
+          `Muitas tentativas erradas. Tente novamente em ${minutes} minuto${minutes > 1 ? "s" : ""}, ou use "Esqueci minha senha".`,
+        );
+        return;
+      }
+    } catch {
+      // Se a checagem de bloqueio falhar por algum motivo, não impede o
+      // login — só significa que essa proteção específica não rodou agora.
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email: emailParsed.data,
       password: pwParsed.data,
     });
     setLoading(false);
     if (error || !data.user) {
-      toast.error("Não conseguimos entrar. Verifique e-mail e senha.");
+      try {
+        const result = await recordFailed({ data: { email: emailParsed.data } });
+        if (result.locked) {
+          setLockMessage(`Muitas tentativas erradas. Sua conta ficou temporariamente bloqueada por 15 minutos.`);
+        } else if (result.remainingAttempts <= 2) {
+          toast.error(`E-mail ou senha incorretos. Restam ${result.remainingAttempts} tentativas antes do bloqueio temporário.`);
+        } else {
+          toast.error("Não conseguimos entrar. Verifique e-mail e senha.");
+        }
+      } catch {
+        toast.error("Não conseguimos entrar. Verifique e-mail e senha.");
+      }
       return;
     }
+    recordSuccess({ data: { email: emailParsed.data } }).catch(() => {});
     toast.success("Bem-vinda!");
     await redirectByRole(data.user.id);
   }
@@ -132,7 +170,10 @@ function AuthPage() {
                     type="email"
                     autoComplete="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setLockMessage(null);
+                    }}
                     required
                   />
                 </div>
@@ -156,9 +197,12 @@ function AuthPage() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full" disabled={loading || Boolean(lockMessage)}>
                   {loading ? "Entrando…" : "Entrar"}
                 </Button>
+                {lockMessage && (
+                  <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{lockMessage}</p>
+                )}
               </form>
               <div className="mt-6 text-center">
                 <p className="text-xs text-muted-foreground">
