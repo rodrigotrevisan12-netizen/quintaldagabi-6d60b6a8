@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { checkLoginLock, recordFailedLogin, recordSuccessfulLogin } from "@/lib/login-security.functions";
+import { needsMfaStepUp, listTotpFactors, verifyLoginMfaCode } from "@/lib/mfa";
 import { verifyTurnstileToken } from "@/lib/turnstile.functions";
 import { isTurnstileConfigured, renderTurnstile, resetTurnstile } from "@/lib/turnstile";
 
@@ -33,6 +34,10 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [lockMessage, setLockMessage] = useState<string | null>(null);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<HTMLDivElement>(null);
   const captchaWidgetId = useRef<string | undefined>(undefined);
@@ -144,9 +149,41 @@ function AuthPage() {
       }
       return;
     }
+
+    // Senha correta — mas se a conta tiver verificação em duas etapas
+    // ativada, ainda falta confirmar o código antes de liberar o acesso.
+    const needsMfa = await needsMfaStepUp();
+    if (needsMfa) {
+      const factors = await listTotpFactors();
+      if (factors[0]) {
+        setMfaFactorId(factors[0].id);
+        setPendingUserId(data.user.id);
+        return;
+      }
+    }
+
     recordSuccess({ data: { email: emailParsed.data } }).catch(() => {});
     toast.success("Bem-vinda!");
     await redirectByRole(data.user.id);
+  }
+
+  async function handleMfaSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mfaFactorId || !pendingUserId) return;
+    if (mfaCode.trim().length !== 6) {
+      toast.error("Digite o código de 6 dígitos do seu app autenticador.");
+      return;
+    }
+    setMfaLoading(true);
+    try {
+      await verifyLoginMfaCode(mfaFactorId, mfaCode.trim());
+      toast.success("Bem-vinda!");
+      await redirectByRole(pendingUserId);
+    } catch (err: any) {
+      toast.error(err.message ?? "Código inválido.");
+    } finally {
+      setMfaLoading(false);
+    }
   }
 
   async function handleForgot(e: React.FormEvent) {
@@ -204,7 +241,38 @@ function AuthPage() {
             <span className="text-lg font-extrabold text-[#E86A3C]">Central Pet</span>
           </Link>
 
-          {mode === "login" ? (
+          {mfaFactorId ? (
+            <>
+              <h1 className="font-display text-3xl font-semibold">Verificação em duas etapas</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Digite o código de 6 dígitos do seu app autenticador.
+              </p>
+              <form onSubmit={handleMfaSubmit} className="mt-8 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mfa-login-code">Código</Label>
+                  <Input
+                    id="mfa-login-code"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="000000"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                    autoFocus
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={mfaLoading}>
+                  {mfaLoading ? "Verificando…" : "Confirmar"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => { setMfaFactorId(null); setPendingUserId(null); setMfaCode(""); }}
+                  className="w-full text-center text-xs text-muted-foreground hover:underline"
+                >
+                  Voltar
+                </button>
+              </form>
+            </>
+          ) : mode === "login" ? (
             <>
               <h1 className="font-display text-3xl font-semibold">Bem-vinda de volta</h1>
               <p className="mt-2 text-sm text-muted-foreground">
