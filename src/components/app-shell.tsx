@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Folder,
   CreditCard,
+  KeyRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -286,6 +287,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
             <p className="truncate text-xs text-sidebar-foreground/60">{me?.email}</p>
           </div>
+          <Link
+            to="/conta"
+            className="mb-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <KeyRound className="h-4 w-4" />
+            Segurança da conta
+          </Link>
           <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sair
