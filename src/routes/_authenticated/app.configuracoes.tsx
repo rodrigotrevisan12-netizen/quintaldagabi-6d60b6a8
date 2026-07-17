@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Loader2, Building2, Scissors, CalendarRange, Palette, ShieldCheck } from "lucide-react";
+import { Plus, Loader2, Building2, Scissors, CalendarRange, Palette, ShieldCheck, History } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,9 @@ function ConfiguracoesPage() {
           {isAdmin && (
             <TabsTrigger value="lgpd"><ShieldCheck className="mr-1 h-4 w-4" />LGPD</TabsTrigger>
           )}
+          {isAdmin && (
+            <TabsTrigger value="auditoria"><History className="mr-1 h-4 w-4" />Auditoria</TabsTrigger>
+          )}
         </TabsList>
         {isAdmin && (
           <TabsContent value="identidade"><BrandingPanel /></TabsContent>
@@ -54,6 +57,9 @@ function ConfiguracoesPage() {
         <TabsContent value="pacotes"><DaycarePackagesPanel /></TabsContent>
         {isAdmin && (
           <TabsContent value="lgpd"><LgpdPanel /></TabsContent>
+        )}
+        {isAdmin && (
+          <TabsContent value="auditoria"><AuditLogPanel /></TabsContent>
         )}
       </Tabs>
     </div>
@@ -1006,5 +1012,83 @@ function LgpdPanel() {
         </Card>
       )}
     </div>
+  );
+}
+
+const AUDIT_TABLE_LABEL: Record<string, string> = {
+  financial_transactions: "Financeiro",
+  occurrences: "Ocorrências",
+  arrival_notifications: "Chegadas",
+  dogs: "Cães",
+  tutors: "Tutores",
+  employees: "Funcionários",
+  daycare_packages: "Pacotes de creche",
+  daycare_package_purchases: "Venda de pacote avulso",
+  documents: "Documentos",
+};
+
+function AuditLogPanel() {
+  const [tableFilter, setTableFilter] = useState<string>("todas");
+
+  const q = useQuery({
+    queryKey: ["audit-log", tableFilter],
+    queryFn: async () => {
+      let qb = (supabase as any).from("audit_log").select("*").order("created_at", { ascending: false }).limit(200);
+      if (tableFilter !== "todas") qb = qb.eq("table_name", tableFilter);
+      const { data, error } = await qb;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <History className="h-5 w-5" />
+          Log de auditoria — exclusões
+        </CardTitle>
+        <CardDescription>
+          Registro automático de quem excluiu o quê e quando, nas áreas mais sensíveis do sistema
+          (financeiro, ocorrências, chegadas, cães, tutores, funcionários, pacotes, documentos). Só admin
+          consegue ver este histórico.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button size="sm" variant={tableFilter === "todas" ? "default" : "outline"} onClick={() => setTableFilter("todas")}>
+            Todas
+          </Button>
+          {Object.entries(AUDIT_TABLE_LABEL).map(([key, label]) => (
+            <Button key={key} size="sm" variant={tableFilter === key ? "default" : "outline"} onClick={() => setTableFilter(key)}>
+              {label}
+            </Button>
+          ))}
+        </div>
+
+        {q.isLoading ? (
+          <p className="text-muted-foreground">Carregando…</p>
+        ) : (q.data ?? []).length === 0 ? (
+          <p className="text-muted-foreground">Nenhuma exclusão registrada ainda.</p>
+        ) : (
+          <div className="space-y-2">
+            {(q.data ?? []).map((r: any) => (
+              <div key={r.id} className="flex items-start justify-between gap-3 rounded-lg border p-3 text-sm">
+                <div>
+                  <p className="font-medium">
+                    {AUDIT_TABLE_LABEL[r.table_name] ?? r.table_name}
+                    {r.record_summary ? ` — "${r.record_summary}"` : ""}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Excluído por {r.actor_email ?? "—"} em {new Date(r.created_at).toLocaleString("pt-BR")}
+                  </p>
+                </div>
+                <Badge variant="destructive">Excluído</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
