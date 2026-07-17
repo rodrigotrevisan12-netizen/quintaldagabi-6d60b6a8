@@ -1,11 +1,13 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PawPrint, Home, Dog, FileText, Newspaper, Receipt, LogOut, Send, Scissors, Camera, ShieldCheck, KeyRound } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useBrand } from "@/lib/branding";
+import { recordLogoutEvent } from "@/lib/audit-events.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -46,8 +48,13 @@ function TutorShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const recordLogout = useServerFn(recordLogoutEvent);
 
   async function signOut() {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      recordLogout({ data: { userId: userData.user.id, email: userData.user.email } }).catch(() => {});
+    }
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
