@@ -6,6 +6,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { strongPasswordSchema, PASSWORD_REQUIREMENTS_TEXT } from "@/lib/password-schema";
 import { Label } from "@/components/ui/label";
 import { signupCompany } from "@/lib/signup.functions";
 
@@ -47,6 +49,11 @@ function SignupPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const pwParsed = strongPasswordSchema.safeParse(form.password);
+    if (!pwParsed.success) {
+      toast.error(pwParsed.error.issues[0].message);
+      return;
+    }
     setLoading(true);
     try {
       await signup({ data: form });
@@ -166,9 +173,8 @@ function SignupPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => upd("password", e.target.value)}
@@ -176,7 +182,7 @@ function SignupPage() {
                 minLength={8}
                 maxLength={72}
               />
-              <p className="text-xs text-muted-foreground">Mínimo de 8 caracteres.</p>
+              <p className="text-xs text-muted-foreground">{PASSWORD_REQUIREMENTS_TEXT}</p>
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
