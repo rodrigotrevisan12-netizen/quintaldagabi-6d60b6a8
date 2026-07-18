@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { useBrand } from "@/lib/branding";
 import { recordLogoutEvent } from "@/lib/audit-events.functions";
+import { NavItemBadge } from "@/components/nav-badges";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -231,6 +232,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   >
                     <Icon className="h-4 w-4" />
                     <span className="flex-1">{item.label}</span>
+                    <NavItemBadge to={item.to} />
                   </Link>
                 );
               });
@@ -278,6 +280,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         >
                           <Icon className="h-3.5 w-3.5" />
                           <span className="flex-1">{item.label}</span>
+                          <NavItemBadge to={item.to} />
                         </Link>
                       );
                     })}
