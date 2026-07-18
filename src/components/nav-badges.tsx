@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 
-function Dot({ count }: { count: number }) {
+export function Dot({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
     <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
@@ -12,8 +12,12 @@ function Dot({ count }: { count: number }) {
   );
 }
 
-/** Selo da Creche: quantos tutores estão "a caminho" agora, em tempo real. */
-export function ChegadasBadge() {
+/**
+ * Quantos tutores estão "a caminho" agora, em tempo real. Chamado UMA VEZ
+ * lá no topo do menu (AppShell) — assim funciona mesmo com o grupo
+ * "Operação do dia" fechado, sem precisar abrir pra "ativar" a contagem.
+ */
+export function useChegadasCount(): number {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -38,11 +42,11 @@ export function ChegadasBadge() {
     };
   }, []);
 
-  return <Dot count={count} />;
+  return count;
 }
 
-/** Selo da Comunicação: quantos avisos/ocorrências/mensagens novas desde a última vez que a pessoa entrou lá. */
-export function ComunicacaoBadge() {
+/** Quantos avisos/ocorrências/mensagens novas desde a última vez que a pessoa entrou em Comunicação. */
+export function useComunicacaoCount(): number {
   const { data: count = 0 } = useQuery({
     queryKey: ["comunicacao-unseen-count"],
     queryFn: async () => {
@@ -69,15 +73,10 @@ export function ComunicacaoBadge() {
     refetchInterval: 30_000,
   });
 
-  return <Dot count={count} />;
+  return count;
 }
 
-/** Escolhe qual selo mostrar, de acordo com a rota do item de menu. */
-export function NavItemBadge({ to }: { to: string }) {
-  if (to === "/app/agenda") return <ChegadasBadge />;
-  if (to === "/app/comunicacao") return <ComunicacaoBadge />;
-  return null;
-}
+/** Chama isso quando a pessoa ENTRA na tela de Comunicação, pra zerar o selo. */
 export async function markComunicacaoSeen() {
   const { data: userData } = await supabase.auth.getUser();
   const uid = userData.user?.id;
