@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, RefreshCw, Pencil } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -54,6 +54,95 @@ export function CostEngine({
   const [toDelete, setToDelete] = useState<any | null>(null);
   const { data: me } = useCurrentUser();
   const isAdmin = me?.primaryRole === "admin";
+
+  // Ao abrir a tela, gera sozinho os lançamentos fixos recorrentes do mês
+  // corrente (se ainda não tiverem sido gerados) — sem duplicar, o banco
+  // já impede isso.
+  useEffect(() => {
+    if (!isAdmin) return;
+    (supabase as any).rpc("generate_recurring_expenses").then(({ data, error }: any) => {
+      if (!error && data > 0) {
+        qc.invalidateQueries();
+      }
+    });
+  }, [isAdmin]);
+
+  const templatesQuery = useQuery({
+    queryKey: ["recurring-expense-templates"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("recurring_expense_templates")
+        .select("*")
+        .order("description");
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: isAdmin,
+  });
+
+  const [tplOpen, setTplOpen] = useState(false);
+  const [editingTpl, setEditingTpl] = useState<any | null>(null);
+  const [tplForm, setTplForm] = useState({ description: "", amount: "", category: "aluguel", due_day: "10" });
+  const [tplToDelete, setTplToDelete] = useState<any | null>(null);
+
+  function openNewTpl() {
+    setEditingTpl(null);
+    setTplForm({ description: "", amount: "", category: "aluguel", due_day: "10" });
+    setTplOpen(true);
+  }
+  function openEditTpl(t: any) {
+    setEditingTpl(t);
+    setTplForm({ description: t.description, amount: String(t.amount), category: t.category, due_day: String(t.due_day) });
+    setTplOpen(true);
+  }
+
+  const saveTemplate = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        description: tplForm.description.trim(),
+        amount: Number(tplForm.amount),
+        category: tplForm.category,
+        due_day: Number(tplForm.due_day) || 10,
+      };
+      if (!payload.description || !payload.amount) throw new Error("Preencha descrição e valor.");
+      if (editingTpl) {
+        const { error } = await (supabase as any).from("recurring_expense_templates").update(payload).eq("id", editingTpl.id);
+        if (error) throw error;
+      } else {
+        const { error } = await (supabase as any).from("recurring_expense_templates").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(editingTpl ? "Custo fixo atualizado" : "Custo fixo recorrente criado — será lançado sozinho todo mês");
+      setTplOpen(false);
+      qc.invalidateQueries({ queryKey: ["recurring-expense-templates"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const toggleTemplateActive = useMutation({
+    mutationFn: async (t: any) => {
+      const { error } = await (supabase as any)
+        .from("recurring_expense_templates").update({ active: !t.active }).eq("id", t.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["recurring-expense-templates"] }),
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteTemplate = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from("recurring_expense_templates").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Custo fixo recorrente removido");
+      setTplToDelete(null);
+      qc.invalidateQueries({ queryKey: ["recurring-expense-templates"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
   const [form, setForm] = useState({
     description: "",
     amount: "",
@@ -71,6 +160,13 @@ export function CostEngine({
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  // Contas de MESES ANTERIORES que ainda constam como "pendente" — aviso
+  // antes de simplesmente deixar pra trás quando o mês vira.
+  const overdueFromPastMonths = expenses.filter((tx) => {
+    const d = new Date(tx.due_date || tx.created_at);
+    return d < monthStart && (tx.status === "pendente" || tx.status === "vencido");
+  });
 
   const monthExpenses = expenses.filter((tx) => {
     const d = new Date(tx.due_date || tx.created_at);
@@ -144,6 +240,138 @@ export function CostEngine({
 
   return (
     <div className="space-y-6">
+      {overdueFromPastMonths.length > 0 && (
+        <Card className="border-amber-400 bg-amber-50 dark:bg-amber-950/20">
+          <CardContent className="flex items-start gap-3 py-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="text-sm">
+              <p className="font-medium">
+                {overdueFromPastMonths.length} conta{overdueFromPastMonths.length > 1 ? "s" : ""} de mês anterior
+                ainda marcada{overdueFromPastMonths.length > 1 ? "s" : ""} como não paga
+              </p>
+              <ul className="mt-1 space-y-0.5 text-muted-foreground">
+                {overdueFromPastMonths.slice(0, 5).map((tx) => (
+                  <li key={tx.id}>
+                    {tx.description} — {fmtBRL(Number(tx.amount))} (venceu {fmtDate(tx.due_date)})
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Confirme se essas contas já foram pagas — se sim, marque como "pago" no Financeiro.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5" />
+              Custos fixos recorrentes
+            </CardTitle>
+            <CardDescription>
+              Cadastre uma vez (aluguel, por exemplo) e o sistema lança sozinho todo mês, sem precisar
+              recadastrar — a não ser que você mude o valor ou desative.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-end">
+              <Button size="sm" onClick={openNewTpl}><Plus className="mr-1 h-4 w-4" />Novo custo fixo</Button>
+            </div>
+            {(templatesQuery.data ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum custo fixo recorrente cadastrado ainda.</p>
+            ) : (
+              <div className="space-y-2">
+                {(templatesQuery.data ?? []).map((t: any) => (
+                  <div key={t.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
+                    <div>
+                      <p className="font-medium">
+                        {t.description}
+                        {!t.active && <Badge variant="secondary" className="ml-2">Desativado</Badge>}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {CATEGORY_LABELS[t.category] ?? t.category} · {fmtBRL(Number(t.amount))} · todo dia {t.due_day}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => openEditTpl(t)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => toggleTemplateActive.mutate(t)}>
+                        {t.active ? "Desativar" : "Ativar"}
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={() => setTplToDelete(t)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={tplOpen} onOpenChange={setTplOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingTpl ? "Editar custo fixo" : "Novo custo fixo recorrente"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Descrição</Label>
+              <Input value={tplForm.description} onChange={(e) => setTplForm({ ...tplForm, description: e.target.value })} placeholder="Ex: Aluguel" />
+            </div>
+            <div>
+              <Label>Categoria</Label>
+              <Select value={tplForm.category} onValueChange={(v) => setTplForm({ ...tplForm, category: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {FIXED_CATEGORIES.filter((c) => c !== "salarios").map((c) => (
+                    <SelectItem key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Valor (R$)</Label>
+                <Input type="number" step="0.01" value={tplForm.amount} onChange={(e) => setTplForm({ ...tplForm, amount: e.target.value })} />
+              </div>
+              <div>
+                <Label>Dia do vencimento</Label>
+                <Input type="number" min="1" max="28" value={tplForm.due_day} onChange={(e) => setTplForm({ ...tplForm, due_day: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => saveTemplate.mutate()} disabled={saveTemplate.isPending}>
+              {editingTpl ? "Salvar alterações" : "Criar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={tplToDelete !== null} onOpenChange={(o) => !o && setTplToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover este custo fixo recorrente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tplToDelete?.description}. Os lançamentos já gerados em meses anteriores continuam no
+              histórico — só para de gerar novos a partir de agora.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-2">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => tplToDelete && deleteTemplate.mutate(tplToDelete.id)}>
+              Remover
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Cards de totais */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <MetricCard label="Custo Fixo Mensal" value={fmtBRL(fixedTotal)} hint="Salários + custos fixos do mês" />
