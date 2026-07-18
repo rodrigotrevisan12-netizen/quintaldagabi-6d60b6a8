@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { validateFile, ATTACHMENT_TYPES } from "@/lib/file-validation";
+import { markComunicacaoSeen } from "@/components/nav-badges";
 
 export const Route = createFileRoute("/_authenticated/app/comunicacao")({
   head: () => ({ meta: [{ title: "Comunicação — Quintal da Gabi" }] }),
@@ -44,6 +45,10 @@ const TYPES = [
 ] as const;
 
 function Comms() {
+  useEffect(() => {
+    markComunicacaoSeen();
+  }, []);
+
   return (
     <div className="space-y-4">
       <header>
