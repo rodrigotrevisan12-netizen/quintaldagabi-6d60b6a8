@@ -31,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, type AppRole } from "@/hooks/use-current-user";
 import { useBrand } from "@/lib/branding";
 import { recordLogoutEvent } from "@/lib/audit-events.functions";
-import { NavItemBadge } from "@/components/nav-badges";
+import { Dot, useChegadasCount, useComunicacaoCount } from "@/components/nav-badges";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -157,6 +157,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const recordLogout = useServerFn(recordLogoutEvent);
 
+  // Sempre ativos, independente de qualquer grupo do menu estar aberto ou
+  // fechado — assim o aviso aparece de verdade, mesmo sem abrir o grupo.
+  const chegadasCount = useChegadasCount();
+  const comunicacaoCount = useComunicacaoCount();
+  const badgeCountByRoute: Record<string, number> = {
+    "/app/agenda": chegadasCount,
+    "/app/comunicacao": comunicacaoCount,
+  };
+
   async function handleSignOut() {
     const { data: userData } = await supabase.auth.getUser();
     if (userData.user) {
@@ -232,7 +241,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   >
                     <Icon className="h-4 w-4" />
                     <span className="flex-1">{item.label}</span>
-                    <NavItemBadge to={item.to} />
+                    <Dot count={badgeCountByRoute[item.to] ?? 0} />
                   </Link>
                 );
               });
@@ -256,6 +265,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   <GroupIcon className="h-4 w-4" />
                   <span className="flex-1 text-left">{group.label}</span>
+                  <Dot count={group.items.reduce((sum, it) => sum + (badgeCountByRoute[it.to] ?? 0), 0)} />
                   <ChevronDown
                     className={cn("h-3.5 w-3.5 transition-transform", open ? "rotate-180" : "")}
                   />
@@ -280,7 +290,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         >
                           <Icon className="h-3.5 w-3.5" />
                           <span className="flex-1">{item.label}</span>
-                          <NavItemBadge to={item.to} />
+                          <Dot count={badgeCountByRoute[item.to] ?? 0} />
                         </Link>
                       );
                     })}
