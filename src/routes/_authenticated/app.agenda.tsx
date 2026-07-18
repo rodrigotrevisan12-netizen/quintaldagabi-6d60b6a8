@@ -21,6 +21,7 @@ import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dot, useChegadasCount } from "@/components/nav-badges";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,6 +67,8 @@ export const Route = createFileRoute("/_authenticated/app/agenda")({
 });
 
 function AgendaPage() {
+  const chegadasCount = useChegadasCount();
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
@@ -78,7 +81,10 @@ function AgendaPage() {
       <Tabs defaultValue="presenca">
         <TabsList>
           <TabsTrigger value="presenca">Presença</TabsTrigger>
-          <TabsTrigger value="chegadas">Chegadas</TabsTrigger>
+          <TabsTrigger value="chegadas" className="gap-1.5">
+            Chegadas
+            <Dot count={chegadasCount} />
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="presenca" className="mt-4">
           <CrecheTab />
