@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ export function Dot({ count }: { count: number }) {
  */
 export function useChegadasCount(): number {
   const [count, setCount] = useState(0);
+  const instanceId = useId();
 
   useEffect(() => {
     let active = true;
@@ -32,7 +33,7 @@ export function useChegadasCount(): number {
     load();
 
     const channel = supabase
-      .channel("nav-arrivals-badge")
+      .channel(`nav-arrivals-badge-${instanceId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "arrival_notifications" }, load)
       .subscribe();
 
@@ -40,7 +41,7 @@ export function useChegadasCount(): number {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [instanceId]);
 
   return count;
 }
