@@ -76,18 +76,18 @@ function TutorFin() {
         <h2 className="text-sm font-semibold text-muted-foreground">Em aberto</h2>
         {!open.length ? <p className="text-sm text-muted-foreground">Nenhum valor em aberto.</p> :
           open.map((t: any) => (
-            <Card key={t.id}><CardContent className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <Receipt className="h-5 w-5 text-amber-600" />
-                <div>
-                  <p className="font-medium">{t.description ?? t.category}</p>
+            <Card key={t.id}><CardContent className="flex items-center justify-between gap-3 p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <Receipt className="h-5 w-5 shrink-0 text-amber-600" />
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{t.description ?? t.category}</p>
                   <p className="text-xs text-muted-foreground">
                     {t.due_date ? `Vence em ${new Date(t.due_date).toLocaleDateString("pt-BR")}` :
                       new Date(t.created_at).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="shrink-0 text-right">
                 <p className="font-semibold">{fmt(Number(t.amount ?? 0))}</p>
                 <Badge variant="outline" className="border-amber-400 text-amber-700">Em aberto</Badge>
               </div>
@@ -101,18 +101,18 @@ function TutorFin() {
           paid.map((t: any) => {
             const r = receiptByTx[t.id];
             return (
-              <Card key={t.id}><CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <Receipt className="h-5 w-5 text-emerald-600" />
-                  <div>
-                    <p className="font-medium">{t.description ?? t.category}</p>
+              <Card key={t.id}><CardContent className="flex items-center justify-between gap-3 p-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <Receipt className="h-5 w-5 shrink-0 text-emerald-600" />
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{t.description ?? t.category}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(t.paid_at ?? t.created_at).toLocaleDateString("pt-BR")}
                       {r ? ` · Recibo nº ${r.number}` : ""}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex shrink-0 items-center gap-3">
                   <div className="text-right">
                     <p className="font-semibold">{fmt(Number(t.amount ?? 0))}</p>
                     <Badge>Pago</Badge>
