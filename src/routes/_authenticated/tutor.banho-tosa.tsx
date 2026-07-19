@@ -261,14 +261,14 @@ function TutorBanhoTosa() {
         ) : (
           <ul className="space-y-2">
             {myAppointments.data.map((a: any) => (
-              <li key={a.id} className="flex items-center justify-between rounded-xl border p-3 text-sm">
-                <div>
-                  <p className="font-medium">{a.dog?.name}</p>
+              <li key={a.id} className="flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{a.dog?.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   </p>
                 </div>
-                <Badge variant={a.status === "done" ? "default" : a.status === "cancelled" ? "destructive" : "secondary"}>
+                <Badge variant={a.status === "done" ? "default" : a.status === "cancelled" ? "destructive" : "secondary"} className="shrink-0">
                   {a.status}
                 </Badge>
               </li>
