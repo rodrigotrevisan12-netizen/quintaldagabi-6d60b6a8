@@ -92,17 +92,17 @@ function Docs() {
       ) : (
         docs.map((d) => (
           <Card key={d.id} className="cursor-pointer transition hover:bg-muted/40" onClick={() => setOpened(d)}>
-            <CardContent className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="font-medium">{d.title}</p>
+            <CardContent className="flex items-center justify-between gap-3 p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <FileText className="h-5 w-5 shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{d.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {DOCUMENT_TYPE_LABEL[d.type] ?? d.type} · {format(new Date(d.created_at), "dd/MM/yyyy")}
                   </p>
                 </div>
               </div>
-              <Badge variant={d.status === "signed" ? "default" : d.status === "cancelled" ? "destructive" : "secondary"}>
+              <Badge variant={d.status === "signed" ? "default" : d.status === "cancelled" ? "destructive" : "secondary"} className="shrink-0">
                 {DOCUMENT_STATUS_LABEL[d.status] ?? d.status}
               </Badge>
             </CardContent>
