@@ -62,7 +62,7 @@ function TutorShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-[240px_1fr]">
+    <div className="grid min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background lg:grid-cols-[240px_1fr]">
       <aside className="hidden border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <div className="flex items-center gap-2 px-6 py-6">
           {brand.logoUrl ? (
@@ -128,7 +128,7 @@ function TutorShell({ children }: { children: ReactNode }) {
           </Link>
           <Button size="sm" variant="ghost" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
         </header>
-        <main className="flex-1 px-4 py-6 lg:px-10 lg:py-8">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-6 lg:px-10 lg:py-8">{children}</main>
         <nav className="sticky bottom-0 grid grid-cols-5 border-t bg-card lg:hidden">
           {ITEMS.slice(0, 5).map((it) => {
             const Icon = it.icon;
